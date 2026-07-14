@@ -78,21 +78,17 @@
       return Math.max(80, Math.min(240, Math.floor(area / 5200)));
     }
 
-    function updateGlyphText(glyph) {
-      glyph.el.textContent = pick(source);
-      glyph.el.style.color = pick(palette);
-      glyph.el.style.opacity = random(0.34, 0.9).toFixed(2);
-      glyph.nextChange = performance.now() + random(1700, 5200);
-    }
-
     function createGlyph() {
       const el = document.createElement("span");
       const size = random(20, 76);
       el.className = "kanji";
+      el.textContent = pick(source);
       el.style.fontSize = `${size}px`;
+      el.style.color = pick(palette);
+      el.style.opacity = random(0.34, 0.9).toFixed(2);
       stage.appendChild(el);
 
-      const glyph = {
+      return {
         el,
         size,
         x: random(0, Math.max(1, width - size)),
@@ -100,12 +96,8 @@
         vx: random(-44, 44) || 24,
         vy: random(-44, 44) || -24,
         spin: random(-12, 12),
-        angle: random(-18, 18),
-        nextChange: 0
+        angle: random(-18, 18)
       };
-
-      updateGlyphText(glyph);
-      return glyph;
     }
 
     function rebuildGlyphs() {
@@ -117,7 +109,7 @@
       }
     }
 
-    function moveGlyph(glyph, delta, now) {
+    function moveGlyph(glyph, delta) {
       glyph.x += glyph.vx * delta;
       glyph.y += glyph.vy * delta;
       glyph.angle += glyph.spin * delta;
@@ -132,17 +124,13 @@
         glyph.y = Math.max(0, Math.min(height - glyph.size, glyph.y));
       }
 
-      if (now >= glyph.nextChange) {
-        updateGlyphText(glyph);
-      }
-
       glyph.el.style.transform = `translate3d(${glyph.x}px, ${glyph.y}px, 0) rotate(${glyph.angle}deg)`;
     }
 
     function animate(now) {
       const delta = Math.min(0.04, (now - lastTime) / 1000);
       lastTime = now;
-      glyphs.forEach((glyph) => moveGlyph(glyph, delta, now));
+      glyphs.forEach((glyph) => moveGlyph(glyph, delta));
       requestAnimationFrame(animate);
     }
 
