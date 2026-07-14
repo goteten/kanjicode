@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kanji Code Game</title>
+  <title>漢字コードゲーム</title>
   <style>
     :root {
       color-scheme: light;
@@ -36,7 +36,7 @@
     }
 
     main {
-      width: min(920px, 100%);
+      width: min(980px, 100%);
       display: grid;
       gap: 18px;
     }
@@ -62,6 +62,37 @@
       padding: clamp(18px, 4vw, 34px);
       display: grid;
       gap: 22px;
+    }
+
+    .mode-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mode-button {
+      min-height: 48px;
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: normal;
+    }
+
+    .mode-button[aria-pressed="true"] {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--white);
+    }
+
+    .mode-info {
+      margin: -10px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
     }
 
     .cards {
@@ -93,7 +124,6 @@
       color: var(--muted);
       font-size: 0.86rem;
       font-weight: 700;
-      text-transform: uppercase;
     }
 
     .char {
@@ -144,7 +174,7 @@
       align-items: center;
     }
 
-    button {
+    button.action {
       min-height: 52px;
       border: 0;
       border-radius: 8px;
@@ -194,13 +224,20 @@
       font-weight: 900;
     }
 
+    @media (max-width: 780px) {
+      .mode-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 680px) {
       body {
         padding: 14px;
       }
 
       .cards,
-      .controls {
+      .controls,
+      .mode-row {
         grid-template-columns: 1fr;
       }
 
@@ -208,7 +245,7 @@
         min-height: 160px;
       }
 
-      button {
+      button.action {
         width: 100%;
       }
     }
@@ -217,50 +254,57 @@
 <body>
   <main>
     <header>
-      <h1>Kanji Code Game</h1>
-      <p class="subtitle">Unicode no ikkomae to ikkoato kara, mannaka no kanji wo yosou suru game desu.</p>
+      <h1>漢字コードゲーム</h1>
+      <p class="subtitle">Unicodeのひとつ前とひとつ後から、真ん中の漢字を予想するゲームです。</p>
     </header>
 
-    <section class="game" aria-label="kanji unicode character guessing game">
+    <section class="game" aria-label="漢字Unicode文字当てゲーム">
+      <div class="mode-row" aria-label="出題モード">
+        <button class="mode-button" type="button" data-mode="joyo" aria-pressed="true">常用漢字</button>
+        <button class="mode-button" type="button" data-mode="kankenPre1" aria-pressed="false">漢検準1級</button>
+        <button class="mode-button" type="button" data-mode="kanken1" aria-pressed="false">漢検1級</button>
+        <button class="mode-button" type="button" data-mode="all" aria-pressed="false">すべての漢字</button>
+      </div>
+      <p class="mode-info" id="modeInfo"></p>
+
       <div class="cards">
         <article class="moji-card">
-          <div class="label">Ikkomae</div>
+          <div class="label">ひとつ前</div>
           <div class="char" id="prevChar">上</div>
           <div class="code" id="prevCode">U+4E0A</div>
         </article>
 
         <article class="moji-card middle">
-          <div class="label">Mannaka</div>
+          <div class="label">真ん中</div>
           <div class="char" id="middleChar">?</div>
           <div class="code" id="middleCode">U+????</div>
         </article>
 
         <article class="moji-card">
-          <div class="label">Ikkoato</div>
+          <div class="label">ひとつ後</div>
           <div class="char" id="nextChar">下</div>
           <div class="code" id="nextCode">U+4E0B</div>
         </article>
       </div>
 
       <div class="answer-panel" aria-live="polite">
-        <p class="answer-text" id="message">Mannaka no kanji wo omoitsuitara, kotae wo mite kudasai.</p>
+        <p class="answer-text" id="message">真ん中の漢字を思いついたら、答えを見てください。</p>
       </div>
 
       <div class="controls">
-        <button class="primary" type="button" id="answerButton">Kotae wo miru</button>
-        <button class="secondary" type="button" id="nextButton" disabled>Tsugi no mondai</button>
+        <button class="action primary" type="button" id="answerButton">答えを見る</button>
+        <button class="action secondary" type="button" id="nextButton" disabled>次の問題</button>
       </div>
 
       <div class="hint">
         <span class="chip">?</span>
-        <span><b>Tip:</b> Maeno Unicode bango ni 1 tasu to, mannaka no kanji no bango ni narimasu.</span>
+        <span><b>ヒント:</b> 前のUnicode番号に1を足すと、真ん中の漢字の番号になります。</span>
       </div>
     </section>
   </main>
 
+  <script src="kanji-data.js"></script>
   <script>
-    const kanjiRange = [0x4E00, 0x9FA5];
-
     const prevChar = document.querySelector("#prevChar");
     const middleChar = document.querySelector("#middleChar");
     const nextChar = document.querySelector("#nextChar");
@@ -268,11 +312,50 @@
     const middleCode = document.querySelector("#middleCode");
     const nextCode = document.querySelector("#nextCode");
     const message = document.querySelector("#message");
+    const modeInfo = document.querySelector("#modeInfo");
     const answerButton = document.querySelector("#answerButton");
     const nextButton = document.querySelector("#nextButton");
+    const modeButtons = document.querySelectorAll(".mode-button");
 
+    const allKanji = makeRange(0x3400, 0x4DBF).concat(makeRange(0x4E00, 0x9FFF));
+    const modes = {
+      joyo: {
+        label: "常用漢字",
+        note: "常用漢字表の2136字から出題します。",
+        chars: uniqueChars(JOYO_KANJI)
+      },
+      kankenPre1: {
+        label: "漢検準1級",
+        note: "常用漢字とJIS第一水準の漢字を候補にします。",
+        chars: uniqueChars(JOYO_KANJI + JIS_LEVEL_1_KANJI)
+      },
+      kanken1: {
+        label: "漢検1級",
+        note: "常用漢字とJIS第一・第二水準の漢字を候補にします。",
+        chars: uniqueChars(JOYO_KANJI + JIS_LEVEL_1_KANJI + JIS_LEVEL_2_KANJI)
+      },
+      all: {
+        label: "すべての漢字",
+        note: "UnicodeのCJK統合漢字と拡張Aを候補にします。",
+        chars: allKanji
+      }
+    };
+
+    let activeMode = "joyo";
     let answerCode = 0x4E0A;
     let answered = false;
+
+    function uniqueChars(text) {
+      return Array.from(new Set(Array.from(text)));
+    }
+
+    function makeRange(start, end) {
+      const chars = [];
+      for (let code = start; code <= end; code += 1) {
+        chars.push(String.fromCodePoint(code));
+      }
+      return chars;
+    }
 
     function toChar(codePoint) {
       return String.fromCodePoint(codePoint);
@@ -283,9 +366,14 @@
     }
 
     function randomAnswerCode() {
-      const min = kanjiRange[0] + 1;
-      const max = kanjiRange[1] - 1;
-      return Math.floor(Math.random() * (max - min + 1)) + min;
+      const candidates = modes[activeMode].chars;
+      const answer = candidates[Math.floor(Math.random() * candidates.length)];
+      return answer.codePointAt(0);
+    }
+
+    function updateModeInfo() {
+      const mode = modes[activeMode];
+      modeInfo.textContent = `${mode.label}: ${mode.chars.length.toLocaleString("ja-JP")}字。${mode.note}`;
     }
 
     function showHiddenQuestion() {
@@ -295,10 +383,11 @@
       prevCode.textContent = toCodeLabel(answerCode - 1);
       nextCode.textContent = toCodeLabel(answerCode + 1);
       middleCode.textContent = "U+????";
-      message.textContent = "Mannaka no kanji wo omoitsuitara, kotae wo mite kudasai.";
+      message.textContent = "真ん中の漢字を思いついたら、答えを見てください。";
       answerButton.disabled = false;
       nextButton.disabled = true;
       answered = false;
+      updateModeInfo();
     }
 
     function newQuestion() {
@@ -310,11 +399,21 @@
       const answer = toChar(answerCode);
       middleChar.textContent = answer;
       middleCode.textContent = toCodeLabel(answerCode);
-      message.innerHTML = `<strong>Kotae:</strong> ${answer} (${toCodeLabel(answerCode)}) desu.`;
+      message.innerHTML = `<strong>答え:</strong> ${answer} (${toCodeLabel(answerCode)}) です。`;
       answerButton.disabled = true;
       nextButton.disabled = false;
       answered = true;
     }
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeMode = button.dataset.mode;
+        modeButtons.forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+        newQuestion();
+      });
+    });
 
     answerButton.addEventListener("click", revealAnswer);
     nextButton.addEventListener("click", () => {
