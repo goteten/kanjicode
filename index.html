@@ -261,8 +261,8 @@
     <section class="game" aria-label="漢字Unicode文字当てゲーム">
       <div class="mode-row" aria-label="出題モード">
         <button class="mode-button" type="button" data-mode="joyo" aria-pressed="true">常用漢字</button>
-        <button class="mode-button" type="button" data-mode="kankenPre1" aria-pressed="false">漢検準1級</button>
-        <button class="mode-button" type="button" data-mode="kanken1" aria-pressed="false">漢検1級</button>
+        <button class="mode-button" type="button" data-mode="jisLevel1" aria-pressed="false">JIS第一水準</button>
+        <button class="mode-button" type="button" data-mode="jisLevel12" aria-pressed="false">JIS第一・第二水準</button>
         <button class="mode-button" type="button" data-mode="all" aria-pressed="false">すべての漢字</button>
       </div>
       <p class="mode-info" id="modeInfo"></p>
@@ -324,13 +324,13 @@
         note: "常用漢字表の2136字から出題します。",
         chars: uniqueChars(JOYO_KANJI)
       },
-      kankenPre1: {
-        label: "漢検準1級",
+      jisLevel1: {
+        label: "JIS第一水準",
         note: "常用漢字とJIS第一水準の漢字を候補にします。",
         chars: uniqueChars(JOYO_KANJI + JIS_LEVEL_1_KANJI)
       },
-      kanken1: {
-        label: "漢検1級",
+      jisLevel12: {
+        label: "JIS第一・第二水準",
         note: "常用漢字とJIS第一・第二水準の漢字を候補にします。",
         chars: uniqueChars(JOYO_KANJI + JIS_LEVEL_1_KANJI + JIS_LEVEL_2_KANJI)
       },
