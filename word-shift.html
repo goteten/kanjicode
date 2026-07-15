@@ -253,7 +253,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
       align-items: center;
     }
@@ -368,6 +368,7 @@
       <div class="controls">
         <button class="action primary" type="button" id="answerButton">答えを表示</button>
         <button class="action secondary" type="button" id="nextButton" disabled>次の問題</button>
+        <button class="action secondary" type="button" id="copyButton">9行をコピー</button>
       </div>
 
       <div class="note">
@@ -438,6 +439,7 @@
     const message = document.querySelector("#message");
     const answerButton = document.querySelector("#answerButton");
     const nextButton = document.querySelector("#nextButton");
+    const copyButton = document.querySelector("#copyButton");
     const modeButtons = document.querySelectorAll(".mode-button");
 
     let activeMode = "quiz";
@@ -446,6 +448,7 @@
     let previousAnswer = "";
     let answered = false;
     let customAnswerHidden = false;
+    let currentRows = [];
 
     function pickWord() {
       let picked = quizWords[Math.floor(Math.random() * quizWords.length)];
@@ -494,6 +497,11 @@
       ));
       const centerRow = createShiftRow(0, centerText, "center");
       shiftStack.replaceChildren(...negativeRows, centerRow, ...positiveRows);
+      currentRows = [
+        ...[-4, -3, -2, -1].map((amount) => [amount, shiftWord(sourceText, amount)]),
+        [0, centerText],
+        ...[1, 2, 3, 4].map((amount) => [amount, shiftWord(sourceText, amount)])
+      ];
     }
 
     function newQuestion() {
@@ -510,6 +518,7 @@
       customPanel.hidden = true;
       answerButton.hidden = false;
       nextButton.hidden = false;
+      copyButton.hidden = false;
       renderShiftRows(answer, hiddenWord(answer));
     }
 
@@ -541,6 +550,7 @@
       customPanel.hidden = false;
       answerButton.hidden = true;
       nextButton.hidden = true;
+      copyButton.hidden = false;
       renderShiftRows(sourceText, centerText);
     }
 
@@ -551,6 +561,7 @@
         customPanel.hidden = true;
         answerButton.hidden = false;
         nextButton.hidden = false;
+        copyButton.hidden = false;
         if (!answer) {
           newQuestion();
           return;
@@ -571,6 +582,36 @@
       customInput.focus();
     }
 
+    function rowLabel(amount) {
+      return amount > 0 ? `+${amount}` : amount < 0 ? String(amount) : "???";
+    }
+
+    function puzzleText() {
+      return currentRows.map(([amount, word]) => `${rowLabel(amount)} ${word}`).join("\n");
+    }
+
+    async function copyPuzzleText() {
+      const text = puzzleText();
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        helper.setAttribute("readonly", "");
+        helper.style.position = "fixed";
+        helper.style.left = "-9999px";
+        document.body.append(helper);
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+      }
+      const previousText = copyButton.textContent;
+      copyButton.textContent = "コピーしました";
+      window.setTimeout(() => {
+        copyButton.textContent = previousText;
+      }, 1300);
+    }
+
     modeButtons.forEach((button) => {
       button.addEventListener("click", () => switchMode(button.dataset.mode));
     });
@@ -582,6 +623,11 @@
     });
     answerButton.addEventListener("click", revealAnswer);
     nextButton.addEventListener("click", newQuestion);
+    copyButton.addEventListener("click", () => {
+      copyPuzzleText().catch(() => {
+        message.textContent = "コピーできませんでした。ブラウザのクリップボード権限を確認してください。";
+      });
+    });
 
     newQuestion();
   </script>
