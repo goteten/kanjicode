@@ -150,37 +150,58 @@
       outline-offset: 2px;
     }
 
-    .shift-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .shift-card {
-      min-height: 112px;
+    .shift-stack {
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: var(--white);
-      padding: 12px;
+      background:
+        linear-gradient(180deg, rgba(105, 210, 192, 0.12), transparent 42%),
+        linear-gradient(0deg, rgba(239, 139, 117, 0.12), transparent 42%),
+        var(--white);
       display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 10px;
       overflow: hidden;
     }
 
-    .shift-card.negative {
-      border-top: 4px solid var(--mint);
+    .shift-row {
+      min-height: 72px;
+      border-bottom: 1px solid rgba(216, 214, 202, 0.72);
+      padding: 8px clamp(10px, 2vw, 18px);
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      opacity: calc(1 - (var(--distance) - 1) * 0.16);
+      overflow: hidden;
     }
 
-    .shift-card.positive {
-      border-top: 4px solid var(--coral);
+    .shift-row:last-child {
+      border-bottom: 0;
+    }
+
+    .shift-row.negative {
+      color: #226f66;
+    }
+
+    .shift-row.positive {
+      color: #9f4f42;
+    }
+
+    .shift-row.center {
+      min-height: 92px;
+      background:
+        linear-gradient(90deg, rgba(242, 201, 76, 0.24), transparent 34%, transparent 66%, rgba(242, 201, 76, 0.18));
+      color: var(--ink);
+      opacity: 1;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.8);
     }
 
     .shift-label {
-      color: var(--muted);
+      color: currentColor;
       font-family: Consolas, "Courier New", monospace;
-      font-weight: 800;
-      font-size: 0.9rem;
+      font-weight: 900;
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      text-align: right;
     }
 
     .shift-word {
@@ -189,9 +210,14 @@
       min-width: 0;
       overflow-wrap: anywhere;
       word-break: break-all;
-      font-size: clamp(1.55rem, 4vw, 2.6rem);
+      font-size: clamp(1.45rem, 4vw, 2.45rem);
       line-height: 1.08;
       font-weight: 900;
+    }
+
+    .shift-row.center .shift-word {
+      font-size: clamp(2.05rem, 6vw, 4.2rem);
+      letter-spacing: 0;
     }
 
     .answer-panel {
@@ -271,12 +297,6 @@
       font-family: Consolas, "Courier New", monospace;
     }
 
-    @media (max-width: 860px) {
-      .shift-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
     @media (max-width: 620px) {
       body {
         padding: 14px;
@@ -284,13 +304,17 @@
 
       .question-top,
       .controls,
-      .mode-tabs,
-      .shift-grid {
+      .mode-tabs {
         grid-template-columns: 1fr;
       }
 
       .length-badge {
         justify-self: start;
+      }
+
+      .shift-row {
+        min-height: 62px;
+        grid-template-columns: 46px minmax(0, 1fr);
       }
 
       button.action {
@@ -322,7 +346,7 @@
         <textarea id="customInput" maxlength="40" spellcheck="false">漢字迷宮</textarea>
       </div>
 
-      <div class="shift-grid" id="shiftGrid" aria-label="文字コードをずらした単語一覧"></div>
+      <div class="shift-stack" id="shiftStack" aria-label="文字コードをずらした単語一覧"></div>
 
       <div class="answer-panel" aria-live="polite">
         <p class="answer-text" id="message">ずらされる前の言葉を想像してから、答えを表示してください。</p>
@@ -391,7 +415,7 @@
       const length = Array.from(word).length;
       return length >= 3 && length <= 20;
     });
-    const shiftGrid = document.querySelector("#shiftGrid");
+    const shiftStack = document.querySelector("#shiftStack");
     const roundLabel = document.querySelector("#roundLabel");
     const lengthBadge = document.querySelector("#lengthBadge");
     const customPanel = document.querySelector("#customPanel");
@@ -405,6 +429,7 @@
     let round = 0;
     let answer = "";
     let previousAnswer = "";
+    let answered = false;
 
     function pickWord() {
       let picked = quizWords[Math.floor(Math.random() * quizWords.length)];
@@ -422,23 +447,37 @@
       }).join("");
     }
 
-    function renderShiftCards(sourceText) {
-      shiftGrid.replaceChildren();
-      shifts.forEach((amount) => {
-        const card = document.createElement("article");
-        card.className = `shift-card ${amount < 0 ? "negative" : "positive"}`;
+    function hiddenWord(word) {
+      return Array.from(word, (char) => char.trim() ? "？" : char).join("");
+    }
 
-        const label = document.createElement("div");
-        label.className = "shift-label";
-        label.textContent = amount > 0 ? `+${amount}` : String(amount);
+    function createShiftRow(amount, word, rowType) {
+      const row = document.createElement("article");
+      const distance = amount === 0 ? 1 : Math.abs(amount);
+      row.className = `shift-row ${rowType}`;
+      row.style.setProperty("--distance", String(distance));
 
-        const word = document.createElement("div");
-        word.className = "shift-word";
-        word.textContent = shiftWord(sourceText, amount);
+      const label = document.createElement("div");
+      label.className = "shift-label";
+      label.textContent = amount > 0 ? `+${amount}` : amount < 0 ? String(amount) : "???";
 
-        card.append(label, word);
-        shiftGrid.append(card);
-      });
+      const wordEl = document.createElement("div");
+      wordEl.className = "shift-word";
+      wordEl.textContent = word;
+
+      row.append(label, wordEl);
+      return row;
+    }
+
+    function renderShiftRows(sourceText, centerText) {
+      const negativeRows = [-4, -3, -2, -1].map((amount) => (
+        createShiftRow(amount, shiftWord(sourceText, amount), "negative")
+      ));
+      const positiveRows = [1, 2, 3, 4].map((amount) => (
+        createShiftRow(amount, shiftWord(sourceText, amount), "positive")
+      ));
+      const centerRow = createShiftRow(0, centerText, "center");
+      shiftStack.replaceChildren(...negativeRows, centerRow, ...positiveRows);
     }
 
     function newQuestion() {
@@ -446,6 +485,7 @@
       updateModeButtons();
       round += 1;
       answer = pickWord();
+      answered = false;
       roundLabel.textContent = `問題 ${round}`;
       lengthBadge.textContent = `${Array.from(answer).length}文字`;
       message.textContent = "ずらされる前の言葉を想像してから、答えを表示してください。";
@@ -454,13 +494,15 @@
       customPanel.hidden = true;
       answerButton.hidden = false;
       nextButton.hidden = false;
-      renderShiftCards(answer);
+      renderShiftRows(answer, hiddenWord(answer));
     }
 
     function revealAnswer() {
       message.innerHTML = `<span>答えは </span><strong>${answer}</strong><span> です。</span>`;
       answerButton.disabled = true;
       nextButton.disabled = false;
+      answered = true;
+      renderShiftRows(answer, answer);
     }
 
     function updateModeButtons() {
@@ -477,7 +519,7 @@
       customPanel.hidden = false;
       answerButton.hidden = true;
       nextButton.hidden = true;
-      renderShiftCards(sourceText);
+      renderShiftRows(sourceText, sourceText);
     }
 
     function switchMode(mode) {
@@ -493,10 +535,14 @@
         }
         roundLabel.textContent = `問題 ${round}`;
         lengthBadge.textContent = `${Array.from(answer).length}文字`;
-        message.textContent = "ずらされる前の言葉を想像してから、答えを表示してください。";
-        answerButton.disabled = false;
-        nextButton.disabled = true;
-        renderShiftCards(answer);
+        if (answered) {
+          message.innerHTML = `<span>答えは </span><strong>${answer}</strong><span> です。</span>`;
+        } else {
+          message.textContent = "ずらされる前の言葉を想像してから、答えを表示してください。";
+        }
+        answerButton.disabled = answered;
+        nextButton.disabled = !answered;
+        renderShiftRows(answer, answered ? answer : hiddenWord(answer));
         return;
       }
       renderCustomMode();
