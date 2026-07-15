@@ -150,6 +150,19 @@
       outline-offset: 2px;
     }
 
+    .custom-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .custom-status {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
     .shift-stack {
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -303,6 +316,7 @@
       }
 
       .question-top,
+      .custom-controls,
       .controls,
       .mode-tabs {
         grid-template-columns: 1fr;
@@ -344,6 +358,10 @@
       <div class="custom-panel" id="customPanel" hidden>
         <label class="custom-label" for="customInput">ずらして表示する文字列</label>
         <textarea id="customInput" maxlength="40" spellcheck="false">漢字迷宮</textarea>
+        <div class="custom-controls">
+          <span class="custom-status" id="customStatus">中央の答えを表示中</span>
+          <button class="action secondary" type="button" id="customHideButton">答えを隠す</button>
+        </div>
       </div>
 
       <div class="shift-stack" id="shiftStack" aria-label="文字コードをずらした単語一覧"></div>
@@ -420,6 +438,8 @@
     const lengthBadge = document.querySelector("#lengthBadge");
     const customPanel = document.querySelector("#customPanel");
     const customInput = document.querySelector("#customInput");
+    const customStatus = document.querySelector("#customStatus");
+    const customHideButton = document.querySelector("#customHideButton");
     const message = document.querySelector("#message");
     const answerButton = document.querySelector("#answerButton");
     const nextButton = document.querySelector("#nextButton");
@@ -430,6 +450,7 @@
     let answer = "";
     let previousAnswer = "";
     let answered = false;
+    let customAnswerHidden = false;
 
     function pickWord() {
       let picked = quizWords[Math.floor(Math.random() * quizWords.length)];
@@ -513,13 +534,19 @@
 
     function renderCustomMode() {
       const sourceText = customInput.value || " ";
+      const centerText = customAnswerHidden ? hiddenWord(sourceText) : sourceText;
       roundLabel.textContent = "入力モード";
       lengthBadge.textContent = `${Array.from(sourceText.trim()).length}文字`;
-      message.textContent = "入力した文字列を、文字コードでずらして表示しています。";
+      message.textContent = customAnswerHidden
+        ? "中央の答えを隠しています。このままオリジナル問題として出せます。"
+        : "入力した文字列を、文字コードでずらして表示しています。";
+      customStatus.textContent = customAnswerHidden ? "中央の答えを非表示中" : "中央の答えを表示中";
+      customHideButton.textContent = customAnswerHidden ? "答えを表示" : "答えを隠す";
+      customHideButton.setAttribute("aria-pressed", String(customAnswerHidden));
       customPanel.hidden = false;
       answerButton.hidden = true;
       nextButton.hidden = true;
-      renderShiftRows(sourceText, sourceText);
+      renderShiftRows(sourceText, centerText);
     }
 
     function switchMode(mode) {
@@ -554,6 +581,10 @@
     });
 
     customInput.addEventListener("input", renderCustomMode);
+    customHideButton.addEventListener("click", () => {
+      customAnswerHidden = !customAnswerHidden;
+      renderCustomMode();
+    });
     answerButton.addEventListener("click", revealAnswer);
     nextButton.addEventListener("click", newQuestion);
 
