@@ -104,7 +104,7 @@
 
     .seed-panel {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      grid-template-columns: auto minmax(0, 1fr) auto auto auto;
       gap: 10px;
       align-items: center;
     }
@@ -361,6 +361,7 @@
         <input class="seed-input" id="seedInput" type="text" maxlength="40" spellcheck="false" autocomplete="off">
         <button class="action secondary" type="button" id="applySeedButton">適用</button>
         <button class="action secondary" type="button" id="randomSeedButton">URL作成</button>
+        <button class="action secondary" type="button" id="normalModeButton">通常モード</button>
       </div>
 
       <div class="seed-url-row">
@@ -410,6 +411,7 @@
     const shareUrl = document.querySelector("#shareUrl");
     const applySeedButton = document.querySelector("#applySeedButton");
     const randomSeedButton = document.querySelector("#randomSeedButton");
+    const normalModeButton = document.querySelector("#normalModeButton");
     const copyUrlButton = document.querySelector("#copyUrlButton");
     const answerButton = document.querySelector("#answerButton");
     const nextButton = document.querySelector("#nextButton");
@@ -498,6 +500,14 @@
       }
     }
 
+    function clearSeedFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      params.delete("seed");
+      params.set("range", activeRange);
+      const query = params.toString();
+      window.history.replaceState(null, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
+    }
+
     function resetSeed(seed, options = {}) {
       const { startNewQuestion = true, oneQuestion = false } = options;
       seededMode = oneQuestion;
@@ -509,6 +519,17 @@
       if (startNewQuestion) {
         newQuestion();
       }
+    }
+
+    function startNormalMode() {
+      seededMode = false;
+      seedValue = randomSeedValue();
+      seedInput.value = "";
+      shareUrl.value = "";
+      random = Math.random;
+      previousAnswer = "";
+      clearSeedFromUrl();
+      newQuestion();
     }
 
     function pick(list) {
@@ -682,6 +703,7 @@
 
     applySeedButton.addEventListener("click", () => resetSeed(seedInput.value, { oneQuestion: true }));
     randomSeedButton.addEventListener("click", () => resetSeed(randomSeedValue(), { oneQuestion: true }));
+    normalModeButton.addEventListener("click", startNormalMode);
     copyUrlButton.addEventListener("click", async () => {
       if (!shareUrl.value) {
         syncShareUrl();
