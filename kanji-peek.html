@@ -102,6 +102,37 @@
       font-weight: 700;
     }
 
+    .seed-panel {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .seed-label {
+      color: var(--muted);
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .seed-input {
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--ink);
+      padding: 8px 12px;
+      font: inherit;
+      font-family: Consolas, "Courier New", monospace;
+      font-weight: 800;
+      min-width: 0;
+    }
+
+    .seed-input:focus {
+      outline: 3px solid rgba(105, 210, 192, 0.42);
+      outline-offset: 2px;
+    }
+
     .stage {
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -288,6 +319,7 @@
       }
 
       .range-tabs,
+      .seed-panel,
       .controls,
       .status-panel {
         grid-template-columns: 1fr;
@@ -314,6 +346,13 @@
       </div>
 
       <p class="mode-info" id="modeInfo"></p>
+
+      <div class="seed-panel">
+        <label class="seed-label" for="seedInput">シード</label>
+        <input class="seed-input" id="seedInput" type="text" maxlength="40" spellcheck="false" autocomplete="off">
+        <button class="action secondary" type="button" id="applySeedButton">適用</button>
+        <button class="action secondary" type="button" id="randomSeedButton">新規</button>
+      </div>
 
       <div class="stage">
         <div class="canvas-wrap" aria-label="一部分だけ表示された漢字">
@@ -353,6 +392,9 @@
     const modeInfo = document.querySelector("#modeInfo");
     const initialStatus = document.querySelector("#initialStatus");
     const openStatus = document.querySelector("#openStatus");
+    const seedInput = document.querySelector("#seedInput");
+    const applySeedButton = document.querySelector("#applySeedButton");
+    const randomSeedButton = document.querySelector("#randomSeedButton");
     const answerButton = document.querySelector("#answerButton");
     const nextButton = document.querySelector("#nextButton");
     const rangeButtons = document.querySelectorAll(".range-button");
@@ -385,13 +427,67 @@
     let initialOpenedCells = new Set();
     let isRevealed = false;
     let previousAnswer = "";
+    let seedValue = "";
+    let random = Math.random;
 
     function uniqueChars(text) {
       return Array.from(new Set(Array.from(text)));
     }
 
+    function normalizeSeed(seed) {
+      return seed.trim() || randomSeedValue();
+    }
+
+    function randomSeedValue() {
+      if (window.crypto && window.crypto.getRandomValues) {
+        const values = new Uint32Array(2);
+        window.crypto.getRandomValues(values);
+        return Array.from(values, (value) => value.toString(36)).join("-");
+      }
+      return Math.floor(Math.random() * 0xFFFFFFFF).toString(36);
+    }
+
+    function seedToNumber(seed) {
+      let hash = 2166136261;
+      for (let index = 0; index < seed.length; index += 1) {
+        hash ^= seed.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return hash >>> 0;
+    }
+
+    function makeSeededRandom(seed) {
+      let state = seedToNumber(seed) || 0x6D2B79F5;
+      return () => {
+        state += 0x6D2B79F5;
+        let value = state;
+        value = Math.imul(value ^ (value >>> 15), value | 1);
+        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function syncUrl() {
+      const params = new URLSearchParams(window.location.search);
+      params.set("seed", seedValue);
+      params.set("range", activeRange);
+      const nextUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState(null, "", nextUrl);
+    }
+
+    function resetSeed(seed, startNewQuestion = true) {
+      seedValue = normalizeSeed(seed);
+      seedInput.value = seedValue;
+      random = makeSeededRandom(`${activeRange}:${seedValue}`);
+      previousAnswer = "";
+      syncUrl();
+      if (startNewQuestion) {
+        newQuestion();
+      }
+    }
+
     function pick(list) {
-      return list[Math.floor(Math.random() * list.length)];
+      return list[Math.floor(random() * list.length)];
     }
 
     function toCodeLabel(char) {
@@ -493,7 +589,7 @@
     function openRandomStartingCells() {
       openedCells = new Set();
       while (openedCells.size < initialOpenCount) {
-        openedCells.add(Math.floor(Math.random() * cellCount));
+        openedCells.add(Math.floor(random() * cellCount));
       }
       initialOpenedCells = new Set(openedCells);
     }
@@ -553,10 +649,17 @@
         rangeButtons.forEach((item) => {
           item.setAttribute("aria-pressed", String(item === button));
         });
-        newQuestion();
+        resetSeed(seedInput.value);
       });
     });
 
+    applySeedButton.addEventListener("click", () => resetSeed(seedInput.value));
+    randomSeedButton.addEventListener("click", () => resetSeed(randomSeedValue()));
+    seedInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        resetSeed(seedInput.value);
+      }
+    });
     answerButton.addEventListener("click", revealAnswer);
     nextButton.addEventListener("click", newQuestion);
 
@@ -564,7 +667,15 @@
       drawKanji(false);
     });
 
-    newQuestion();
+    const initialParams = new URLSearchParams(window.location.search);
+    const requestedRange = initialParams.get("range");
+    if (requestedRange && ranges[requestedRange]) {
+      activeRange = requestedRange;
+      rangeButtons.forEach((item) => {
+        item.setAttribute("aria-pressed", String(item.dataset.range === activeRange));
+      });
+    }
+    resetSeed(initialParams.get("seed") || randomSeedValue());
   </script>
 </body>
 </html>
