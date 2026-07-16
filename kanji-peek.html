@@ -365,7 +365,7 @@
 
       <div class="seed-url-row">
         <input class="seed-input" id="shareUrl" type="text" readonly aria-label="シード付きURL">
-        <button class="action secondary" type="button" id="copyUrlButton">コピー</button>
+        <button class="action secondary" type="button" id="copyUrlButton">URLコピー</button>
       </div>
 
       <div class="stage">
@@ -695,7 +695,7 @@
         copyUrlButton.textContent = "コピー済み";
       }
       window.setTimeout(() => {
-        copyUrlButton.textContent = "コピー";
+        copyUrlButton.textContent = "URLコピー";
       }, 1300);
     });
     seedInput.addEventListener("keydown", (event) => {
