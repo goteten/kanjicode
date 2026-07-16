@@ -396,6 +396,7 @@
 
     let activeRange = "joyo";
     let seedValue = "";
+    let hasSeed = false;
     let answer = "漢";
     let openedCells = new Set();
     let isRevealed = false;
@@ -411,10 +412,6 @@
         return Array.from(values, (value) => value.toString(36)).join("-");
       }
       return Math.floor(Math.random() * 0xFFFFFFFF).toString(36);
-    }
-
-    function normalizeSeed(seed) {
-      return seed.trim() || randomSeedValue();
     }
 
     function seedToNumber(seed) {
@@ -442,6 +439,10 @@
       params.set("seed", seed);
       params.set("range", range);
       return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    }
+
+    function randomUrl() {
+      return `${window.location.origin}${window.location.pathname}?range=${encodeURIComponent(activeRange)}`;
     }
 
     function pick(list, random) {
@@ -509,15 +510,22 @@
     }
 
     function syncUrl() {
-      shareUrl.value = seededUrlFor(seedValue);
-      window.history.replaceState(null, "", `${window.location.pathname}?${new URL(shareUrl.value).searchParams.toString()}`);
+      if (hasSeed) {
+        shareUrl.value = seededUrlFor(seedValue);
+        window.history.replaceState(null, "", `${window.location.pathname}?${new URL(shareUrl.value).searchParams.toString()}`);
+        return;
+      }
+      shareUrl.value = "";
+      window.history.replaceState(null, "", randomUrl().replace(window.location.origin, ""));
     }
 
-    function renderQuestion(seed) {
-      seedValue = normalizeSeed(seed);
+    function renderQuestion(seed, options = {}) {
+      const { forceSeed = false } = options;
+      seedValue = seed.trim();
+      hasSeed = forceSeed || seedValue.length > 0;
       seedInput.value = seedValue;
 
-      const random = makeSeededRandom(`${activeRange}:${seedValue}`);
+      const random = hasSeed ? makeSeededRandom(`${activeRange}:${seedValue}`) : Math.random;
       const candidates = ranges[activeRange].chars;
       answer = pick(candidates, random);
       openedCells = openCellsFromSeed(random);
@@ -544,7 +552,7 @@
 
     async function copyShareUrl() {
       if (!shareUrl.value) {
-        syncUrl();
+        renderQuestion(randomSeedValue(), { forceSeed: true });
       }
       try {
         await navigator.clipboard.writeText(shareUrl.value);
@@ -564,12 +572,12 @@
         rangeButtons.forEach((item) => {
           item.setAttribute("aria-pressed", String(item === button));
         });
-        renderQuestion(seedInput.value);
+        renderQuestion(seedInput.value, { forceSeed: hasSeed });
       });
     });
 
     applySeedButton.addEventListener("click", () => renderQuestion(seedInput.value));
-    randomSeedButton.addEventListener("click", () => renderQuestion(randomSeedValue()));
+    randomSeedButton.addEventListener("click", () => renderQuestion(randomSeedValue(), { forceSeed: true }));
     copyUrlButton.addEventListener("click", copyShareUrl);
     answerButton.addEventListener("click", revealAnswer);
     hideButton.addEventListener("click", hideAnswer);
@@ -591,7 +599,7 @@
         item.setAttribute("aria-pressed", String(item.dataset.range === activeRange));
       });
     }
-    renderQuestion(initialParams.get("seed") || randomSeedValue());
+    renderQuestion(initialParams.get("seed") || "");
   </script>
 </body>
 </html>
