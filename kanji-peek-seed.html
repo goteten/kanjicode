@@ -375,6 +375,15 @@
     const cellCount = gridSize * gridSize;
     const minOpenCount = 3;
     const maxOpenCount = 20;
+    const panelPalette = [
+      "#eef7f3",
+      "#fff3d6",
+      "#f8e7e1",
+      "#eaf0ff",
+      "#f2ecfa",
+      "#e9f6fb",
+      "#f5f0df"
+    ];
 
     const ranges = {
       joyo: {
@@ -399,6 +408,7 @@
     let hasSeed = false;
     let answer = "漢";
     let openedCells = new Set();
+    let panelColors = [];
     let isRevealed = false;
 
     function uniqueChars(text) {
@@ -468,6 +478,10 @@
       return cells;
     }
 
+    function panelColorsFromSeed(random) {
+      return Array.from({ length: cellCount }, () => panelPalette[Math.floor(random() * panelPalette.length)]);
+    }
+
     function updateRangeInfo() {
       const range = ranges[activeRange];
       modeInfo.textContent = `${range.label}: ${range.chars.length.toLocaleString("ja-JP")}字。${range.note}`;
@@ -489,6 +503,18 @@
       const size = canvas.width;
       const cellSize = size / gridSize;
       clearCanvas();
+
+      if (!revealAll) {
+        for (let cellIndex = 0; cellIndex < cellCount; cellIndex += 1) {
+          if (openedCells.has(cellIndex)) {
+            continue;
+          }
+          const x = cellIndex % gridSize;
+          const y = Math.floor(cellIndex / gridSize);
+          context.fillStyle = panelColors[cellIndex] || panelPalette[cellIndex % panelPalette.length];
+          context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        }
+      }
 
       context.save();
       if (!revealAll) {
@@ -529,6 +555,7 @@
       const candidates = ranges[activeRange].chars;
       answer = pick(candidates, random);
       openedCells = openCellsFromSeed(random);
+      panelColors = panelColorsFromSeed(random);
       isRevealed = false;
 
       updateRangeInfo();
