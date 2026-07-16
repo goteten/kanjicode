@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kanji Seed Peek</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbfaf6;
+      --ink: #1d2630;
+      --muted: #657385;
+      --line: #d8d6ca;
+      --mint: #69d2c0;
+      --coral: #ef8b75;
+      --yellow: #f2c94c;
+      --blue: #405b8f;
+      --white: #ffffff;
+      --shadow: 0 18px 55px rgba(31, 45, 61, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background:
+        linear-gradient(135deg, rgba(105, 210, 192, 0.28), transparent 34%),
+        linear-gradient(315deg, rgba(239, 139, 117, 0.18), transparent 38%),
+        var(--paper);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    main {
+      width: min(980px, 100%);
+      display: grid;
+      gap: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4.8rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .game {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 4vw, 34px);
+      display: grid;
+      gap: 20px;
+    }
+
+    .range-tabs,
+    .seed-panel,
+    .url-panel,
+    .controls,
+    .status-panel {
+      display: grid;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .range-tabs {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .seed-panel {
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+    }
+
+    .url-panel {
+      grid-template-columns: minmax(0, 1fr) auto;
+      margin-top: -10px;
+    }
+
+    .controls,
+    .status-panel {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .range-button,
+    .action {
+      min-height: 52px;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 850;
+      cursor: pointer;
+      white-space: normal;
+    }
+
+    .range-button {
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--ink);
+      padding: 8px 10px;
+    }
+
+    .range-button[aria-pressed="true"] {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--white);
+    }
+
+    .seed-label {
+      color: var(--muted);
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .seed-input {
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--ink);
+      padding: 8px 12px;
+      font: inherit;
+      font-family: Consolas, "Courier New", monospace;
+      font-weight: 800;
+      min-width: 0;
+    }
+
+    .seed-input:focus {
+      outline: 3px solid rgba(105, 210, 192, 0.42);
+      outline-offset: 2px;
+    }
+
+    .mode-info {
+      margin: -8px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .stage {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(105, 210, 192, 0.12), transparent 52%),
+        linear-gradient(0deg, rgba(242, 201, 76, 0.13), transparent 42%),
+        var(--white);
+      min-height: clamp(330px, 58vw, 520px);
+      display: grid;
+      place-items: center;
+      padding: clamp(12px, 3vw, 26px);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .canvas-wrap {
+      width: min(430px, 86vw);
+      aspect-ratio: 1;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(29, 38, 48, 0.18);
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent calc(20% - 1px),
+          rgba(29, 38, 48, 0.18) calc(20% - 1px),
+          rgba(29, 38, 48, 0.18) 20%
+        ),
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent calc(20% - 1px),
+          rgba(29, 38, 48, 0.18) calc(20% - 1px),
+          rgba(29, 38, 48, 0.18) 20%
+        );
+      pointer-events: none;
+    }
+
+    .status-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .answer-panel {
+      min-height: 72px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7fbff;
+      display: grid;
+      align-items: center;
+      padding: 14px;
+    }
+
+    .answer-text {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .answer-text strong {
+      color: var(--ink);
+      font-family: "Yu Mincho", "Hiragino Mincho ProN", "MS Mincho", serif;
+      font-size: clamp(2.2rem, 8vw, 4.2rem);
+      line-height: 1;
+      vertical-align: middle;
+    }
+
+    .code {
+      color: var(--blue);
+      font-family: Consolas, "Courier New", monospace;
+      font-weight: 850;
+    }
+
+    .action {
+      border: 0;
+      padding: 0 16px;
+    }
+
+    .primary {
+      background: var(--coral);
+      color: var(--white);
+    }
+
+    .secondary {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .note {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .chip {
+      display: inline-grid;
+      place-items: center;
+      min-width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--yellow);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    @media (max-width: 680px) {
+      body {
+        padding: 14px;
+      }
+
+      .range-tabs,
+      .seed-panel,
+      .url-panel,
+      .controls,
+      .status-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .stage {
+        min-height: 330px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Kanji Seed Peek</h1>
+      <p class="subtitle">5×5に分割された漢字の、シードで決まった場所だけが開いている1問勝負版です。</p>
+    </header>
+
+    <section class="game" aria-label="シード式の漢字一部当てゲーム">
+      <div class="range-tabs" aria-label="出題範囲">
+        <button class="range-button" type="button" data-range="joyo" aria-pressed="true">常用漢字</button>
+        <button class="range-button" type="button" data-range="jisLevel1" aria-pressed="false">JIS第1水準</button>
+        <button class="range-button" type="button" data-range="jisLevel12" aria-pressed="false">JIS第1・第2水準</button>
+      </div>
+
+      <p class="mode-info" id="modeInfo"></p>
+
+      <div class="seed-panel">
+        <label class="seed-label" for="seedInput">シード</label>
+        <input class="seed-input" id="seedInput" type="text" maxlength="40" spellcheck="false" autocomplete="off">
+        <button class="action secondary" type="button" id="applySeedButton">適用</button>
+        <button class="action secondary" type="button" id="randomSeedButton">URL作成</button>
+      </div>
+
+      <div class="url-panel">
+        <input class="seed-input" id="shareUrl" type="text" readonly aria-label="シード付きURL">
+        <button class="action secondary" type="button" id="copyUrlButton">URLコピー</button>
+      </div>
+
+      <div class="stage">
+        <div class="canvas-wrap" aria-label="シードで決まった部分だけ表示された漢字">
+          <canvas id="kanjiCanvas" width="1000" height="1000"></canvas>
+          <span class="grid-lines" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="status-panel" aria-live="polite">
+        <div class="status-item" id="openCountStatus">オープン数: - / 25マス</div>
+        <div class="status-item" id="openCellsStatus">オープン座標: -</div>
+      </div>
+
+      <div class="answer-panel" aria-live="polite">
+        <p class="answer-text" id="message">表示されている部分だけで漢字を当ててください。</p>
+      </div>
+
+      <div class="controls">
+        <button class="action primary" type="button" id="answerButton">答えを見る</button>
+        <button class="action secondary" type="button" id="hideButton">答えを隠す</button>
+      </div>
+
+      <div class="note">
+        <span class="chip">5×5</span>
+        <span>開いている数は3から20マスの間で、漢字・個数・場所はすべてシード値から決まります。プレイヤーが追加で開ける操作はありません。</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="kanji-data.js"></script>
+  <script>
+    const canvas = document.querySelector("#kanjiCanvas");
+    const context = canvas.getContext("2d");
+    const message = document.querySelector("#message");
+    const modeInfo = document.querySelector("#modeInfo");
+    const seedInput = document.querySelector("#seedInput");
+    const shareUrl = document.querySelector("#shareUrl");
+    const applySeedButton = document.querySelector("#applySeedButton");
+    const randomSeedButton = document.querySelector("#randomSeedButton");
+    const copyUrlButton = document.querySelector("#copyUrlButton");
+    const answerButton = document.querySelector("#answerButton");
+    const hideButton = document.querySelector("#hideButton");
+    const openCountStatus = document.querySelector("#openCountStatus");
+    const openCellsStatus = document.querySelector("#openCellsStatus");
+    const rangeButtons = document.querySelectorAll(".range-button");
+
+    const gridSize = 5;
+    const cellCount = gridSize * gridSize;
+    const minOpenCount = 3;
+    const maxOpenCount = 20;
+
+    const ranges = {
+      joyo: {
+        label: "常用漢字",
+        note: "常用漢字表から出題します。",
+        chars: uniqueChars(JOYO_KANJI)
+      },
+      jisLevel1: {
+        label: "JIS第1水準",
+        note: "常用漢字とJIS第1水準の漢字から出題します。",
+        chars: uniqueChars(JOYO_KANJI + JIS_LEVEL_1_KANJI)
+      },
+      jisLevel12: {
+        label: "JIS第1・第2水準",
+        note: "常用漢字、JIS第1水準、JIS第2水準の漢字から出題します。",
+        chars: uniqueChars(JOYO_KANJI + JIS_LEVEL_1_KANJI + JIS_LEVEL_2_KANJI)
+      }
+    };
+
+    let activeRange = "joyo";
+    let seedValue = "";
+    let answer = "漢";
+    let openedCells = new Set();
+    let isRevealed = false;
+
+    function uniqueChars(text) {
+      return Array.from(new Set(Array.from(text)));
+    }
+
+    function randomSeedValue() {
+      if (window.crypto && window.crypto.getRandomValues) {
+        const values = new Uint32Array(2);
+        window.crypto.getRandomValues(values);
+        return Array.from(values, (value) => value.toString(36)).join("-");
+      }
+      return Math.floor(Math.random() * 0xFFFFFFFF).toString(36);
+    }
+
+    function normalizeSeed(seed) {
+      return seed.trim() || randomSeedValue();
+    }
+
+    function seedToNumber(seed) {
+      let hash = 2166136261;
+      for (let index = 0; index < seed.length; index += 1) {
+        hash ^= seed.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return hash >>> 0;
+    }
+
+    function makeSeededRandom(seed) {
+      let state = seedToNumber(seed) || 0x6D2B79F5;
+      return () => {
+        state += 0x6D2B79F5;
+        let value = state;
+        value = Math.imul(value ^ (value >>> 15), value | 1);
+        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function seededUrlFor(seed, range = activeRange) {
+      const params = new URLSearchParams();
+      params.set("seed", seed);
+      params.set("range", range);
+      return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    }
+
+    function pick(list, random) {
+      return list[Math.floor(random() * list.length)];
+    }
+
+    function toCodeLabel(char) {
+      return "U+" + char.codePointAt(0).toString(16).toUpperCase().padStart(4, "0");
+    }
+
+    function cellLabel(cellIndex) {
+      const row = Math.floor(cellIndex / gridSize) + 1;
+      const column = (cellIndex % gridSize) + 1;
+      return `(${row},${column})`;
+    }
+
+    function openCellsFromSeed(random) {
+      const openCount = minOpenCount + Math.floor(random() * (maxOpenCount - minOpenCount + 1));
+      const cells = new Set();
+      while (cells.size < openCount) {
+        cells.add(Math.floor(random() * cellCount));
+      }
+      return cells;
+    }
+
+    function updateRangeInfo() {
+      const range = ranges[activeRange];
+      modeInfo.textContent = `${range.label}: ${range.chars.length.toLocaleString("ja-JP")}字。${range.note}`;
+    }
+
+    function updateStatus() {
+      const labels = Array.from(openedCells).sort((a, b) => a - b).map(cellLabel);
+      openCountStatus.textContent = `オープン数: ${openedCells.size} / ${cellCount}マス`;
+      openCellsStatus.textContent = `オープン座標: ${labels.join("、")}`;
+    }
+
+    function clearCanvas() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawKanji(revealAll = false) {
+      const size = canvas.width;
+      const cellSize = size / gridSize;
+      clearCanvas();
+
+      context.save();
+      if (!revealAll) {
+        context.beginPath();
+        openedCells.forEach((cellIndex) => {
+          const x = cellIndex % gridSize;
+          const y = Math.floor(cellIndex / gridSize);
+          context.rect(x * cellSize, y * cellSize, cellSize, cellSize);
+        });
+        context.clip();
+      }
+
+      context.fillStyle = "#1d2630";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.font = '840px "Yu Mincho", "Hiragino Mincho ProN", "MS Mincho", serif';
+      context.fillText(answer, size / 2, size / 2 + 28);
+      context.restore();
+    }
+
+    function syncUrl() {
+      shareUrl.value = seededUrlFor(seedValue);
+      window.history.replaceState(null, "", `${window.location.pathname}?${new URL(shareUrl.value).searchParams.toString()}`);
+    }
+
+    function renderQuestion(seed) {
+      seedValue = normalizeSeed(seed);
+      seedInput.value = seedValue;
+
+      const random = makeSeededRandom(`${activeRange}:${seedValue}`);
+      const candidates = ranges[activeRange].chars;
+      answer = pick(candidates, random);
+      openedCells = openCellsFromSeed(random);
+      isRevealed = false;
+
+      updateRangeInfo();
+      updateStatus();
+      syncUrl();
+      drawKanji(false);
+      message.textContent = "表示されている部分だけで漢字を当ててください。";
+    }
+
+    function revealAnswer() {
+      isRevealed = true;
+      drawKanji(true);
+      message.innerHTML = `答えは <strong>${answer}</strong> <span class="code">(${toCodeLabel(answer)})</span> です。`;
+    }
+
+    function hideAnswer() {
+      isRevealed = false;
+      drawKanji(false);
+      message.textContent = "表示されている部分だけで漢字を当ててください。";
+    }
+
+    async function copyShareUrl() {
+      if (!shareUrl.value) {
+        syncUrl();
+      }
+      try {
+        await navigator.clipboard.writeText(shareUrl.value);
+      } catch {
+        shareUrl.select();
+        document.execCommand("copy");
+      }
+      copyUrlButton.textContent = "コピー済み";
+      window.setTimeout(() => {
+        copyUrlButton.textContent = "URLコピー";
+      }, 1300);
+    }
+
+    rangeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeRange = button.dataset.range;
+        rangeButtons.forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+        renderQuestion(seedInput.value);
+      });
+    });
+
+    applySeedButton.addEventListener("click", () => renderQuestion(seedInput.value));
+    randomSeedButton.addEventListener("click", () => renderQuestion(randomSeedValue()));
+    copyUrlButton.addEventListener("click", copyShareUrl);
+    answerButton.addEventListener("click", revealAnswer);
+    hideButton.addEventListener("click", hideAnswer);
+    seedInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        renderQuestion(seedInput.value);
+      }
+    });
+
+    document.fonts.ready.then(() => {
+      drawKanji(isRevealed);
+    });
+
+    const initialParams = new URLSearchParams(window.location.search);
+    const requestedRange = initialParams.get("range");
+    if (requestedRange && ranges[requestedRange]) {
+      activeRange = requestedRange;
+      rangeButtons.forEach((item) => {
+        item.setAttribute("aria-pressed", String(item.dataset.range === activeRange));
+      });
+    }
+    renderQuestion(initialParams.get("seed") || randomSeedValue());
+  </script>
+</body>
+</html>
