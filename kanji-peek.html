@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kanji Peek</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbfaf6;
+      --ink: #1d2630;
+      --muted: #657385;
+      --line: #d8d6ca;
+      --mint: #69d2c0;
+      --coral: #ef8b75;
+      --yellow: #f2c94c;
+      --blue: #405b8f;
+      --white: #ffffff;
+      --shadow: 0 18px 55px rgba(31, 45, 61, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background:
+        linear-gradient(135deg, rgba(105, 210, 192, 0.28), transparent 34%),
+        linear-gradient(315deg, rgba(239, 139, 117, 0.18), transparent 38%),
+        var(--paper);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    main {
+      width: min(980px, 100%);
+      display: grid;
+      gap: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4.8rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .game {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 4vw, 34px);
+      display: grid;
+      gap: 20px;
+    }
+
+    .range-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .range-button,
+    .action {
+      min-height: 52px;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 850;
+      cursor: pointer;
+      white-space: normal;
+    }
+
+    .range-button {
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--ink);
+      padding: 8px 10px;
+    }
+
+    .range-button[aria-pressed="true"] {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--white);
+    }
+
+    .mode-info {
+      margin: -8px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .stage {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(105, 210, 192, 0.12), transparent 52%),
+        linear-gradient(0deg, rgba(242, 201, 76, 0.13), transparent 42%),
+        var(--white);
+      min-height: clamp(330px, 58vw, 520px);
+      display: grid;
+      place-items: center;
+      padding: clamp(12px, 3vw, 26px);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .canvas-wrap {
+      width: min(430px, 86vw);
+      aspect-ratio: 1;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(29, 38, 48, 0.18);
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent calc(25% - 1px),
+          rgba(29, 38, 48, 0.18) calc(25% - 1px),
+          rgba(29, 38, 48, 0.18) 25%
+        ),
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent calc(25% - 1px),
+          rgba(29, 38, 48, 0.18) calc(25% - 1px),
+          rgba(29, 38, 48, 0.18) 25%
+        );
+      pointer-events: none;
+    }
+
+    .cell-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: repeat(4, minmax(0, 1fr));
+    }
+
+    .peek-cell {
+      border: 0;
+      background: rgba(29, 38, 48, 0.08);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .peek-cell:hover,
+    .peek-cell:focus-visible {
+      background: rgba(105, 210, 192, 0.18);
+      outline: 3px solid rgba(105, 210, 192, 0.55);
+      outline-offset: -3px;
+    }
+
+    .peek-cell.open {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .peek-cell.initial {
+      box-shadow: inset 0 0 0 3px rgba(242, 201, 76, 0.52);
+    }
+
+    .status-panel {
+      margin-top: -10px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 750;
+    }
+
+    .status-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 10px 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .answer-panel {
+      min-height: 72px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7fbff;
+      display: grid;
+      align-items: center;
+      padding: 14px;
+    }
+
+    .answer-text {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .answer-text strong {
+      color: var(--ink);
+      font-family: "Yu Mincho", "Hiragino Mincho ProN", "MS Mincho", serif;
+      font-size: clamp(2.2rem, 8vw, 4.2rem);
+      line-height: 1;
+      vertical-align: middle;
+    }
+
+    .code {
+      color: var(--blue);
+      font-family: Consolas, "Courier New", monospace;
+      font-weight: 850;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+
+    .action {
+      border: 0;
+      padding: 0 16px;
+    }
+
+    .primary {
+      background: var(--coral);
+      color: var(--white);
+    }
+
+    .secondary {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .action:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+    }
+
+    .note {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .chip {
+      display: inline-grid;
+      place-items: center;
+      min-width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--yellow);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    @media (max-width: 680px) {
+      body {
+        padding: 14px;
+      }
+
+      .range-tabs,
+      .controls,
+      .status-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .stage {
+        min-height: 330px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Kanji Peek</h1>
+      <p class="subtitle">16分割された漢字を少しずつ開けて、何の漢字か当てるゲームです。</p>
+    </header>
+
+    <section class="game" aria-label="漢字の一部当てゲーム">
+      <div class="range-tabs" aria-label="出題範囲">
+        <button class="range-button" type="button" data-range="joyo" aria-pressed="true">常用漢字</button>
+        <button class="range-button" type="button" data-range="jisLevel1" aria-pressed="false">JIS第1水準</button>
+        <button class="range-button" type="button" data-range="jisLevel12" aria-pressed="false">JIS第1・第2水準</button>
+      </div>
+
+      <p class="mode-info" id="modeInfo"></p>
+
+      <div class="stage">
+        <div class="canvas-wrap" aria-label="一部分だけ表示された漢字">
+          <canvas id="kanjiCanvas" width="900" height="900"></canvas>
+          <span class="grid-lines" aria-hidden="true"></span>
+          <div class="cell-grid" id="cellGrid" aria-label="開ける場所"></div>
+        </div>
+      </div>
+
+      <div class="status-panel" aria-live="polite">
+        <div class="status-item" id="initialStatus">初期オープン: -</div>
+        <div class="status-item" id="openStatus">現在: 0 / 16マス</div>
+      </div>
+
+      <div class="answer-panel" aria-live="polite">
+        <p class="answer-text" id="message">見えている部分から漢字を想像して、答えを見るボタンを押してください。</p>
+      </div>
+
+      <div class="controls">
+        <button class="action primary" type="button" id="answerButton">答えを見る</button>
+        <button class="action secondary" type="button" id="nextButton">次の問題</button>
+      </div>
+
+      <div class="note">
+        <span class="chip">4×4</span>
+        <span>マスを押すとその場所だけ開きます。開けた数が少ないほど気持ちよく勝ちです。問題の漢字部分は画像として描いているため、直接コピーしづらくしています。</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="kanji-data.js"></script>
+  <script>
+    const canvas = document.querySelector("#kanjiCanvas");
+    const context = canvas.getContext("2d");
+    const cellGrid = document.querySelector("#cellGrid");
+    const message = document.querySelector("#message");
+    const modeInfo = document.querySelector("#modeInfo");
+    const initialStatus = document.querySelector("#initialStatus");
+    const openStatus = document.querySelector("#openStatus");
+    const answerButton = document.querySelector("#answerButton");
+    const nextButton = document.querySelector("#nextButton");
+    const rangeButtons = document.querySelectorAll(".range-button");
+
+    const gridSize = 4;
+    const cellCount = gridSize * gridSize;
+    const initialOpenCount = 2;
+
+    const ranges = {
+      joyo: {
+        label: "常用漢字",
+        note: "常用漢字表から出題します。",
+        chars: uniqueChars(JOYO_KANJI)
+      },
+      jisLevel1: {
+        label: "JIS第1水準",
+        note: "常用漢字とJIS第1水準の漢字から出題します。",
+        chars: uniqueChars(JOYO_KANJI + JIS_LEVEL_1_KANJI)
+      },
+      jisLevel12: {
+        label: "JIS第1・第2水準",
+        note: "常用漢字、JIS第1水準、JIS第2水準の漢字から出題します。",
+        chars: uniqueChars(JOYO_KANJI + JIS_LEVEL_1_KANJI + JIS_LEVEL_2_KANJI)
+      }
+    };
+
+    let activeRange = "joyo";
+    let answer = "漢";
+    let openedCells = new Set();
+    let initialOpenedCells = new Set();
+    let isRevealed = false;
+    let previousAnswer = "";
+
+    function uniqueChars(text) {
+      return Array.from(new Set(Array.from(text)));
+    }
+
+    function pick(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function toCodeLabel(char) {
+      return "U+" + char.codePointAt(0).toString(16).toUpperCase().padStart(4, "0");
+    }
+
+    function updateRangeInfo() {
+      const range = ranges[activeRange];
+      modeInfo.textContent = `${range.label}: ${range.chars.length.toLocaleString("ja-JP")}字。${range.note}`;
+    }
+
+    function clearCanvas() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawKanji(revealAll = false) {
+      const size = canvas.width;
+      const cellSize = size / gridSize;
+      clearCanvas();
+
+      context.save();
+      if (!revealAll) {
+        context.beginPath();
+        openedCells.forEach((cellIndex) => {
+          const x = cellIndex % gridSize;
+          const y = Math.floor(cellIndex / gridSize);
+          context.rect(x * cellSize, y * cellSize, cellSize, cellSize);
+        });
+        context.clip();
+      }
+
+      context.fillStyle = "#1d2630";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.font = '760px "Yu Mincho", "Hiragino Mincho ProN", "MS Mincho", serif';
+      context.fillText(answer, size / 2, size / 2 + 24);
+      context.restore();
+    }
+
+    function openedCount() {
+      return openedCells.size;
+    }
+
+    function cellLabel(cellIndex) {
+      const row = Math.floor(cellIndex / gridSize) + 1;
+      const column = (cellIndex % gridSize) + 1;
+      return `上${row}・左${column}`;
+    }
+
+    function updateStatusPanel() {
+      const initialLabels = Array.from(initialOpenedCells).sort((a, b) => a - b).map(cellLabel);
+      initialStatus.textContent = `初期オープン: ${initialLabels.join("、")}`;
+      openStatus.textContent = `現在: ${openedCount()} / ${cellCount}マス`;
+    }
+
+    function updateCellButtons() {
+      cellGrid.querySelectorAll(".peek-cell").forEach((button) => {
+        const cellIndex = Number(button.dataset.cell);
+        const isOpen = openedCells.has(cellIndex);
+        button.classList.toggle("open", isOpen);
+        button.classList.toggle("initial", initialOpenedCells.has(cellIndex));
+        button.disabled = !isRevealed && isOpen;
+        button.setAttribute("aria-pressed", String(isOpen));
+      });
+      updateStatusPanel();
+    }
+
+    function updateQuestionMessage() {
+      const count = openedCount();
+      message.textContent = count === 0
+        ? "開けたい場所を1マス押してください。少ない手数で当てられると勝ちです。"
+        : `${count}マス開いています。この漢字は何でしょう？`;
+    }
+
+    function openCell(cellIndex) {
+      if (isRevealed) {
+        if (openedCells.has(cellIndex)) {
+          openedCells.delete(cellIndex);
+        } else {
+          openedCells.add(cellIndex);
+        }
+        drawKanji(false);
+        updateCellButtons();
+        updateRevealMessage();
+        return;
+      }
+
+      if (openedCells.has(cellIndex)) {
+        return;
+      }
+      openedCells.add(cellIndex);
+      drawKanji(false);
+      updateCellButtons();
+      updateQuestionMessage();
+    }
+
+    function openRandomStartingCells() {
+      openedCells = new Set();
+      while (openedCells.size < initialOpenCount) {
+        openedCells.add(Math.floor(Math.random() * cellCount));
+      }
+      initialOpenedCells = new Set(openedCells);
+    }
+
+    function newQuestion() {
+      const candidates = ranges[activeRange].chars;
+      answer = pick(candidates);
+      while (candidates.length > 1 && answer === previousAnswer) {
+        answer = pick(candidates);
+      }
+      previousAnswer = answer;
+      openRandomStartingCells();
+      isRevealed = false;
+      drawKanji(false);
+      updateCellButtons();
+      updateRangeInfo();
+      updateQuestionMessage();
+      answerButton.textContent = "答えを見る";
+      answerButton.disabled = false;
+    }
+
+    function updateRevealMessage() {
+      message.innerHTML = `答えは <strong>${answer}</strong> <span class="code">(${toCodeLabel(answer)})</span> です。表示中: ${openedCount()}マス`;
+    }
+
+    function revealAnswer() {
+      isRevealed = !isRevealed;
+      if (isRevealed) {
+        openedCells = new Set(Array.from({ length: cellCount }, (_, index) => index));
+      } else {
+        openedCells = new Set(initialOpenedCells);
+      }
+      drawKanji(false);
+      updateCellButtons();
+      if (isRevealed) {
+        updateRevealMessage();
+        answerButton.textContent = "答えを隠す";
+      } else {
+        updateQuestionMessage();
+        answerButton.textContent = "答えを見る";
+      }
+    }
+
+    for (let index = 0; index < cellCount; index += 1) {
+      const button = document.createElement("button");
+      button.className = "peek-cell";
+      button.type = "button";
+      button.dataset.cell = String(index);
+      button.setAttribute("aria-label", `${cellLabel(index)}のマスを開ける`);
+      button.addEventListener("click", () => openCell(index));
+      cellGrid.append(button);
+    }
+
+    rangeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeRange = button.dataset.range;
+        rangeButtons.forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+        newQuestion();
+      });
+    });
+
+    answerButton.addEventListener("click", revealAnswer);
+    nextButton.addEventListener("click", newQuestion);
+
+    document.fonts.ready.then(() => {
+      drawKanji(false);
+    });
+
+    newQuestion();
+  </script>
+</body>
+</html>

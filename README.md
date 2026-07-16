@@ -2,4 +2,6 @@
 
 A small browser game built as a single HTML file.
 
-Open `index.html` in a browser to play.
+Open `index.html` in a browser to play the Unicode code game.
+
+Open `kanji-peek.html` to play the partial-kanji guessing game.
