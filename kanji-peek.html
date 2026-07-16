@@ -561,7 +561,7 @@
     function cellLabel(cellIndex) {
       const row = Math.floor(cellIndex / gridSize) + 1;
       const column = (cellIndex % gridSize) + 1;
-      return `上${row}・左${column}`;
+      return `(${row},${column})`;
     }
 
     function updateStatusPanel() {
@@ -665,7 +665,7 @@
       button.className = "peek-cell";
       button.type = "button";
       button.dataset.cell = String(index);
-      button.setAttribute("aria-label", `${cellLabel(index)}のマスを開ける`);
+      button.setAttribute("aria-label", `${cellLabel(index)} のマスを開ける`);
       button.addEventListener("click", () => openCell(index));
       cellGrid.append(button);
     }
