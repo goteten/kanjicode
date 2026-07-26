@@ -134,6 +134,27 @@
       background: var(--accent);
     }
 
+    .compact-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: -3px 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .compact-toggle {
+      min-height: 34px;
+      padding: 5px 11px;
+    }
+
+    .compact-toggle[aria-pressed="true"] {
+      color: var(--accent-ink);
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
     .emoji-set {
       margin: 0 0 12px;
       padding: 9px;
@@ -407,6 +428,10 @@
         <button type="button" data-division="12" aria-pressed="false">12分</button>
         <button type="button" data-division="16" aria-pressed="false">16分</button>
       </div>
+      <div class="compact-row">
+        <span>行末の空白絵文字を省略</span>
+        <button type="button" class="compact-toggle" id="compactCopy" aria-pressed="false">節約モード OFF</button>
+      </div>
       <fieldset class="emoji-set" data-emoji-set="a">
         <legend>A：拍の先頭</legend>
         <div class="emoji-fields">
@@ -468,6 +493,7 @@
     let rows = 16;
     let mode = "sp";
     let division = 4;
+    let compactCopy = false;
     let notes = Array.from({ length: rows }, () => Array(8).fill(false));
     let toastTimer;
 
@@ -583,6 +609,18 @@
       button.addEventListener("click", () => setDivision(Number(button.dataset.division)));
     });
 
+    function setCompactCopy(enabled) {
+      compactCopy = enabled;
+      const button = document.querySelector("#compactCopy");
+      button.setAttribute("aria-pressed", String(compactCopy));
+      button.textContent = `節約モード ${compactCopy ? "ON" : "OFF"}`;
+      saveToUrl();
+    }
+
+    document.querySelector("#compactCopy").addEventListener("click", () => {
+      setCompactCopy(!compactCopy);
+    });
+
     document.querySelectorAll(".emoji-field input").forEach(input => {
       input.addEventListener("input", saveToUrl);
     });
@@ -609,7 +647,9 @@
         .map((row, rowIndex) => {
           const pattern = divisionPatterns[division];
           const set = replacements[pattern[rowIndex % pattern.length]];
-          return row.slice(0, laneCount).map((active, index) => active ? set[index % 4] : blank).join("");
+          const lanes = row.slice(0, laneCount);
+          const outputLength = compactCopy ? lanes.lastIndexOf(true) + 1 : laneCount;
+          return lanes.slice(0, outputLength).map((active, index) => active ? set[index % 4] : blank).join("");
         })
         .join("\n");
       await copyText(text, "Discord用の譜面をコピーしました");
@@ -648,6 +688,7 @@
         v: 1,
         m: mode,
         d: division,
+        q: compactCopy,
         n: masks,
         e: getEmojiValues()
       };
@@ -666,8 +707,12 @@
         if (loadedNotes.length >= 4 && loadedNotes.length <= 256) notes = loadedNotes;
         mode = state.m;
         division = state.d;
+        compactCopy = Boolean(state.q);
         document.querySelector("#modeSp").setAttribute("aria-pressed", String(mode === "sp"));
         document.querySelector("#modeDp").setAttribute("aria-pressed", String(mode === "dp"));
+        const compactButton = document.querySelector("#compactCopy");
+        compactButton.setAttribute("aria-pressed", String(compactCopy));
+        compactButton.textContent = `節約モード ${compactCopy ? "ON" : "OFF"}`;
         if (Array.isArray(state.e) && state.e.length === 13) {
           ["A", "B", "C"].forEach((set, setIndex) => {
             Array.from({ length: 4 }, (_, index) => {
