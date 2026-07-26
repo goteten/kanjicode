@@ -18,6 +18,7 @@
       --accent-ink: #101500;
       --arrow: #eef2f8;
       --cell: clamp(54px, 17vw, 78px);
+      --lanes: 4;
     }
 
     * { box-sizing: border-box; }
@@ -73,6 +74,30 @@
       flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 12px;
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      width: 132px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--panel);
+    }
+
+    .mode-switch button {
+      min-height: 34px;
+      border: 0;
+      padding: 5px 10px;
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .mode-switch button[aria-pressed="true"] {
+      color: var(--accent-ink);
+      background: var(--accent);
     }
 
     .discord-settings {
@@ -152,8 +177,19 @@
 
     .labels, .row {
       display: grid;
-      grid-template-columns: 36px repeat(4, var(--cell));
+      grid-template-columns: 36px repeat(var(--lanes), var(--cell));
       justify-content: center;
+    }
+
+    .chart.dp {
+      --lanes: 8;
+      --cell: clamp(38px, 10vw, 62px);
+      overflow-x: auto;
+    }
+
+    .chart.dp .label:nth-child(6),
+    .chart.dp .step:nth-child(6) {
+      border-left: 3px solid #596274;
     }
 
     .labels {
@@ -258,7 +294,7 @@
 
     @media (max-width: 410px) {
       body { padding-inline: 8px; }
-      .labels, .row { grid-template-columns: 28px repeat(4, var(--cell)); }
+      .labels, .row { grid-template-columns: 28px repeat(var(--lanes), var(--cell)); }
       .toolbar button { flex: 1; padding-inline: 8px; }
       button.danger { margin-left: 0; }
       .emoji-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -276,7 +312,13 @@
         <p class="eyebrow">STEP CHART SKETCH</p>
         <h1>DDR NOTE PAD</h1>
       </div>
-      <p class="count"><span id="rowCount">16</span> rows</p>
+      <div>
+        <div class="mode-switch" aria-label="プレイスタイル">
+          <button type="button" id="modeSp" aria-pressed="true">SP</button>
+          <button type="button" id="modeDp" aria-pressed="false">DP</button>
+        </div>
+        <p class="count"><span id="rowCount">16</span> rows</p>
+      </div>
     </header>
 
     <div class="toolbar" aria-label="譜面の操作">
@@ -299,9 +341,7 @@
     </section>
 
     <section class="chart" aria-label="DDR譜面">
-      <div class="labels" aria-hidden="true">
-        <span></span><span class="label">←</span><span class="label">↓</span><span class="label">↑</span><span class="label">→</span>
-      </div>
+      <div class="labels" id="labels" aria-hidden="true"></div>
       <div id="grid"></div>
     </section>
     <p class="hint">マスを押すと矢印をON / OFFできます。コピー結果はそのままチャットに貼れます。</p>
@@ -312,14 +352,28 @@
   <script>
     const arrows = ["←", "↓", "↑", "→"];
     const grid = document.querySelector("#grid");
+    const labels = document.querySelector("#labels");
+    const chart = document.querySelector(".chart");
     const rowCount = document.querySelector("#rowCount");
     const toast = document.querySelector("#toast");
     let rows = 16;
-    let notes = Array.from({ length: rows }, () => [false, false, false, false]);
+    let mode = "sp";
+    let notes = Array.from({ length: rows }, () => Array(8).fill(false));
     let toastTimer;
 
     function render() {
       grid.replaceChildren();
+      labels.replaceChildren();
+      labels.append(document.createElement("span"));
+      const laneCount = mode === "dp" ? 8 : 4;
+      Array.from({ length: laneCount }, (_, index) => {
+        const label = document.createElement("span");
+        label.className = "label";
+        label.textContent = arrows[index % 4];
+        labels.append(label);
+      });
+      chart.classList.toggle("dp", mode === "dp");
+
       notes.forEach((note, rowIndex) => {
         const row = document.createElement("div");
         row.className = "row";
@@ -329,7 +383,8 @@
         number.textContent = rowIndex + 1;
         row.append(number);
 
-        arrows.forEach((arrow, columnIndex) => {
+        Array.from({ length: laneCount }, (_, columnIndex) => {
+          const arrow = arrows[columnIndex % 4];
           const button = document.createElement("button");
           button.type = "button";
           button.className = "step";
@@ -356,7 +411,7 @@
     }
 
     document.querySelector("#addRows").addEventListener("click", () => {
-      notes.push(...Array.from({ length: 4 }, () => [false, false, false, false]));
+      notes.push(...Array.from({ length: 4 }, () => Array(8).fill(false)));
       render();
     });
 
@@ -367,16 +422,27 @@
     });
 
     document.querySelector("#clearChart").addEventListener("click", () => {
-      notes = notes.map(() => [false, false, false, false]);
+      notes = notes.map(() => Array(8).fill(false));
       render();
       showToast("譜面を消去しました");
     });
 
+    function setMode(nextMode) {
+      mode = nextMode;
+      document.querySelector("#modeSp").setAttribute("aria-pressed", String(mode === "sp"));
+      document.querySelector("#modeDp").setAttribute("aria-pressed", String(mode === "dp"));
+      render();
+    }
+
+    document.querySelector("#modeSp").addEventListener("click", () => setMode("sp"));
+    document.querySelector("#modeDp").addEventListener("click", () => setMode("dp"));
+
     document.querySelector("#copyChart").addEventListener("click", async () => {
-      const lastActive = notes.reduce((last, row, index) => row.some(Boolean) ? index : last, -1);
+      const laneCount = mode === "dp" ? 8 : 4;
+      const lastActive = notes.reduce((last, row, index) => row.slice(0, laneCount).some(Boolean) ? index : last, -1);
       const end = Math.max(lastActive + 1, 4);
       const text = notes.slice(0, end)
-        .map(row => row.map((active, index) => active ? arrows[index] : "　").join(""))
+        .map(row => row.slice(0, laneCount).map((active, index) => active ? arrows[index % 4] : "　").join(""))
         .join("\n");
       await copyText(text, "譜面をコピーしました");
     });
@@ -389,10 +455,11 @@
         document.querySelector("#emojiRight").value
       ];
       const blank = document.querySelector("#emojiBlank").value;
-      const lastActive = notes.reduce((last, row, index) => row.some(Boolean) ? index : last, -1);
+      const laneCount = mode === "dp" ? 8 : 4;
+      const lastActive = notes.reduce((last, row, index) => row.slice(0, laneCount).some(Boolean) ? index : last, -1);
       const end = Math.max(lastActive + 1, 4);
       const text = notes.slice(0, end)
-        .map(row => row.map((active, index) => active ? replacements[index] : blank).join(""))
+        .map(row => row.slice(0, laneCount).map((active, index) => active ? replacements[index % 4] : blank).join(""))
         .join("\n");
       await copyText(text, "Discord用の譜面をコピーしました");
     });
