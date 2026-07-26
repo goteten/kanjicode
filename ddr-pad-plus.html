@@ -114,11 +114,69 @@
       letter-spacing: .02em;
     }
 
+    .division-switch {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+
+    .division-switch button {
+      min-height: 36px;
+      padding: 6px;
+      color: var(--muted);
+      background: var(--panel-2);
+    }
+
+    .division-switch button[aria-pressed="true"] {
+      color: var(--accent-ink);
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .emoji-set {
+      margin: 0 0 12px;
+      padding: 9px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+    }
+
+    .emoji-set[hidden] { display: none; }
+
+    .emoji-set[data-tone="red"] {
+      border-color: rgba(255, 104, 104, .24);
+      background: rgba(255, 84, 84, .07);
+    }
+
+    .emoji-set[data-tone="blue"] {
+      border-color: rgba(94, 164, 255, .24);
+      background: rgba(65, 137, 255, .07);
+    }
+
+    .emoji-set[data-tone="green"] {
+      border-color: rgba(94, 221, 144, .24);
+      background: rgba(57, 196, 111, .07);
+    }
+
+    .emoji-set[data-tone="yellow"] {
+      border-color: rgba(255, 213, 74, .25);
+      background: rgba(255, 205, 43, .07);
+    }
+
+    .emoji-set legend {
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
     .emoji-fields {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
     }
+
+    .blank-field { max-width: calc(25% - 6px); }
 
     .emoji-field {
       display: grid;
@@ -217,6 +275,16 @@
     .row:last-child { border-bottom: 0; }
     .row:nth-child(4n + 1) { border-top: 2px solid #596274; }
 
+    .row[data-tone="red"] .step { background: rgba(255, 84, 84, .055); }
+    .row[data-tone="blue"] .step { background: rgba(65, 137, 255, .055); }
+    .row[data-tone="green"] .step { background: rgba(57, 196, 111, .055); }
+    .row[data-tone="yellow"] .step { background: rgba(255, 205, 43, .055); }
+
+    .row[data-tone="red"] .step[aria-pressed="true"]::after { border-color: rgba(255, 104, 104, .7); }
+    .row[data-tone="blue"] .step[aria-pressed="true"]::after { border-color: rgba(94, 164, 255, .7); }
+    .row[data-tone="green"] .step[aria-pressed="true"]::after { border-color: rgba(94, 221, 144, .7); }
+    .row[data-tone="yellow"] .step[aria-pressed="true"]::after { border-color: rgba(255, 213, 74, .7); }
+
     .row-number {
       display: grid;
       place-items: center;
@@ -298,6 +366,7 @@
       .toolbar button { flex: 1; padding-inline: 8px; }
       button.danger { margin-left: 0; }
       .emoji-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .blank-field { max-width: calc(50% - 4px); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -326,31 +395,71 @@
       <button type="button" id="removeRows">− 4行</button>
       <button type="button" class="primary" id="copyChart">譜面をコピー</button>
       <button type="button" id="copyDiscord">Discord用コピー</button>
+      <button type="button" id="copyShareUrl">共有URLをコピー</button>
       <button type="button" class="danger" id="clearChart">全消去</button>
     </div>
 
     <section class="discord-settings" aria-labelledby="discordSettingsTitle">
       <h2 id="discordSettingsTitle">Discord用の置き換え</h2>
-      <div class="emoji-fields">
-        <label class="emoji-field">←<input id="emojiLeft" value=":l_:" aria-label="左矢印のDiscord絵文字"></label>
-        <label class="emoji-field">↓<input id="emojiDown" value=":d_:" aria-label="下矢印のDiscord絵文字"></label>
-        <label class="emoji-field">↑<input id="emojiUp" value=":u_:" aria-label="上矢印のDiscord絵文字"></label>
-        <label class="emoji-field">→<input id="emojiRight" value=":r_:" aria-label="右矢印のDiscord絵文字"></label>
-        <label class="emoji-field">空白<input id="emojiBlank" value=":air:" aria-label="空白のDiscord絵文字"></label>
+      <div class="division-switch" aria-label="音符の細かさ">
+        <button type="button" data-division="4" aria-pressed="true">4分</button>
+        <button type="button" data-division="8" aria-pressed="false">8分</button>
+        <button type="button" data-division="12" aria-pressed="false">12分</button>
+        <button type="button" data-division="16" aria-pressed="false">16分</button>
       </div>
+      <fieldset class="emoji-set" data-emoji-set="a">
+        <legend>A：拍の先頭</legend>
+        <div class="emoji-fields">
+          <label class="emoji-field">←<input id="emojiA0" value=":l_:" aria-label="A 左矢印のDiscord絵文字"></label>
+          <label class="emoji-field">↓<input id="emojiA1" value=":d_:" aria-label="A 下矢印のDiscord絵文字"></label>
+          <label class="emoji-field">↑<input id="emojiA2" value=":u_:" aria-label="A 上矢印のDiscord絵文字"></label>
+          <label class="emoji-field">→<input id="emojiA3" value=":r_:" aria-label="A 右矢印のDiscord絵文字"></label>
+        </div>
+      </fieldset>
+      <fieldset class="emoji-set" data-emoji-set="b" hidden>
+        <legend>B：拍の途中</legend>
+        <div class="emoji-fields">
+          <label class="emoji-field">←<input id="emojiB0" value=":l_:" aria-label="B 左矢印のDiscord絵文字"></label>
+          <label class="emoji-field">↓<input id="emojiB1" value=":d_:" aria-label="B 下矢印のDiscord絵文字"></label>
+          <label class="emoji-field">↑<input id="emojiB2" value=":u_:" aria-label="B 上矢印のDiscord絵文字"></label>
+          <label class="emoji-field">→<input id="emojiB3" value=":r_:" aria-label="B 右矢印のDiscord絵文字"></label>
+        </div>
+      </fieldset>
+      <fieldset class="emoji-set" data-emoji-set="c" hidden>
+        <legend>C：拍の中央</legend>
+        <div class="emoji-fields">
+          <label class="emoji-field">←<input id="emojiC0" value=":l_:" aria-label="C 左矢印のDiscord絵文字"></label>
+          <label class="emoji-field">↓<input id="emojiC1" value=":d_:" aria-label="C 下矢印のDiscord絵文字"></label>
+          <label class="emoji-field">↑<input id="emojiC2" value=":u_:" aria-label="C 上矢印のDiscord絵文字"></label>
+          <label class="emoji-field">→<input id="emojiC3" value=":r_:" aria-label="C 右矢印のDiscord絵文字"></label>
+        </div>
+      </fieldset>
+      <label class="emoji-field blank-field">空白<input id="emojiBlank" value=":air:" aria-label="空白のDiscord絵文字"></label>
     </section>
 
     <section class="chart" aria-label="DDR譜面">
       <div class="labels" id="labels" aria-hidden="true"></div>
       <div id="grid"></div>
     </section>
-    <p class="hint">マスを押すと矢印をON / OFFできます。コピー結果はそのままチャットに貼れます。</p>
+    <p class="hint">入力内容はURLに自動保存されます。共有URLを開くと同じ譜面と設定を復元できます。</p>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
     const arrows = ["←", "↓", "↑", "→"];
+    const divisionPatterns = {
+      4: [0],
+      8: [0, 1],
+      12: [0, 1, 1],
+      16: [0, 1, 2, 1]
+    };
+    const divisionTones = {
+      4: [""],
+      8: ["red", "blue"],
+      12: ["red", "green", "green"],
+      16: ["red", "yellow", "blue", "yellow"]
+    };
     const grid = document.querySelector("#grid");
     const labels = document.querySelector("#labels");
     const chart = document.querySelector(".chart");
@@ -358,6 +467,7 @@
     const toast = document.querySelector("#toast");
     let rows = 16;
     let mode = "sp";
+    let division = 4;
     let notes = Array.from({ length: rows }, () => Array(8).fill(false));
     let toastTimer;
 
@@ -377,6 +487,8 @@
       notes.forEach((note, rowIndex) => {
         const row = document.createElement("div");
         row.className = "row";
+        const tone = divisionTones[division][rowIndex % divisionTones[division].length];
+        if (tone) row.dataset.tone = tone;
 
         const number = document.createElement("span");
         number.className = "row-number";
@@ -394,6 +506,7 @@
           button.addEventListener("click", () => {
             notes[rowIndex][columnIndex] = !notes[rowIndex][columnIndex];
             button.setAttribute("aria-pressed", String(notes[rowIndex][columnIndex]));
+            saveToUrl();
           });
           row.append(button);
         });
@@ -413,17 +526,20 @@
     document.querySelector("#addRows").addEventListener("click", () => {
       notes.push(...Array.from({ length: 4 }, () => Array(8).fill(false)));
       render();
+      saveToUrl();
     });
 
     document.querySelector("#removeRows").addEventListener("click", () => {
       if (notes.length <= 4) return showToast("これ以上は減らせません");
       notes.splice(-4);
       render();
+      saveToUrl();
     });
 
     document.querySelector("#clearChart").addEventListener("click", () => {
       notes = notes.map(() => Array(8).fill(false));
       render();
+      saveToUrl();
       showToast("譜面を消去しました");
     });
 
@@ -432,10 +548,44 @@
       document.querySelector("#modeSp").setAttribute("aria-pressed", String(mode === "sp"));
       document.querySelector("#modeDp").setAttribute("aria-pressed", String(mode === "dp"));
       render();
+      saveToUrl();
     }
 
     document.querySelector("#modeSp").addEventListener("click", () => setMode("sp"));
     document.querySelector("#modeDp").addEventListener("click", () => setMode("dp"));
+
+    function setDivision(nextDivision) {
+      division = nextDivision;
+      document.querySelectorAll("[data-division]").forEach(button => {
+        button.setAttribute("aria-pressed", String(Number(button.dataset.division) === division));
+      });
+      const sets = {
+        a: document.querySelector('[data-emoji-set="a"]'),
+        b: document.querySelector('[data-emoji-set="b"]'),
+        c: document.querySelector('[data-emoji-set="c"]')
+      };
+      Object.values(sets).forEach(set => set.removeAttribute("data-tone"));
+      sets.b.hidden = division === 4;
+      sets.c.hidden = division !== 16;
+
+      if (division !== 4) sets.a.dataset.tone = "red";
+      if (division === 8) sets.b.dataset.tone = "blue";
+      if (division === 12) sets.b.dataset.tone = "green";
+      if (division === 16) {
+        sets.b.dataset.tone = "yellow";
+        sets.c.dataset.tone = "blue";
+      }
+      render();
+      saveToUrl();
+    }
+
+    document.querySelectorAll("[data-division]").forEach(button => {
+      button.addEventListener("click", () => setDivision(Number(button.dataset.division)));
+    });
+
+    document.querySelectorAll(".emoji-field input").forEach(input => {
+      input.addEventListener("input", saveToUrl);
+    });
 
     document.querySelector("#copyChart").addEventListener("click", async () => {
       const laneCount = mode === "dp" ? 8 : 4;
@@ -448,21 +598,88 @@
     });
 
     document.querySelector("#copyDiscord").addEventListener("click", async () => {
-      const replacements = [
-        document.querySelector("#emojiLeft").value,
-        document.querySelector("#emojiDown").value,
-        document.querySelector("#emojiUp").value,
-        document.querySelector("#emojiRight").value
-      ];
+      const replacements = ["A", "B", "C"].map(set =>
+        Array.from({ length: 4 }, (_, index) => document.querySelector(`#emoji${set}${index}`).value)
+      );
       const blank = document.querySelector("#emojiBlank").value;
       const laneCount = mode === "dp" ? 8 : 4;
       const lastActive = notes.reduce((last, row, index) => row.slice(0, laneCount).some(Boolean) ? index : last, -1);
       const end = Math.max(lastActive + 1, 4);
       const text = notes.slice(0, end)
-        .map(row => row.slice(0, laneCount).map((active, index) => active ? replacements[index % 4] : blank).join(""))
+        .map((row, rowIndex) => {
+          const pattern = divisionPatterns[division];
+          const set = replacements[pattern[rowIndex % pattern.length]];
+          return row.slice(0, laneCount).map((active, index) => active ? set[index % 4] : blank).join("");
+        })
         .join("\n");
       await copyText(text, "Discord用の譜面をコピーしました");
     });
+
+    document.querySelector("#copyShareUrl").addEventListener("click", async () => {
+      saveToUrl();
+      await copyText(location.href, "共有URLをコピーしました");
+    });
+
+    function getEmojiValues() {
+      return ["A", "B", "C"].flatMap(set =>
+        Array.from({ length: 4 }, (_, index) => document.querySelector(`#emoji${set}${index}`).value)
+      ).concat(document.querySelector("#emojiBlank").value);
+    }
+
+    function encodeState(value) {
+      const bytes = new TextEncoder().encode(JSON.stringify(value));
+      let binary = "";
+      bytes.forEach(byte => binary += String.fromCharCode(byte));
+      return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+    }
+
+    function decodeState(value) {
+      const base64 = value.replaceAll("-", "+").replaceAll("_", "/");
+      const binary = atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, "="));
+      const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }
+
+    function saveToUrl() {
+      const masks = notes.map(row =>
+        row.reduce((mask, active, index) => active ? mask | (1 << index) : mask, 0).toString(36)
+      ).join(".");
+      const state = {
+        v: 1,
+        m: mode,
+        d: division,
+        n: masks,
+        e: getEmojiValues()
+      };
+      history.replaceState(null, "", `#s=${encodeState(state)}`);
+    }
+
+    function loadFromUrl() {
+      if (!location.hash.startsWith("#s=")) return;
+      try {
+        const state = decodeState(location.hash.slice(3));
+        if (state.v !== 1 || !["sp", "dp"].includes(state.m) || !divisionPatterns[state.d]) return;
+        const loadedNotes = String(state.n).split(".").map(value => {
+          const mask = parseInt(value, 36);
+          return Array.from({ length: 8 }, (_, index) => Boolean(mask & (1 << index)));
+        });
+        if (loadedNotes.length >= 4 && loadedNotes.length <= 256) notes = loadedNotes;
+        mode = state.m;
+        division = state.d;
+        document.querySelector("#modeSp").setAttribute("aria-pressed", String(mode === "sp"));
+        document.querySelector("#modeDp").setAttribute("aria-pressed", String(mode === "dp"));
+        if (Array.isArray(state.e) && state.e.length === 13) {
+          ["A", "B", "C"].forEach((set, setIndex) => {
+            Array.from({ length: 4 }, (_, index) => {
+              document.querySelector(`#emoji${set}${index}`).value = String(state.e[setIndex * 4 + index]);
+            });
+          });
+          document.querySelector("#emojiBlank").value = String(state.e[12]);
+        }
+      } catch {
+        showToast("URLの保存データを読み込めませんでした");
+      }
+    }
 
     async function copyText(text, message) {
       try {
@@ -479,7 +696,8 @@
       }
     }
 
-    render();
+    loadFromUrl();
+    setDivision(division);
   </script>
 </body>
 </html>
