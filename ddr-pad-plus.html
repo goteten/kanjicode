@@ -466,7 +466,7 @@
       <div class="labels" id="labels" aria-hidden="true"></div>
       <div id="grid"></div>
     </section>
-    <p class="hint">入力内容はURLに自動保存されます。共有URLを開くと同じ譜面と設定を復元できます。</p>
+    <p class="hint">置き換え文字などの設定はURLに自動保存されます。譜面の配置はURLに含まれません。</p>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -532,7 +532,6 @@
           button.addEventListener("click", () => {
             notes[rowIndex][columnIndex] = !notes[rowIndex][columnIndex];
             button.setAttribute("aria-pressed", String(notes[rowIndex][columnIndex]));
-            saveToUrl();
           });
           row.append(button);
         });
@@ -552,20 +551,17 @@
     document.querySelector("#addRows").addEventListener("click", () => {
       notes.push(...Array.from({ length: 4 }, () => Array(8).fill(false)));
       render();
-      saveToUrl();
     });
 
     document.querySelector("#removeRows").addEventListener("click", () => {
       if (notes.length <= 4) return showToast("これ以上は減らせません");
       notes.splice(-4);
       render();
-      saveToUrl();
     });
 
     document.querySelector("#clearChart").addEventListener("click", () => {
       notes = notes.map(() => Array(8).fill(false));
       render();
-      saveToUrl();
       showToast("譜面を消去しました");
     });
 
@@ -681,15 +677,11 @@
     }
 
     function saveToUrl() {
-      const masks = notes.map(row =>
-        row.reduce((mask, active, index) => active ? mask | (1 << index) : mask, 0).toString(36)
-      ).join(".");
       const state = {
         v: 1,
         m: mode,
         d: division,
         q: compactCopy,
-        n: masks,
         e: getEmojiValues()
       };
       history.replaceState(null, "", `#s=${encodeState(state)}`);
@@ -700,11 +692,6 @@
       try {
         const state = decodeState(location.hash.slice(3));
         if (state.v !== 1 || !["sp", "dp"].includes(state.m) || !divisionPatterns[state.d]) return;
-        const loadedNotes = String(state.n).split(".").map(value => {
-          const mask = parseInt(value, 36);
-          return Array.from({ length: 8 }, (_, index) => Boolean(mask & (1 << index)));
-        });
-        if (loadedNotes.length >= 4 && loadedNotes.length <= 256) notes = loadedNotes;
         mode = state.m;
         division = state.d;
         compactCopy = Boolean(state.q);
