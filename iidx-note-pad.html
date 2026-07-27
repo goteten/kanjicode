@@ -113,22 +113,38 @@
       letter-spacing: .06em;
     }
 
-    .division-switch {
+    .replacement-fields {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .replacement-field {
+      display: grid;
       gap: 5px;
-    }
-
-    .division-switch button {
-      min-height: 36px;
-      padding: 5px;
       color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      text-align: center;
     }
 
-    .division-switch button[aria-pressed="true"] {
-      color: white;
-      border-color: var(--accent);
-      background: var(--accent);
+    .replacement-field input {
+      width: 100%;
+      min-width: 0;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 8px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .replacement-field input:focus {
+      outline: 3px solid #ff7390;
+      outline-offset: 1px;
     }
 
     .chart {
@@ -174,10 +190,7 @@
     }
 
     .row:last-child { border-bottom: 0; }
-    .row.measure-start { border-top: 3px solid var(--line-strong); }
-    .row[data-tone="blue"] .note { background-color: rgba(60, 141, 255, .035); }
-    .row[data-tone="yellow"] .note { background-color: rgba(255, 204, 55, .035); }
-    .row[data-tone="green"] .note { background-color: rgba(64, 210, 138, .035); }
+    .row.measure-start { border-top: 2px solid var(--line-strong); }
 
     .row-number {
       display: grid;
@@ -266,6 +279,7 @@
       button.danger { margin-left: 0; }
       .toolbar button { flex: 1; padding-inline: 8px; }
       .labels, .row { grid-template-columns: 27px repeat(8, var(--cell)); }
+      .replacement-fields { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -287,17 +301,26 @@
       <button type="button" id="addRows">＋ 4行</button>
       <button type="button" id="removeRows">− 4行</button>
       <button type="button" class="primary" id="copyChart">譜面をコピー</button>
+      <button type="button" id="copyDiscord">Discord用コピー</button>
       <button type="button" id="copyShareUrl">共有URLをコピー</button>
       <button type="button" class="danger" id="clearChart">全消去</button>
     </div>
 
-    <section class="settings" aria-label="表示設定">
-      <span class="settings-label">音符の細かさ</span>
-      <div class="division-switch">
-        <button type="button" data-division="4" aria-pressed="false">4分</button>
-        <button type="button" data-division="8" aria-pressed="false">8分</button>
-        <button type="button" data-division="12" aria-pressed="false">12分</button>
-        <button type="button" data-division="16" aria-pressed="true">16分</button>
+    <section class="settings" aria-label="Discord用の置換文字列">
+      <span class="settings-label">DISCORD用の置換文字列</span>
+      <div class="replacement-fields">
+        <label class="replacement-field">🟥 赤
+          <input id="replacementRed" value=":red_square:" aria-label="赤のDiscord用置換文字列">
+        </label>
+        <label class="replacement-field">⬜️ 白
+          <input id="replacementWhite" value=":white_large_square:" aria-label="白のDiscord用置換文字列">
+        </label>
+        <label class="replacement-field">🟦 青
+          <input id="replacementBlue" value=":blue_square:" aria-label="青のDiscord用置換文字列">
+        </label>
+        <label class="replacement-field">空白
+          <input id="replacementBlank" value=":black_large_square:" aria-label="空白のDiscord用置換文字列">
+        </label>
       </div>
     </section>
 
@@ -328,18 +351,17 @@
     const laneSymbols = ["🟥", "⬜️", "🟦", "⬜️", "🟦", "⬜️", "🟦", "⬜️"];
     const keyTypes = ["red", "white", "blue", "white", "blue", "white", "blue", "white"];
     const keyBindings = ["KeyA", "KeyS", "KeyD", "KeyF", "Space", "KeyJ", "KeyK", "KeyL"];
-    const divisionTones = {
-      4: [""],
-      8: ["", "blue"],
-      12: ["", "green", "green"],
-      16: ["", "yellow", "blue", "yellow"]
-    };
     const storageKey = "eight-key-note-pad-v1";
     const grid = document.querySelector("#grid");
     const rowCount = document.querySelector("#rowCount");
     const toast = document.querySelector("#toast");
+    const replacementInputs = {
+      red: document.querySelector("#replacementRed"),
+      white: document.querySelector("#replacementWhite"),
+      blue: document.querySelector("#replacementBlue"),
+      blank: document.querySelector("#replacementBlank")
+    };
     let notes = Array.from({ length: 16 }, () => Array(8).fill(false));
-    let division = 16;
     let cursorRow = 0;
     let toastTimer;
 
@@ -348,9 +370,7 @@
       notes.forEach((rowNotes, rowIndex) => {
         const row = document.createElement("div");
         row.className = "row";
-        if (rowIndex > 0 && rowIndex % division === 0) row.classList.add("measure-start");
-        const tone = divisionTones[division][rowIndex % divisionTones[division].length];
-        if (tone) row.dataset.tone = tone;
+        if (rowIndex > 0 && rowIndex % 4 === 0) row.classList.add("measure-start");
 
         const number = document.createElement("span");
         number.className = "row-number";
@@ -381,14 +401,6 @@
       saveLocal();
     }
 
-    function setDivision(nextDivision) {
-      division = nextDivision;
-      document.querySelectorAll("[data-division]").forEach(button => {
-        button.setAttribute("aria-pressed", String(Number(button.dataset.division) === division));
-      });
-      render();
-    }
-
     function showToast(message) {
       clearTimeout(toastTimer);
       toast.textContent = message;
@@ -398,7 +410,10 @@
 
     function saveLocal() {
       try {
-        localStorage.setItem(storageKey, JSON.stringify({ notes, division }));
+        localStorage.setItem(storageKey, JSON.stringify({
+          notes,
+          replacements: getReplacements()
+        }));
       } catch {}
     }
 
@@ -408,8 +423,20 @@
         if (Array.isArray(saved?.notes) && saved.notes.every(row => Array.isArray(row) && row.length === 8)) {
           notes = saved.notes.map(row => row.map(Boolean));
         }
-        if ([4, 8, 12, 16].includes(saved?.division)) division = saved.division;
+        if (saved?.replacements) setReplacements(saved.replacements);
       } catch {}
+    }
+
+    function getReplacements() {
+      return Object.fromEntries(
+        Object.entries(replacementInputs).map(([key, input]) => [key, input.value])
+      );
+    }
+
+    function setReplacements(replacements) {
+      Object.entries(replacementInputs).forEach(([key, input]) => {
+        if (typeof replacements[key] === "string") input.value = replacements[key];
+      });
     }
 
     function encodeChart() {
@@ -426,7 +453,6 @@
       const params = new URLSearchParams(location.hash.slice(1));
       const chart = params.get("c");
       const rows = Number(params.get("r"));
-      const urlDivision = Number(params.get("d"));
       if (!chart || !Number.isInteger(rows) || rows < 4 || rows > 256) return false;
       try {
         const normalized = chart.replaceAll("-", "+").replaceAll("_", "/");
@@ -435,7 +461,12 @@
         notes = bytes.slice(0, rows).map(value =>
           Array.from({ length: 8 }, (_, lane) => Boolean(value & (1 << lane)))
         );
-        if ([4, 8, 12, 16].includes(urlDivision)) division = urlDivision;
+        setReplacements({
+          red: params.get("red"),
+          white: params.get("white"),
+          blue: params.get("blue"),
+          blank: params.get("blank")
+        });
         return true;
       } catch {
         return false;
@@ -483,15 +514,29 @@
       copyText(text, "譜面をコピーしました");
     });
 
+    document.querySelector("#copyDiscord").addEventListener("click", () => {
+      const lastActive = notes.reduce((last, row, index) => row.some(Boolean) ? index : last, -1);
+      const end = Math.max(lastActive + 1, 4);
+      const replacements = getReplacements();
+      const text = notes.slice(0, end)
+        .map(row => row.map((active, lane) =>
+          active ? replacements[keyTypes[lane]] : replacements.blank
+        ).join(""))
+        .join("\n");
+      copyText(text, "Discord用の譜面をコピーしました");
+    });
+
     document.querySelector("#copyShareUrl").addEventListener("click", () => {
       const url = new URL(location.href);
-      url.hash = new URLSearchParams({ c: encodeChart(), r: String(notes.length), d: String(division) });
+      url.hash = new URLSearchParams({
+        c: encodeChart(),
+        r: String(notes.length),
+        ...getReplacements()
+      });
       copyText(url.href, "共有URLをコピーしました");
     });
 
-    document.querySelectorAll("[data-division]").forEach(button => {
-      button.addEventListener("click", () => setDivision(Number(button.dataset.division)));
-    });
+    Object.values(replacementInputs).forEach(input => input.addEventListener("input", saveLocal));
 
     document.addEventListener("keydown", event => {
       if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
@@ -503,7 +548,7 @@
     });
 
     if (!loadFromUrl()) loadLocal();
-    setDivision(division);
+    render();
   </script>
 </body>
 </html>
