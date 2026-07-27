@@ -245,17 +245,6 @@
       text-align: center;
     }
 
-    kbd {
-      border: 1px solid #414b5d;
-      border-bottom-width: 2px;
-      border-radius: 4px;
-      padding: 1px 4px;
-      color: #b9c1ce;
-      background: #171c25;
-      font: inherit;
-      font-size: 10px;
-    }
-
     .toast {
       position: fixed;
       left: 50%;
@@ -340,8 +329,7 @@
     </section>
 
     <p class="hint">
-      マスを押してノートを配置します。PCでは <kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><kbd>F</kbd><kbd>Space</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> でも入力できます。
-      設定はこの端末に自動保存されます。
+      マスを押してノートを配置します。設定はこの端末に自動保存されます。
     </p>
   </main>
 
@@ -350,7 +338,6 @@
   <script>
     const laneSymbols = ["🟥", "⬜️", "🟦", "⬜️", "🟦", "⬜️", "🟦", "⬜️"];
     const keyTypes = ["red", "white", "blue", "white", "blue", "white", "blue", "white"];
-    const keyBindings = ["KeyA", "KeyS", "KeyD", "KeyF", "Space", "KeyJ", "KeyK", "KeyL"];
     const storageKey = "eight-key-note-pad-v1";
     const grid = document.querySelector("#grid");
     const rowCount = document.querySelector("#rowCount");
@@ -362,7 +349,6 @@
       blank: document.querySelector("#replacementBlank")
     };
     let notes = Array.from({ length: 16 }, () => Array(8).fill(false));
-    let cursorRow = 0;
     let toastTimer;
 
     function render() {
@@ -396,7 +382,6 @@
 
     function toggleNote(rowIndex, laneIndex, button) {
       notes[rowIndex][laneIndex] = !notes[rowIndex][laneIndex];
-      cursorRow = rowIndex;
       button.setAttribute("aria-pressed", String(notes[rowIndex][laneIndex]));
       saveLocal();
     }
@@ -495,7 +480,6 @@
     document.querySelector("#removeRows").addEventListener("click", () => {
       if (notes.length <= 4) return showToast("これ以上は減らせません");
       notes.splice(-4);
-      cursorRow = Math.min(cursorRow, notes.length - 1);
       render();
     });
 
@@ -537,15 +521,6 @@
     });
 
     Object.values(replacementInputs).forEach(input => input.addEventListener("input", saveLocal));
-
-    document.addEventListener("keydown", event => {
-      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
-      const laneIndex = keyBindings.indexOf(event.code);
-      if (laneIndex === -1) return;
-      event.preventDefault();
-      const button = grid.children[cursorRow]?.querySelectorAll(".note")[laneIndex];
-      if (button) toggleNote(cursorRow, laneIndex, button);
-    });
 
     if (!loadFromUrl()) loadLocal();
     render();
