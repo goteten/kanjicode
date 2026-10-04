@@ -13,6 +13,9 @@
     button:focus-visible { outline:3px solid #888; outline-offset:3px; }
     #courses { display:grid; gap:18px; }
     .course-group h2 { margin:0 0 8px; font-size:14px; font-weight:400; color:#666; }
+    .group-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .group-heading h2 { margin:0; }
+    .endless { border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; padding:7px 12px; font-size:12px; }
     .course-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
     .course { aspect-ratio:1; border:1px solid #bbb; border-radius:10px; background:#fff; color:#111; font-size:22px; }
     .course.complete { background:#a8dcae; color:#111; border-color:#8bc493; }
@@ -58,6 +61,7 @@
   const size = 4;
   let course = 0, question = 0, current = 0, remaining = 0, state = 'menu';
   let pressedMask = 0;
+  let endlessMoves = 0, endlessClears = 0, activePuzzle = null;
   let completed = [];
   try {
     const saved = JSON.parse(localStorage.getItem('panel-problems-v3'));
@@ -148,6 +152,24 @@
     return courses;
   }
   const courses = buildCourses();
+  function randomPuzzle(moves, previousBoard = -1) {
+    let board, solution;
+    do {
+      const cells = Array.from({length:16}, (_, i) => i);
+      board = 0; solution = 0;
+      for (let n = 0; n < moves; n++) {
+        const cell = cells.splice(Math.floor(Math.random() * cells.length), 1)[0];
+        solution |= 1 << cell; board ^= flips[cell];
+      }
+    } while (board === previousBoard);
+    // Exhaustive analysis proves the 4x4 map is bijective: this subset is the unique solution.
+    return {board, moves, solution};
+  }
+  function startEndless(moves) {
+    endlessMoves = moves; endlessClears = 0; activePuzzle = null;
+    $('courses').hidden = true; $('game').hidden = false;
+    startQuestion();
+  }
   function announce(text) {
     if (state !== 'playing') {
       for (const slot of $('board').children) slot.classList.remove('affected');
@@ -164,7 +186,11 @@
       const group = document.createElement('section'); group.className = 'course-group';
       const label = document.createElement('h2'); label.textContent = moves + '手';
       const row = document.createElement('div'); row.className = 'course-row';
-      group.append(label); group.append(row);
+      const heading = document.createElement('div'); heading.className = 'group-heading';
+      const endless = document.createElement('button'); endless.type = 'button'; endless.className = 'endless';
+      endless.textContent = 'エンドレス'; endless.setAttribute('aria-label', moves + '手のエンドレスモード');
+      endless.addEventListener('click', () => startEndless(moves));
+      heading.append(label); heading.append(endless); group.append(heading); group.append(row);
       const available = courses.slice((moves - 2) * 4, (moves - 1) * 4).flatMap((questions, band) => questions.map((_, q) => ({id:((moves - 2) * 4 + band) * 5 + q, band})));
       for (let number = 0; number < available.length; number++) {
         const {id, band} = available[number];
@@ -179,13 +205,16 @@
     }
   }
   function startProblem(id) {
+    endlessMoves = 0;
     course = Math.floor(id / 5); question = id % 5;
     $('courses').hidden = true; $('game').hidden = false;
     $('course-number').textContent = (2 + Math.floor(course / 4)) + '手 · ' + (courses.slice(Math.floor(course / 4) * 4, course).reduce((sum, questions) => sum + questions.length, 0) + question + 1);
     startQuestion();
   }
   function startQuestion() {
-    const puzzle = courses[course][question];
+    const puzzle = endlessMoves ? randomPuzzle(endlessMoves, activePuzzle ? activePuzzle.board : -1) : courses[course][question];
+    activePuzzle = puzzle;
+    if (endlessMoves) $('course-number').textContent = endlessMoves + '手 · エンドレス · ' + endlessClears;
     current = puzzle.board; remaining = puzzle.moves; state = 'playing';
     pressedMask = 0;
     draw(); announce('');
@@ -217,9 +246,9 @@
   }
   function play(index) {
     if (state === 'menu') return;
-    if (state === 'complete') { menu(); return; }
+    if (state === 'complete') { if (endlessMoves) startQuestion(); else menu(); return; }
     if (state === 'failed') {
-      current = courses[course][question].board; remaining = courses[course][question].moves;
+      current = activePuzzle.board; remaining = activePuzzle.moves;
       pressedMask = 0;
       state = 'playing'; draw(); announce(''); return;
     }
@@ -228,11 +257,17 @@
     Array.from($('board').children).forEach((slot, i) => paint(slot.firstElementChild, i));
     for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.add('flip');
     if (current === 0) {
-          state = 'complete';
-      const id = course * 5 + question;
-      if (!completed.includes(id)) completed.push(id);
-      try { localStorage.setItem('panel-problems-v3', JSON.stringify(completed)); } catch {}
-      announce('タップで問題選択へ');
+      state = 'complete';
+      if (endlessMoves) {
+        endlessClears++;
+        $('course-number').textContent = endlessMoves + '手 · エンドレス · ' + endlessClears;
+        announce('タップで次の問題へ');
+      } else {
+        const id = course * 5 + question;
+        if (!completed.includes(id)) completed.push(id);
+        try { localStorage.setItem('panel-problems-v3', JSON.stringify(completed)); } catch {}
+        announce('タップで問題選択へ');
+      }
     } else if (remaining === 0) {
       state = 'failed';
       announce('手数切れ。タップで再挑戦');

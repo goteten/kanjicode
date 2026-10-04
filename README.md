@@ -13,3 +13,5 @@ Open `puzzle-panel.html` to play a monochrome 4×4 panel puzzle. Choose any of 2
 Run `node scripts/analyze-puzzle-panel.cjs` to enumerate all 65,536 press subsets and record each board's minimum moves, shortest solution count, total solution count, and shortest solution masks. The generated data and Japanese report are in `puzzle-panel-analysis/`. The analyzer also checks the game's current problems and rotational/reflection duplicates. No external packages are required.
 
 Open `color-orbit.html` to turn an image into a circular color distribution.
+
+Each move group also offers an endless mode drawing from all boards with that exact minimum move count. Failed puzzles can be retried; cleared puzzles lead to a new random board.
