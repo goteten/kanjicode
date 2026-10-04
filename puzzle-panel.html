@@ -13,7 +13,7 @@
     button:focus-visible { outline:3px solid #888; outline-offset:3px; }
     #courses { display:grid; gap:18px; }
     .course-group h2 { margin:0 0 8px; font-size:14px; font-weight:400; color:#666; }
-    .course-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .course-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
     .course { aspect-ratio:1; border:1px solid #bbb; border-radius:10px; background:#fff; color:#111; font-size:22px; }
     .course.complete { background:#a8dcae; color:#111; border-color:#8bc493; }
     .progress { display:flex; justify-content:space-between; align-items:center; padding:0 4px 18px; font-size:18px; }
@@ -38,11 +38,10 @@
 </head>
 <body>
 <main>
-  <div id="courses" aria-label="コース選択"></div>
+  <div id="courses" aria-label="問題選択"></div>
   <section id="game" hidden aria-label="パズル">
     <div class="progress">
       <button id="course-number" aria-label="コース選択に戻る"></button>
-      <span id="progress" aria-label="クリアした問題数"></span>
     </div>
     <div id="board-frame" class="board-frame">
       <div id="board" class="board" aria-label="操作するパネル"></div>
@@ -61,8 +60,12 @@
   let pressedMask = 0;
   let completed = [];
   try {
-    const saved = JSON.parse(localStorage.getItem('panel-courses-overlap-v2'));
-    if (Array.isArray(saved)) completed = saved.filter(n => Number.isInteger(n) && n >= 0 && n < 20);
+    const saved = JSON.parse(localStorage.getItem('panel-problems-v3'));
+    if (Array.isArray(saved)) completed = saved.filter(n => Number.isInteger(n) && n >= 0 && n < 100);
+    else {
+      const previous = JSON.parse(localStorage.getItem('panel-courses-overlap-v2'));
+      if (Array.isArray(previous)) completed = previous.filter(n => Number.isInteger(n) && n >= 0 && n < 20).flatMap(n => Array.from({length:5}, (_, q) => n * 5 + q));
+    }
   } catch {}
   function neighbors(index) {
     const row = Math.floor(index / size), col = index % size, cells = [];
@@ -158,30 +161,28 @@
       const label = document.createElement('h2'); label.textContent = moves + '手';
       const row = document.createElement('div'); row.className = 'course-row';
       group.append(label); group.append(row);
-      for (let band = 0; band < 4; band++) {
-      const index = (moves - 2) * 4 + band;
-      const button = document.createElement('button');
-      button.type = 'button'; button.className = 'course' + (completed.includes(index) ? ' complete' : '');
-      button.textContent = band + 1;
-      button.setAttribute('aria-label', moves + '手、難易度' + (band + 1) + (completed.includes(index) ? '、クリア済み' : ''));
-      button.addEventListener('click', () => startCourse(index));
-      row.append(button);
+      for (let number = 0; number < 20; number++) {
+        const id = (moves - 2) * 20 + number;
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = 'course' + (completed.includes(id) ? ' complete' : '');
+        button.textContent = number + 1;
+        button.setAttribute('aria-label', moves + '手、問題' + (number + 1) + '、難易度' + (Math.floor(number / 5) + 1) + (completed.includes(id) ? '、クリア済み' : ''));
+        button.addEventListener('click', () => startProblem(id));
+        row.append(button);
       }
       $('courses').append(group);
     }
   }
-  function startCourse(index) {
-    course = index; question = 0;
+  function startProblem(id) {
+    course = Math.floor(id / 5); question = id % 5;
     $('courses').hidden = true; $('game').hidden = false;
-    $('course-number').textContent = (2 + Math.floor(course / 4)) + '手 · ' + (course % 4 + 1);
+    $('course-number').textContent = (2 + Math.floor(course / 4)) + '手 · ' + ((course % 4) * 5 + question + 1);
     startQuestion();
   }
   function startQuestion() {
     const puzzle = courses[course][question];
     current = puzzle.board; remaining = puzzle.moves; state = 'playing';
     pressedMask = 0;
-    $('progress').textContent = question + ' / 5';
-    $('progress').setAttribute('aria-label', '5問中' + question + '問クリア');
     draw(); announce('');
   }
   function paint(tile, index) {
@@ -212,7 +213,6 @@
   function play(index) {
     if (state === 'menu') return;
     if (state === 'complete') { menu(); return; }
-    if (state === 'cleared') { question++; startQuestion(); return; }
     if (state === 'failed') {
       current = courses[course][question].board; remaining = courses[course][question].moves;
       pressedMask = 0;
@@ -223,14 +223,11 @@
     Array.from($('board').children).forEach((slot, i) => paint(slot.firstElementChild, i));
     for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.add('flip');
     if (current === 0) {
-      $('progress').textContent = (question + 1) + ' / 5';
-      $('progress').setAttribute('aria-label', '5問中' + (question + 1) + '問クリア');
-      state = question === 4 ? 'complete' : 'cleared';
-      if (state === 'complete') {
-        if (!completed.includes(course)) completed.push(course);
-        try { localStorage.setItem('panel-courses-overlap-v2', JSON.stringify(completed)); } catch {}
-        announce('コースクリア！ タップでコース選択へ');
-      } else announce('タップで次の問題へ');
+          state = 'complete';
+      const id = course * 5 + question;
+      if (!completed.includes(id)) completed.push(id);
+      try { localStorage.setItem('panel-problems-v3', JSON.stringify(completed)); } catch {}
+      announce('タップで問題選択へ');
     } else if (remaining === 0) {
       state = 'failed';
       announce('手数切れ。タップで再挑戦');
