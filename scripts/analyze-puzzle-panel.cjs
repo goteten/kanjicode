@@ -89,7 +89,7 @@ vm.runInContext(source.slice(start, end), context);
 const gameFlips = Array.from(vm.runInContext('flips', context));
 assert.deepEqual(gameFlips, flipMasks);
 const courses = JSON.parse(vm.runInContext('JSON.stringify(courses)', context));
-assert.equal(courses.length, 56);
+assert.equal(courses.length, 52);
 const selected = [], seen = new Set(), symmetryGroups = new Map();
 function overlapMetrics(solution) {
   const counts = Array(16).fill(0);
@@ -111,7 +111,7 @@ courses.forEach((course, c) => {
     const entry = entries[puzzle.board];
     assert.equal(puzzle.moves, entry.minMoves);
     assert.equal(entry.minMoves, 2 + Math.floor(c / 4));
-    assert(entry.minMoves >= 2 && entry.minMoves <= 15);
+    assert(entry.minMoves >= 2 && entry.minMoves <= 14);
     assert.deepEqual(puzzle.overlap, entry.overlap);
     assert.equal(boardsByPresses[puzzle.solution], puzzle.board);
     assert.equal(popcount(puzzle.solution), entry.minMoves);
@@ -181,7 +181,7 @@ const report = [
   '- 保存した全最短解について、手数と完成形への到達を確認。',
   '- ゲーム側の反転ルールと出題した全問題を照合。', '',
   '## 作問について', '',
-  '2〜15手それぞれ4段階、各段階最大5問。候補が少ない手数ではある分だけ選ぶ。正解の押下集合から各マスの反転回数を整数で数え、重なり総量、相殺マス数、重なるマス数、最大反転回数の順で昇順に比較する。回転・鏡映の同型を除いた候補を順位で4分割し、各段階から5問を選ぶ。',
+  '2〜14手それぞれ4段階、各段階最大5問。候補が少ない手数ではある分だけ選ぶ。正解の押下集合から各マスの反転回数を整数で数え、重なり総量、相殺マス数、重なるマス数、最大反転回数の順で昇順に比較する。回転・鏡映の同型を除いた候補を順位で4分割し、各段階から5問を選ぶ。',
   '重なり総量は Σmax(反転回数−1, 0)、相殺マス数は正の偶数回反転するマス数。段階の境界で同点があるため、4段階のスコアが必ず厳密に異なるとは限らない。人の実際の難しさとしては未検証の仮指標。', '',
   '| 手数 | 段階 | 重なり総量 | 相殺マス数 |',
   '| ---: | ---: | ---: | ---: |',

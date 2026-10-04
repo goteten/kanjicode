@@ -61,7 +61,7 @@
   let completed = [];
   try {
     const saved = JSON.parse(localStorage.getItem('panel-problems-v3'));
-    if (Array.isArray(saved)) completed = saved.filter(n => Number.isInteger(n) && n >= 0 && n < 280);
+    if (Array.isArray(saved)) completed = saved.filter(n => Number.isInteger(n) && n >= 0 && n < 260);
     else {
       const previous = JSON.parse(localStorage.getItem('panel-courses-overlap-v2'));
       if (Array.isArray(previous)) completed = previous.filter(n => Number.isInteger(n) && n >= 0 && n < 20).flatMap(n => Array.from({length:5}, (_, q) => n * 5 + q));
@@ -122,7 +122,7 @@
       if (!prior || moves < prior.moves) boards.set(board, {board, moves, solution:presses});
     }
     const courses = [];
-    for (let moves = 2; moves <= 15; moves++) {
+    for (let moves = 2; moves <= 14; moves++) {
       const candidates = Array.from(boards.values()).filter(p => p.board !== 0 && p.moves === moves);
       for (const puzzle of candidates) puzzle.overlap = overlapMetrics(puzzle.solution);
       candidates.sort((a, b) => a.overlap.overlapTotal - b.overlap.overlapTotal
@@ -157,7 +157,7 @@
   function menu() {
     state = 'menu'; $('game').hidden = true; $('courses').hidden = false;
     $('courses').replaceChildren();
-    for (let moves = 2; moves <= 15; moves++) {
+    for (let moves = 2; moves <= 14; moves++) {
       const group = document.createElement('section'); group.className = 'course-group';
       const label = document.createElement('h2'); label.textContent = moves + '手';
       const row = document.createElement('div'); row.className = 'course-row';
