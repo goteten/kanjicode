@@ -254,7 +254,7 @@
   }
   function play(index) {
     if (state === 'menu') return;
-    if (state === 'complete') { if (endlessMoves) startQuestion(); return; }
+    if (state === 'complete') { if (endlessMoves) startQuestion(); else menu(); return; }
     if (state === 'failed') {
       current = activePuzzle.board; remaining = activePuzzle.moves;
       pressedMask = 0;
@@ -275,7 +275,7 @@
         const id = course * 5 + question;
         if (!completed.includes(id)) completed.push(id);
         try { localStorage.setItem('panel-problems-v3', JSON.stringify(completed)); } catch {}
-        announce('戻るボタンで問題選択へ');
+        announce('タップで問題選択へ');
       }
     } else if (remaining === 0) {
       state = 'failed';
