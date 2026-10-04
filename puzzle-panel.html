@@ -24,12 +24,13 @@
     .board { display:grid; aspect-ratio:1; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(4,minmax(0,1fr)); gap:2px; }
     .tile-slot { min-width:0; min-height:0; padding:5px; border-radius:15px; background:transparent; }
     .tile-slot.pressed { background:#bdbdbd; }
-    .tile-slot.affected { background:#c9dff3; }
     .board-frame { padding:12px; margin:0 -12px; border-radius:20px; background:transparent; transition:background .25s ease; }
     .board-frame.cleared { background:#a8dcae; }
     .board-frame.failed { background:#f2c5c5; }
     .tile { width:100%; height:100%; min-width:0; min-height:0; appearance:none; margin:0; border-radius:10px; border:1px solid #bbb; background:#fff; color:#888; font-size:clamp(24px,7vw,36px); line-height:1; display:grid; place-items:center; padding:0; }
     .tile.black { background:#111; }
+    .tile.affected { outline:2px solid #888; outline-offset:1px; }
+    .tile:disabled { cursor:default; }
     .tile.flip { animation:flip .22s ease; }
     @keyframes flip { 50% { transform:scaleX(.3); } }
     .status { margin-top:16px; text-align:center; font-size:14px; }
@@ -172,7 +173,10 @@
   }
   function announce(text) {
     if (state !== 'playing') {
-      for (const slot of $('board').children) slot.classList.remove('affected');
+      for (const slot of $('board').children) {
+        slot.firstElementChild.classList.remove('affected');
+        slot.firstElementChild.disabled = false;
+      }
     }
     $('board-frame').classList.toggle('cleared', state === 'cleared' || state === 'complete');
     $('board-frame').classList.toggle('failed', state === 'failed');
@@ -224,11 +228,12 @@
     const pressed = Boolean(pressedMask & (1 << index));
     tile.className = 'tile' + (black ? ' black' : '');
     tile.parentElement.classList.toggle('pressed', pressed);
+    tile.disabled = pressed && state === 'playing';
     tile.textContent = black ? '×' : '○';
     tile.setAttribute('aria-label', (Math.floor(index / size) + 1) + '行' + (index % size + 1) + '列：' + (black ? '黒' : '白') + (pressed ? '、押したパネル' : ''));
   }
   function highlight(index, on) {
-    for (const cell of neighbors(index)) $('board').children[cell].classList.toggle('affected', on && state === 'playing');
+    for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.toggle('affected', on && state === 'playing');
   }
   function draw() {
     $('board').replaceChildren();
@@ -252,6 +257,7 @@
       pressedMask = 0;
       state = 'playing'; draw(); announce(''); return;
     }
+    if (pressedMask & (1 << index)) return;
     pressedMask |= 1 << index;
     current ^= flips[index]; remaining--;
     Array.from($('board').children).forEach((slot, i) => paint(slot.firstElementChild, i));
