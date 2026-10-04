@@ -21,6 +21,8 @@
     .course.complete { background:#a8dcae; color:#111; border-color:#8bc493; }
     .progress { display:flex; justify-content:space-between; align-items:center; padding:0 4px 18px; font-size:18px; }
     #course-number { background:none; border:0; padding:8px; color:#111; }
+    #back { position:fixed; top:16px; left:16px; z-index:1; border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:8px 12px; font-size:14px; }
+    #game { padding-top:44px; }
     .board { display:grid; aspect-ratio:1; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(4,minmax(0,1fr)); gap:2px; }
     .tile-slot { min-width:0; min-height:0; padding:5px; border-radius:15px; background:transparent; }
     .tile-slot.pressed { background:#bdbdbd; }
@@ -44,8 +46,9 @@
 <main>
   <div id="courses" aria-label="問題選択"></div>
   <section id="game" hidden aria-label="パズル">
+    <button id="back" type="button">戻る</button>
     <div class="progress">
-      <button id="course-number" aria-label="コース選択に戻る"></button>
+      <span id="course-number"></span>
     </div>
     <div id="board-frame" class="board-frame">
       <div id="board" class="board" aria-label="操作するパネル"></div>
@@ -251,7 +254,7 @@
   }
   function play(index) {
     if (state === 'menu') return;
-    if (state === 'complete') { if (endlessMoves) startQuestion(); else menu(); return; }
+    if (state === 'complete') { if (endlessMoves) startQuestion(); return; }
     if (state === 'failed') {
       current = activePuzzle.board; remaining = activePuzzle.moves;
       pressedMask = 0;
@@ -272,14 +275,14 @@
         const id = course * 5 + question;
         if (!completed.includes(id)) completed.push(id);
         try { localStorage.setItem('panel-problems-v3', JSON.stringify(completed)); } catch {}
-        announce('タップで問題選択へ');
+        announce('戻るボタンで問題選択へ');
       }
     } else if (remaining === 0) {
       state = 'failed';
       announce('手数切れ。タップで再挑戦');
     } else announce('');
   }
-  $('course-number').addEventListener('click', menu);
+  $('back').addEventListener('click', menu);
   menu();
 </script>
 </body>
