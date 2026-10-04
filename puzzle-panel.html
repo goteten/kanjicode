@@ -178,7 +178,6 @@
     if (state !== 'playing') {
       for (const slot of $('board').children) {
         slot.firstElementChild.classList.remove('affected');
-        slot.firstElementChild.disabled = false;
       }
     }
     $('board-frame').classList.toggle('cleared', state === 'cleared' || state === 'complete');
@@ -231,7 +230,7 @@
     const pressed = Boolean(pressedMask & (1 << index));
     tile.className = 'tile' + (black ? ' black' : '');
     tile.parentElement.classList.toggle('pressed', pressed);
-    tile.disabled = pressed && state === 'playing';
+    tile.disabled = pressed;
     tile.textContent = black ? '×' : '○';
     tile.setAttribute('aria-label', (Math.floor(index / size) + 1) + '行' + (index % size + 1) + '列：' + (black ? '黒' : '白') + (pressed ? '、押したパネル' : ''));
   }
