@@ -89,7 +89,7 @@ vm.runInContext(source.slice(start, end), context);
 const gameFlips = Array.from(vm.runInContext('flips', context));
 assert.deepEqual(gameFlips, flipMasks);
 const courses = JSON.parse(vm.runInContext('JSON.stringify(courses)', context));
-assert.equal(courses.length, 20);
+assert.equal(courses.length, 56);
 const selected = [], seen = new Set(), symmetryGroups = new Map();
 function overlapMetrics(solution) {
   const counts = Array(16).fill(0);
@@ -106,12 +106,12 @@ function overlapMetrics(solution) {
 }
 for (const entry of entries) entry.overlap = overlapMetrics(entry.shortestSolutions[0]);
 courses.forEach((course, c) => {
-  assert.equal(course.length, 5);
+  assert(course.length <= 5);
   course.forEach((puzzle, q) => {
     const entry = entries[puzzle.board];
     assert.equal(puzzle.moves, entry.minMoves);
     assert.equal(entry.minMoves, 2 + Math.floor(c / 4));
-    assert(entry.minMoves >= 2 && entry.minMoves <= 6);
+    assert(entry.minMoves >= 2 && entry.minMoves <= 15);
     assert.deepEqual(puzzle.overlap, entry.overlap);
     assert.equal(boardsByPresses[puzzle.solution], puzzle.board);
     assert.equal(popcount(puzzle.solution), entry.minMoves);
@@ -141,8 +141,8 @@ const courseSummary = courses.map((questions, index) => ({
   cancellationMin:Math.min(...questions.map(p => p.overlap.cancellationCells)),
   cancellationMax:Math.max(...questions.map(p => p.overlap.cancellationCells)),
 }));
-for (let c = 0; c < 20; c++) {
-  if (c % 4) assert(courseSummary[c - 1].overlapMax <= courseSummary[c].overlapMin);
+for (let c = 0; c < courses.length; c++) {
+  if (c % 4 && courses[c-1].length && courses[c].length) assert(courseSummary[c - 1].overlapMax <= courseSummary[c].overlapMin);
 }
 const output = path.join(root, 'puzzle-panel-analysis');
 fs.mkdirSync(output, {recursive:true});
@@ -168,8 +168,8 @@ const report = [
   `- 解けない盤面：${(states - reachable).toLocaleString('en-US')}`,
   `- 押す場所の集合が複数ある盤面：${multipleSolutions.toLocaleString('en-US')}`,
   `- 最短解が複数ある盤面：${multipleShortest.toLocaleString('en-US')}`,
-  `- 現在の20コース・100問：全問で最短手数・解を照合済み。完全一致の重複なし。`,
-  `- 現在の100問のうち、回転・鏡映で同一になるグループ：${symmetricCourseGroups.length}`,
+  `- 現在の${selected.length}問：全問で最短手数・解を照合済み。完全一致の重複なし。`,
+  `- 現在の${selected.length}問のうち、回転・鏡映で同一になるグループ：${symmetricCourseGroups.length}`,
   '', '## 最短手数ごとの問題数', '',
   '| 最短手数 | 盤面数 | 回転・鏡映をまとめた数 |',
   '| ---: | ---: | ---: |',
@@ -179,13 +179,13 @@ const report = [
   '- 全組み合わせで、漸化式による計算を直接XORする計算と照合。',
   '- 解の総数の合計が65,536になることを確認。',
   '- 保存した全最短解について、手数と完成形への到達を確認。',
-  '- ゲーム側の反転ルールと出題した100問を照合。', '',
+  '- ゲーム側の反転ルールと出題した全問題を照合。', '',
   '## 作問について', '',
-  '2〜6手それぞれ4段階、各5問。正解の押下集合から各マスの反転回数を整数で数え、重なり総量、相殺マス数、重なるマス数、最大反転回数の順で昇順に比較する。回転・鏡映の同型を除いた候補を順位で4分割し、各段階から5問を選ぶ。',
+  '2〜15手それぞれ4段階、各段階最大5問。候補が少ない手数ではある分だけ選ぶ。正解の押下集合から各マスの反転回数を整数で数え、重なり総量、相殺マス数、重なるマス数、最大反転回数の順で昇順に比較する。回転・鏡映の同型を除いた候補を順位で4分割し、各段階から5問を選ぶ。',
   '重なり総量は Σmax(反転回数−1, 0)、相殺マス数は正の偶数回反転するマス数。段階の境界で同点があるため、4段階のスコアが必ず厳密に異なるとは限らない。人の実際の難しさとしては未検証の仮指標。', '',
   '| 手数 | 段階 | 重なり総量 | 相殺マス数 |',
   '| ---: | ---: | ---: | ---: |',
-  ...courseSummary.map(c => `| ${c.moves} | ${c.difficulty} | ${c.overlapMin}〜${c.overlapMax} | ${c.cancellationMin}〜${c.cancellationMax} |`),
+  ...courseSummary.filter(c => Number.isFinite(c.overlapMin)).map(c => `| ${c.moves} | ${c.difficulty} | ${c.overlapMin}〜${c.overlapMax} | ${c.cancellationMin}〜${c.cancellationMax} |`),
   ...(multipleSolutions === 0 ? ['', 'このルールでは全盤面の解の集合が一意。最短解の別解数だけでは問題の質を区別できない。押す順番の違いは残るが、順序によって盤面の最終結果は変わらない。'] : []),
   '', '## 再実行', '',
   '`node scripts/analyze-puzzle-panel.cjs`', '',

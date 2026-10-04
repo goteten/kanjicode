@@ -61,7 +61,7 @@
   let completed = [];
   try {
     const saved = JSON.parse(localStorage.getItem('panel-problems-v3'));
-    if (Array.isArray(saved)) completed = saved.filter(n => Number.isInteger(n) && n >= 0 && n < 100);
+    if (Array.isArray(saved)) completed = saved.filter(n => Number.isInteger(n) && n >= 0 && n < 280);
     else {
       const previous = JSON.parse(localStorage.getItem('panel-courses-overlap-v2'));
       if (Array.isArray(previous)) completed = previous.filter(n => Number.isInteger(n) && n >= 0 && n < 20).flatMap(n => Array.from({length:5}, (_, q) => n * 5 + q));
@@ -122,7 +122,7 @@
       if (!prior || moves < prior.moves) boards.set(board, {board, moves, solution:presses});
     }
     const courses = [];
-    for (let moves = 2; moves <= 6; moves++) {
+    for (let moves = 2; moves <= 15; moves++) {
       const candidates = Array.from(boards.values()).filter(p => p.board !== 0 && p.moves === moves);
       for (const puzzle of candidates) puzzle.overlap = overlapMetrics(puzzle.solution);
       candidates.sort((a, b) => a.overlap.overlapTotal - b.overlap.overlapTotal
@@ -140,7 +140,8 @@
         const questions = [];
         const lower = Math.floor(pool.length * band / 4);
         const upper = Math.floor(pool.length * (band + 1) / 4);
-        for (let q = 0; q < 5; q++) questions.push(pool[lower + Math.floor((upper - lower) * (q + .5) / 5)]);
+        const count = Math.min(5, upper - lower);
+        for (let q = 0; q < count; q++) questions.push(pool[lower + Math.floor((upper - lower) * (q + .5) / count)]);
         courses.push(questions);
       }
     }
@@ -156,17 +157,18 @@
   function menu() {
     state = 'menu'; $('game').hidden = true; $('courses').hidden = false;
     $('courses').replaceChildren();
-    for (let moves = 2; moves <= 6; moves++) {
+    for (let moves = 2; moves <= 15; moves++) {
       const group = document.createElement('section'); group.className = 'course-group';
       const label = document.createElement('h2'); label.textContent = moves + '手';
       const row = document.createElement('div'); row.className = 'course-row';
       group.append(label); group.append(row);
-      for (let number = 0; number < 20; number++) {
-        const id = (moves - 2) * 20 + number;
+      const available = courses.slice((moves - 2) * 4, (moves - 1) * 4).flatMap((questions, band) => questions.map((_, q) => ({id:((moves - 2) * 4 + band) * 5 + q, band})));
+      for (let number = 0; number < available.length; number++) {
+        const {id, band} = available[number];
         const button = document.createElement('button');
         button.type = 'button'; button.className = 'course' + (completed.includes(id) ? ' complete' : '');
         button.textContent = number + 1;
-        button.setAttribute('aria-label', moves + '手、問題' + (number + 1) + '、難易度' + (Math.floor(number / 5) + 1) + (completed.includes(id) ? '、クリア済み' : ''));
+        button.setAttribute('aria-label', moves + '手、問題' + (number + 1) + '、難易度' + (band + 1) + (completed.includes(id) ? '、クリア済み' : ''));
         button.addEventListener('click', () => startProblem(id));
         row.append(button);
       }
@@ -176,7 +178,7 @@
   function startProblem(id) {
     course = Math.floor(id / 5); question = id % 5;
     $('courses').hidden = true; $('game').hidden = false;
-    $('course-number').textContent = (2 + Math.floor(course / 4)) + '手 · ' + ((course % 4) * 5 + question + 1);
+    $('course-number').textContent = (2 + Math.floor(course / 4)) + '手 · ' + (courses.slice(Math.floor(course / 4) * 4, course).reduce((sum, questions) => sum + questions.length, 0) + question + 1);
     startQuestion();
   }
   function startQuestion() {
