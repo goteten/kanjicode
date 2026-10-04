@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Puzzle</title>
+  <style>
+    :root { color-scheme:light; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px 16px; background:#eee; color:#111; font-family:"Segoe UI",sans-serif; }
+    main { width:min(100%,380px); }
+    button { touch-action:manipulation; cursor:pointer; font:inherit; }
+    button:focus-visible { outline:3px solid #888; outline-offset:3px; }
+    #courses { display:grid; gap:18px; }
+    .course-group h2 { margin:0 0 8px; font-size:14px; font-weight:400; color:#666; }
+    .course-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .course { aspect-ratio:1; border:1px solid #bbb; border-radius:10px; background:#fff; color:#111; font-size:22px; }
+    .course.complete { background:#a8dcae; color:#111; border-color:#8bc493; }
+    .progress { display:flex; justify-content:space-between; align-items:center; padding:0 4px 18px; font-size:18px; }
+    #course-number { background:none; border:0; padding:8px; color:#111; }
+    .board { display:grid; aspect-ratio:1; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(4,minmax(0,1fr)); gap:2px; }
+    .tile-slot { min-width:0; min-height:0; padding:5px; border-radius:15px; background:transparent; }
+    .tile-slot.pressed { background:#4b8fe2; }
+    .board-frame { padding:12px; margin:0 -12px; border-radius:20px; background:transparent; transition:background .25s ease; }
+    .board-frame.cleared { background:#a8dcae; }
+    .board-frame.failed { background:#f2c5c5; }
+    .tile { width:100%; height:100%; min-width:0; min-height:0; appearance:none; margin:0; border-radius:10px; border:1px solid #bbb; background:#fff; color:#888; font-size:clamp(24px,7vw,36px); line-height:1; display:grid; place-items:center; padding:0; }
+    .tile.black { background:#111; }
+    .tile.affected { outline:2px solid #888; outline-offset:1px; }
+    .tile.flip { animation:flip .22s ease; }
+    @keyframes flip { 50% { transform:scaleX(.3); } }
+    .status { margin-top:16px; text-align:center; font-size:14px; }
+    #moves { margin:0; font-variant-numeric:tabular-nums; }
+    #message { min-height:44px; margin:8px 0 0; color:#666; line-height:1.6; }
+    [hidden] { display:none !important; }
+    @media(prefers-reduced-motion:reduce) { .tile.flip { animation:none; } .board-frame { transition:none; } }
+  </style>
+</head>
+<body>
+<main>
+  <div id="courses" aria-label="コース選択"></div>
+  <section id="game" hidden aria-label="パズル">
+    <div class="progress">
+      <button id="course-number" aria-label="コース選択に戻る"></button>
+      <span id="progress" aria-label="クリアした問題数"></span>
+    </div>
+    <div id="board-frame" class="board-frame">
+      <div id="board" class="board" aria-label="操作するパネル"></div>
+    </div>
+    <div class="status">
+      <p id="moves"></p>
+      <p id="message" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+</main>
+<script>
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const size = 4;
+  let course = 0, question = 0, current = 0, remaining = 0, state = 'menu';
+  let pressedMask = 0;
+  let completed = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem('panel-courses-overlap-v2'));
+    if (Array.isArray(saved)) completed = saved.filter(n => Number.isInteger(n) && n >= 0 && n < 20);
+  } catch {}
+  function neighbors(index) {
+    const row = Math.floor(index / size), col = index % size, cells = [];
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const r = row + dr, c = col + dc;
+      if (r >= 0 && r < size && c >= 0 && c < size) cells.push(r * size + c);
+    }
+    return cells;
+  }
+  const flips = Array.from({length:16}, (_, i) => neighbors(i).reduce((mask, cell) => mask | (1 << cell), 0));
+  function countBits(mask) {
+    let count = 0;
+    while (mask) { mask &= mask - 1; count++; }
+    return count;
+  }
+  function overlapMetrics(solution) {
+    const counts = Array(16).fill(0);
+    for (let i = 0; i < 16; i++) if (solution & (1 << i)) {
+      for (const cell of neighbors(i)) counts[cell]++;
+    }
+    return {
+      counts,
+      overlapCells:counts.filter(n => n >= 2).length,
+      overlapTotal:counts.reduce((sum, n) => sum + Math.max(0, n - 1), 0),
+      cancellationCells:counts.filter(n => n > 0 && n % 2 === 0).length,
+      maxFlips:Math.max(...counts),
+    };
+  }
+  function symmetryKey(board) {
+    let key = board;
+    for (let reflection = 0; reflection < 2; reflection++) for (let turns = 0; turns < 4; turns++) {
+      let transformed = 0;
+      for (let i = 0; i < 16; i++) if (board & (1 << i)) {
+        let row = Math.floor(i / 4), col = i % 4;
+        if (reflection) col = 3 - col;
+        for (let t = 0; t < turns; t++) [row, col] = [col, 3 - row];
+        transformed |= 1 << (row * 4 + col);
+      }
+      key = Math.min(key, transformed);
+    }
+    return key;
+  }
+  // Enumerate every press combination to find each board's true minimum solution.
+  function buildCourses() {
+    const boards = new Map();
+    const results = new Uint16Array(65536);
+    for (let presses = 1; presses < 65536; presses++) {
+      const bit = presses & -presses;
+      const index = 31 - Math.clz32(bit);
+      const board = results[presses ^ bit] ^ flips[index];
+      results[presses] = board;
+      const moves = countBits(presses);
+      const prior = boards.get(board);
+      if (!prior || moves < prior.moves) boards.set(board, {board, moves, solution:presses});
+    }
+    const courses = [];
+    for (let moves = 2; moves <= 6; moves++) {
+      const candidates = Array.from(boards.values()).filter(p => p.board !== 0 && p.moves === moves);
+      for (const puzzle of candidates) puzzle.overlap = overlapMetrics(puzzle.solution);
+      candidates.sort((a, b) => a.overlap.overlapTotal - b.overlap.overlapTotal
+        || a.overlap.cancellationCells - b.overlap.cancellationCells
+        || a.overlap.overlapCells - b.overlap.overlapCells
+        || a.overlap.maxFlips - b.overlap.maxFlips || a.board - b.board);
+      const seen = new Set();
+      const pool = candidates.filter(p => {
+        const key = symmetryKey(p.board);
+        if (seen.has(key)) return false;
+        seen.add(key); return true;
+      });
+      // Four rank bands per move count, excluding rotated/reflected duplicates.
+      for (let band = 0; band < 4; band++) {
+        const questions = [];
+        const lower = Math.floor(pool.length * band / 4);
+        const upper = Math.floor(pool.length * (band + 1) / 4);
+        for (let q = 0; q < 5; q++) questions.push(pool[lower + Math.floor((upper - lower) * (q + .5) / 5)]);
+        courses.push(questions);
+      }
+    }
+    return courses;
+  }
+  const courses = buildCourses();
+  function announce(text) {
+    $('board-frame').classList.toggle('cleared', state === 'cleared' || state === 'complete');
+    $('board-frame').classList.toggle('failed', state === 'failed');
+    $('moves').textContent = '残り ' + remaining + ' 手';
+    $('message').textContent = text;
+  }
+  function menu() {
+    state = 'menu'; $('game').hidden = true; $('courses').hidden = false;
+    $('courses').replaceChildren();
+    for (let moves = 2; moves <= 6; moves++) {
+      const group = document.createElement('section'); group.className = 'course-group';
+      const label = document.createElement('h2'); label.textContent = moves + '手';
+      const row = document.createElement('div'); row.className = 'course-row';
+      group.append(label); group.append(row);
+      for (let band = 0; band < 4; band++) {
+      const index = (moves - 2) * 4 + band;
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'course' + (completed.includes(index) ? ' complete' : '');
+      button.textContent = band + 1;
+      button.setAttribute('aria-label', moves + '手、難易度' + (band + 1) + (completed.includes(index) ? '、クリア済み' : ''));
+      button.addEventListener('click', () => startCourse(index));
+      row.append(button);
+      }
+      $('courses').append(group);
+    }
+  }
+  function startCourse(index) {
+    course = index; question = 0;
+    $('courses').hidden = true; $('game').hidden = false;
+    $('course-number').textContent = (2 + Math.floor(course / 4)) + '手 · ' + (course % 4 + 1);
+    startQuestion();
+  }
+  function startQuestion() {
+    const puzzle = courses[course][question];
+    current = puzzle.board; remaining = puzzle.moves; state = 'playing';
+    pressedMask = 0;
+    $('progress').textContent = question + ' / 5';
+    $('progress').setAttribute('aria-label', '5問中' + question + '問クリア');
+    draw(); announce('');
+  }
+  function paint(tile, index) {
+    const black = Boolean(current & (1 << index));
+    const pressed = Boolean(pressedMask & (1 << index));
+    tile.className = 'tile' + (black ? ' black' : '');
+    tile.parentElement.classList.toggle('pressed', pressed);
+    tile.textContent = black ? '×' : '○';
+    tile.setAttribute('aria-label', (Math.floor(index / size) + 1) + '行' + (index % size + 1) + '列：' + (black ? '黒' : '白') + (pressed ? '、押したパネル' : ''));
+  }
+  function highlight(index, on) {
+    for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.toggle('affected', on && state === 'playing');
+  }
+  function draw() {
+    $('board').replaceChildren();
+    for (let i = 0; i < 16; i++) {
+      const slot = document.createElement('div'); slot.className = 'tile-slot';
+      const tile = document.createElement('button'); tile.type = 'button';
+      slot.append(tile); paint(tile, i);
+      tile.addEventListener('click', () => play(i));
+      tile.addEventListener('pointerenter', () => highlight(i, true));
+      tile.addEventListener('pointerleave', () => highlight(i, false));
+      tile.addEventListener('focus', () => highlight(i, true));
+      tile.addEventListener('blur', () => highlight(i, false));
+      $('board').append(slot);
+    }
+  }
+  function play(index) {
+    if (state === 'menu') return;
+    if (state === 'complete') { menu(); return; }
+    if (state === 'cleared') { question++; startQuestion(); return; }
+    if (state === 'failed') {
+      current = courses[course][question].board; remaining = courses[course][question].moves;
+      pressedMask = 0;
+      state = 'playing'; draw(); announce(''); return;
+    }
+    pressedMask |= 1 << index;
+    current ^= flips[index]; remaining--;
+    Array.from($('board').children).forEach((slot, i) => paint(slot.firstElementChild, i));
+    for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.add('flip');
+    if (current === 0) {
+      $('progress').textContent = (question + 1) + ' / 5';
+      $('progress').setAttribute('aria-label', '5問中' + (question + 1) + '問クリア');
+      state = question === 4 ? 'complete' : 'cleared';
+      if (state === 'complete') {
+        if (!completed.includes(course)) completed.push(course);
+        try { localStorage.setItem('panel-courses-overlap-v2', JSON.stringify(completed)); } catch {}
+        announce('コースクリア！ タップでコース選択へ');
+      } else announce('タップで次の問題へ');
+    } else if (remaining === 0) {
+      state = 'failed';
+      announce('手数切れ。タップで再挑戦');
+    } else announce('');
+  }
+  $('course-number').addEventListener('click', menu);
+  menu();
+</script>
+</body>
+</html>

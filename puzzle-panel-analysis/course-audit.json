@@ -1,0 +1,3887 @@
+{
+  "selected": [
+    {
+      "course": 1,
+      "difficulty": 1,
+      "question": 1,
+      "board": 255,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        9
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 0,
+        "overlapTotal": 0,
+        "cancellationCells": 0,
+        "maxFlips": 1
+      },
+      "symmetryKey": 255
+    },
+    {
+      "course": 1,
+      "difficulty": 1,
+      "question": 2,
+      "board": 1023,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        24
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 0,
+        "overlapTotal": 0,
+        "cancellationCells": 0,
+        "maxFlips": 1
+      },
+      "symmetryKey": 1023
+    },
+    {
+      "course": 1,
+      "difficulty": 1,
+      "question": 3,
+      "board": 4095,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        144
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 0,
+        "overlapTotal": 0,
+        "cancellationCells": 0,
+        "maxFlips": 1
+      },
+      "symmetryKey": 4095
+    },
+    {
+      "course": 1,
+      "difficulty": 1,
+      "question": 4,
+      "board": 13260,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4104
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 0,
+        "overlapTotal": 0,
+        "cancellationCells": 0,
+        "maxFlips": 1
+      },
+      "symmetryKey": 13260
+    },
+    {
+      "course": 1,
+      "difficulty": 1,
+      "question": 5,
+      "board": 13294,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4100
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 0,
+        "overlapTotal": 0,
+        "cancellationCells": 0,
+        "maxFlips": 1
+      },
+      "symmetryKey": 13294
+    },
+    {
+      "course": 2,
+      "difficulty": 2,
+      "question": 1,
+      "board": 16380,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        384
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 0,
+        "overlapTotal": 0,
+        "cancellationCells": 0,
+        "maxFlips": 1
+      },
+      "symmetryKey": 16380
+    },
+    {
+      "course": 2,
+      "difficulty": 2,
+      "question": 2,
+      "board": 13278,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        260
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 1,
+        "overlapTotal": 1,
+        "cancellationCells": 1,
+        "maxFlips": 2
+      },
+      "symmetryKey": 13278
+    },
+    {
+      "course": 2,
+      "difficulty": 2,
+      "question": 3,
+      "board": 15854,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4160
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          1,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 1,
+        "overlapTotal": 1,
+        "cancellationCells": 1,
+        "maxFlips": 2
+      },
+      "symmetryKey": 15854
+    },
+    {
+      "course": 2,
+      "difficulty": 2,
+      "question": 4,
+      "board": 187,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        10
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 2,
+        "overlapTotal": 2,
+        "cancellationCells": 2,
+        "maxFlips": 2
+      },
+      "symmetryKey": 187
+    },
+    {
+      "course": 2,
+      "difficulty": 2,
+      "question": 5,
+      "board": 989,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        20
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 2,
+        "overlapTotal": 2,
+        "cancellationCells": 2,
+        "maxFlips": 2
+      },
+      "symmetryKey": 989
+    },
+    {
+      "course": 3,
+      "difficulty": 3,
+      "question": 1,
+      "board": 1979,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        40
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 2,
+        "overlapTotal": 2,
+        "cancellationCells": 2,
+        "maxFlips": 2
+      },
+      "symmetryKey": 1979
+    },
+    {
+      "course": 3,
+      "difficulty": 3,
+      "question": 2,
+      "board": 15838,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        320
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 2,
+        "overlapTotal": 2,
+        "cancellationCells": 2,
+        "maxFlips": 2
+      },
+      "symmetryKey": 15838
+    },
+    {
+      "course": 3,
+      "difficulty": 3,
+      "question": 3,
+      "board": 3003,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        160
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 3,
+        "overlapTotal": 3,
+        "cancellationCells": 3,
+        "maxFlips": 2
+      },
+      "symmetryKey": 3003
+    },
+    {
+      "course": 3,
+      "difficulty": 3,
+      "question": 4,
+      "board": 34,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        12
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          2,
+          2,
+          0,
+          1,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 34
+    },
+    {
+      "course": 3,
+      "difficulty": 3,
+      "question": 5,
+      "board": 153,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        6
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 153
+    },
+    {
+      "course": 4,
+      "difficulty": 4,
+      "question": 1,
+      "board": 836,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          2,
+          1,
+          0,
+          2,
+          2,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 836
+    },
+    {
+      "course": 4,
+      "difficulty": 4,
+      "question": 2,
+      "board": 1860,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        33
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          2,
+          1,
+          0,
+          2,
+          2,
+          1,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 1860
+    },
+    {
+      "course": 4,
+      "difficulty": 4,
+      "question": 3,
+      "board": 31134,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        576
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 31134
+    },
+    {
+      "course": 4,
+      "difficulty": 4,
+      "question": 4,
+      "board": 112,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        8704
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          2,
+          2,
+          2,
+          0,
+          2,
+          2,
+          2,
+          0
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 6,
+        "cancellationCells": 6,
+        "maxFlips": 2
+      },
+      "symmetryKey": 112
+    },
+    {
+      "course": 4,
+      "difficulty": 4,
+      "question": 5,
+      "board": 2457,
+      "minMoves": 2,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        96
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 6,
+        "cancellationCells": 6,
+        "maxFlips": 2
+      },
+      "symmetryKey": 2457
+    },
+    {
+      "course": 5,
+      "difficulty": 1,
+      "question": 1,
+      "board": 16383,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4225
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 0,
+        "overlapTotal": 0,
+        "cancellationCells": 0,
+        "maxFlips": 1
+      },
+      "symmetryKey": 16383
+    },
+    {
+      "course": 5,
+      "difficulty": 1,
+      "question": 2,
+      "board": 15615,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4240
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 2,
+        "overlapTotal": 2,
+        "cancellationCells": 2,
+        "maxFlips": 2
+      },
+      "symmetryKey": 15615
+    },
+    {
+      "course": 5,
+      "difficulty": 1,
+      "question": 3,
+      "board": 30975,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        8336
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        "overlapCells": 3,
+        "overlapTotal": 3,
+        "cancellationCells": 3,
+        "maxFlips": 2
+      },
+      "symmetryKey": 30975
+    },
+    {
+      "course": 5,
+      "difficulty": 1,
+      "question": 4,
+      "board": 1011,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        34832
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          0,
+          0,
+          2,
+          2
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 1011
+    },
+    {
+      "course": 5,
+      "difficulty": 1,
+      "question": 5,
+      "board": 12509,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4116
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          2,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 12509
+    },
+    {
+      "course": 6,
+      "difficulty": 2,
+      "question": 1,
+      "board": 16267,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        386
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 16267
+    },
+    {
+      "course": 6,
+      "difficulty": 2,
+      "question": 2,
+      "board": 183,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        34818
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          0,
+          1,
+          1,
+          2,
+          1,
+          0,
+          0,
+          2,
+          2,
+          0,
+          0,
+          2,
+          2
+        ],
+        "overlapCells": 5,
+        "overlapTotal": 5,
+        "cancellationCells": 5,
+        "maxFlips": 2
+      },
+      "symmetryKey": 183
+    },
+    {
+      "course": 6,
+      "difficulty": 2,
+      "question": 3,
+      "board": 15769,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4162
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 5,
+        "overlapTotal": 5,
+        "cancellationCells": 5,
+        "maxFlips": 2
+      },
+      "symmetryKey": 15769
+    },
+    {
+      "course": 6,
+      "difficulty": 2,
+      "question": 4,
+      "board": 31453,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        8272
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          3,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        "overlapCells": 5,
+        "overlapTotal": 6,
+        "cancellationCells": 4,
+        "maxFlips": 3
+      },
+      "symmetryKey": 31453
+    },
+    {
+      "course": 6,
+      "difficulty": 2,
+      "question": 5,
+      "board": 904,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        26
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 6,
+        "cancellationCells": 6,
+        "maxFlips": 2
+      },
+      "symmetryKey": 904
+    },
+    {
+      "course": 7,
+      "difficulty": 3,
+      "question": 1,
+      "board": 8659,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        33808
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          0,
+          0,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 6,
+        "cancellationCells": 6,
+        "maxFlips": 2
+      },
+      "symmetryKey": 8659
+    },
+    {
+      "course": 7,
+      "difficulty": 3,
+      "question": 2,
+      "board": 16109,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        336
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          1,
+          1,
+          2,
+          3,
+          1,
+          1,
+          2,
+          3,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 5,
+        "overlapTotal": 7,
+        "cancellationCells": 3,
+        "maxFlips": 3
+      },
+      "symmetryKey": 16109
+    },
+    {
+      "course": 7,
+      "difficulty": 3,
+      "question": 3,
+      "board": 188,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        8712
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2,
+          2,
+          2,
+          0,
+          2,
+          2,
+          2,
+          0
+        ],
+        "overlapCells": 7,
+        "overlapTotal": 7,
+        "cancellationCells": 7,
+        "maxFlips": 2
+      },
+      "symmetryKey": 188
+    },
+    {
+      "course": 7,
+      "difficulty": 3,
+      "question": 4,
+      "board": 85,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        14
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          3,
+          2,
+          1,
+          2,
+          3,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 8,
+        "cancellationCells": 4,
+        "maxFlips": 3
+      },
+      "symmetryKey": 85
+    },
+    {
+      "course": 7,
+      "difficulty": 3,
+      "question": 5,
+      "board": 1996,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        42
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          2,
+          3,
+          1,
+          2,
+          2,
+          3,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 8,
+        "cancellationCells": 4,
+        "maxFlips": 3
+      },
+      "symmetryKey": 1996
+    },
+    {
+      "course": 8,
+      "difficulty": 4,
+      "question": 1,
+      "board": 15001,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4192
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          1,
+          2,
+          3,
+          2,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 7,
+        "overlapTotal": 8,
+        "cancellationCells": 6,
+        "maxFlips": 3
+      },
+      "symmetryKey": 15001
+    },
+    {
+      "course": 8,
+      "difficulty": 4,
+      "question": 2,
+      "board": 3020,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        162
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          2,
+          3,
+          1,
+          2,
+          2,
+          3,
+          1,
+          1,
+          1,
+          2,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 7,
+        "overlapTotal": 9,
+        "cancellationCells": 5,
+        "maxFlips": 3
+      },
+      "symmetryKey": 3020
+    },
+    {
+      "course": 8,
+      "difficulty": 4,
+      "question": 3,
+      "board": 750,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        200
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          3,
+          3,
+          0,
+          1,
+          3,
+          3,
+          0,
+          1,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 10,
+        "cancellationCells": 2,
+        "maxFlips": 3
+      },
+      "symmetryKey": 750
+    },
+    {
+      "course": 8,
+      "difficulty": 4,
+      "question": 4,
+      "board": 2389,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        104
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          3,
+          2,
+          1,
+          2,
+          3,
+          2,
+          1,
+          2,
+          2,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 10,
+        "cancellationCells": 6,
+        "maxFlips": 3
+      },
+      "symmetryKey": 2389
+    },
+    {
+      "course": 8,
+      "difficulty": 4,
+      "question": 5,
+      "board": 32489,
+      "minMoves": 3,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        608
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          2,
+          3,
+          3,
+          1,
+          2,
+          3,
+          3,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 12,
+        "cancellationCells": 4,
+        "maxFlips": 3
+      },
+      "symmetryKey": 32489
+    },
+    {
+      "course": 9,
+      "difficulty": 1,
+      "question": 1,
+      "board": 48059,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        40970
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 4,
+        "cancellationCells": 4,
+        "maxFlips": 2
+      },
+      "symmetryKey": 48059
+    },
+    {
+      "course": 9,
+      "difficulty": 1,
+      "question": 2,
+      "board": 4604,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        49416
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 6,
+        "cancellationCells": 6,
+        "maxFlips": 2
+      },
+      "symmetryKey": 4604
+    },
+    {
+      "course": 9,
+      "difficulty": 1,
+      "question": 3,
+      "board": 16366,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4236
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          3,
+          3,
+          0,
+          1,
+          3,
+          3,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 4,
+        "overlapTotal": 8,
+        "cancellationCells": 0,
+        "maxFlips": 3
+      },
+      "symmetryKey": 16366
+    },
+    {
+      "course": 9,
+      "difficulty": 1,
+      "question": 4,
+      "board": 38331,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        24706
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          3,
+          2,
+          1,
+          2,
+          2,
+          1
+        ],
+        "overlapCells": 7,
+        "overlapTotal": 8,
+        "cancellationCells": 6,
+        "maxFlips": 3
+      },
+      "symmetryKey": 38331
+    },
+    {
+      "course": 9,
+      "difficulty": 1,
+      "question": 5,
+      "board": 47133,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        10260
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 8,
+        "cancellationCells": 8,
+        "maxFlips": 2
+      },
+      "symmetryKey": 47133
+    },
+    {
+      "course": 10,
+      "difficulty": 2,
+      "question": 1,
+      "board": 4819,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        37904
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          0,
+          0,
+          1,
+          2,
+          1,
+          1,
+          2,
+          3,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 9,
+        "cancellationCells": 7,
+        "maxFlips": 3
+      },
+      "symmetryKey": 4819
+    },
+    {
+      "course": 10,
+      "difficulty": 2,
+      "question": 2,
+      "board": 4027,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        147
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          3,
+          2,
+          1,
+          3,
+          3,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 10,
+        "cancellationCells": 2,
+        "maxFlips": 3
+      },
+      "symmetryKey": 4027
+    },
+    {
+      "course": 10,
+      "difficulty": 2,
+      "question": 3,
+      "board": 7468,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        38016
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          1,
+          2,
+          2,
+          1,
+          2,
+          3,
+          3,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 10,
+        "cancellationCells": 6,
+        "maxFlips": 3
+      },
+      "symmetryKey": 7468
+    },
+    {
+      "course": 10,
+      "difficulty": 2,
+      "question": 4,
+      "board": 9625,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        49188
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          2,
+          3,
+          2,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 10,
+        "cancellationCells": 8,
+        "maxFlips": 3
+      },
+      "symmetryKey": 9625
+    },
+    {
+      "course": 10,
+      "difficulty": 2,
+      "question": 5,
+      "board": 37563,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        24736
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2,
+          3,
+          4,
+          2,
+          1,
+          2,
+          2,
+          1
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 11,
+        "cancellationCells": 7,
+        "maxFlips": 4
+      },
+      "symmetryKey": 37563
+    },
+    {
+      "course": 11,
+      "difficulty": 3,
+      "question": 1,
+      "board": 38347,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        17026
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          2,
+          2,
+          3,
+          1,
+          1,
+          2,
+          3,
+          2,
+          1,
+          2,
+          2,
+          1
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 11,
+        "cancellationCells": 7,
+        "maxFlips": 3
+      },
+      "symmetryKey": 38347
+    },
+    {
+      "course": 11,
+      "difficulty": 3,
+      "question": 2,
+      "board": 3942,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        150
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          3,
+          3,
+          2,
+          2,
+          3,
+          3,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 12,
+        "cancellationCells": 4,
+        "maxFlips": 3
+      },
+      "symmetryKey": 3942
+    },
+    {
+      "course": 11,
+      "difficulty": 3,
+      "question": 3,
+      "board": 8701,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        3092
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          1,
+          1,
+          1,
+          3,
+          3,
+          3,
+          1,
+          2,
+          2,
+          2,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 12,
+        "cancellationCells": 6,
+        "maxFlips": 3
+      },
+      "symmetryKey": 8701
+    },
+    {
+      "course": 11,
+      "difficulty": 3,
+      "question": 4,
+      "board": 11931,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        3202
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          4,
+          3,
+          0,
+          1,
+          3,
+          3,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 13,
+        "cancellationCells": 5,
+        "maxFlips": 4
+      },
+      "symmetryKey": 11931
+    },
+    {
+      "course": 11,
+      "difficulty": 3,
+      "question": 5,
+      "board": 10587,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        33952
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          3,
+          2,
+          1,
+          2,
+          4,
+          3,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 13,
+        "cancellationCells": 7,
+        "maxFlips": 4
+      },
+      "symmetryKey": 10587
+    },
+    {
+      "course": 12,
+      "difficulty": 4,
+      "question": 1,
+      "board": 15774,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        12864
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          1,
+          3,
+          4,
+          3,
+          1,
+          3,
+          3,
+          2,
+          0
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 14,
+        "cancellationCells": 4,
+        "maxFlips": 4
+      },
+      "symmetryKey": 15774
+    },
+    {
+      "course": 12,
+      "difficulty": 4,
+      "question": 2,
+      "board": 38511,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        1680
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          3,
+          3,
+          2,
+          2,
+          3,
+          3,
+          2,
+          1,
+          2,
+          2,
+          1
+        ],
+        "overlapCells": 10,
+        "overlapTotal": 14,
+        "cancellationCells": 6,
+        "maxFlips": 3
+      },
+      "symmetryKey": 38511
+    },
+    {
+      "course": 12,
+      "difficulty": 4,
+      "question": 3,
+      "board": 10651,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        3232
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          4,
+          3,
+          1,
+          2,
+          4,
+          3,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 15,
+        "cancellationCells": 7,
+        "maxFlips": 4
+      },
+      "symmetryKey": 10651
+    },
+    {
+      "course": 12,
+      "difficulty": 4,
+      "question": 4,
+      "board": 1433,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        232
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          4,
+          3,
+          1,
+          2,
+          4,
+          3,
+          1,
+          2,
+          3,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 16,
+        "cancellationCells": 6,
+        "maxFlips": 4
+      },
+      "symmetryKey": 1433
+    },
+    {
+      "course": 12,
+      "difficulty": 4,
+      "question": 5,
+      "board": 23486,
+      "minMoves": 4,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        3648
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          3,
+          4,
+          3,
+          1,
+          3,
+          4,
+          3,
+          1,
+          2,
+          3,
+          2
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 18,
+        "cancellationCells": 4,
+        "maxFlips": 4
+      },
+      "symmetryKey": 23486
+    },
+    {
+      "course": 13,
+      "difficulty": 1,
+      "question": 1,
+      "board": 7487,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        22657
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          1,
+          2,
+          3,
+          3,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 8,
+        "overlapTotal": 10,
+        "cancellationCells": 6,
+        "maxFlips": 3
+      },
+      "symmetryKey": 7487
+    },
+    {
+      "course": 13,
+      "difficulty": 1,
+      "question": 2,
+      "board": 16281,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        4238
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          4,
+          3,
+          1,
+          2,
+          4,
+          3,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 6,
+        "overlapTotal": 12,
+        "cancellationCells": 4,
+        "maxFlips": 4
+      },
+      "symmetryKey": 16281
+    },
+    {
+      "course": 13,
+      "difficulty": 1,
+      "question": 3,
+      "board": 4397,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18693
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          1,
+          1,
+          2,
+          3,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 12,
+        "cancellationCells": 10,
+        "maxFlips": 3
+      },
+      "symmetryKey": 4397
+    },
+    {
+      "course": 13,
+      "difficulty": 1,
+      "question": 4,
+      "board": 7711,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        38032
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          3,
+          3,
+          3,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 10,
+        "overlapTotal": 13,
+        "cancellationCells": 7,
+        "maxFlips": 3
+      },
+      "symmetryKey": 7711
+    },
+    {
+      "course": 13,
+      "difficulty": 1,
+      "question": 5,
+      "board": 15597,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        412
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          3,
+          3,
+          2,
+          3,
+          3,
+          3,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 14,
+        "cancellationCells": 4,
+        "maxFlips": 3
+      },
+      "symmetryKey": 15597
+    },
+    {
+      "course": 14,
+      "difficulty": 2,
+      "question": 1,
+      "board": 4457,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18694
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          2,
+          3,
+          3,
+          2,
+          1,
+          2,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 12,
+        "overlapTotal": 14,
+        "cancellationCells": 10,
+        "maxFlips": 3
+      },
+      "symmetryKey": 4457
+    },
+    {
+      "course": 14,
+      "difficulty": 2,
+      "question": 2,
+      "board": 8599,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        33811
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          3,
+          1,
+          0,
+          3,
+          4,
+          2,
+          1,
+          1,
+          2,
+          2,
+          2,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 10,
+        "overlapTotal": 15,
+        "cancellationCells": 7,
+        "maxFlips": 4
+      },
+      "symmetryKey": 8599
+    },
+    {
+      "course": 14,
+      "difficulty": 2,
+      "question": 3,
+      "board": 4537,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        7174
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          1,
+          3,
+          4,
+          3,
+          1,
+          2,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 15,
+        "cancellationCells": 9,
+        "maxFlips": 4
+      },
+      "symmetryKey": 4537
+    },
+    {
+      "course": 14,
+      "difficulty": 2,
+      "question": 4,
+      "board": 10679,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18600
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          3,
+          2,
+          1,
+          1,
+          4,
+          3,
+          1,
+          2,
+          4,
+          3,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 16,
+        "cancellationCells": 6,
+        "maxFlips": 4
+      },
+      "symmetryKey": 10679
+    },
+    {
+      "course": 14,
+      "difficulty": 2,
+      "question": 5,
+      "board": 9607,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        22816
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          0,
+          2,
+          2,
+          2,
+          1,
+          3,
+          4,
+          3,
+          2,
+          2,
+          3,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 16,
+        "cancellationCells": 8,
+        "maxFlips": 4
+      },
+      "symmetryKey": 9607
+    },
+    {
+      "course": 15,
+      "difficulty": 3,
+      "question": 1,
+      "board": 23263,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        11408
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          3,
+          3,
+          2,
+          3,
+          4,
+          3,
+          1,
+          2,
+          3,
+          2
+        ],
+        "overlapCells": 10,
+        "overlapTotal": 17,
+        "cancellationCells": 5,
+        "maxFlips": 4
+      },
+      "symmetryKey": 23263
+    },
+    {
+      "course": 15,
+      "difficulty": 3,
+      "question": 2,
+      "board": 1016,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        8730
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          2,
+          2,
+          1,
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          2,
+          0,
+          2,
+          2,
+          2,
+          0
+        ],
+        "overlapCells": 12,
+        "overlapTotal": 17,
+        "cancellationCells": 7,
+        "maxFlips": 3
+      },
+      "symmetryKey": 1016
+    },
+    {
+      "course": 15,
+      "difficulty": 3,
+      "question": 3,
+      "board": 12275,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18516
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          3,
+          2,
+          2,
+          1,
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          3,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 18,
+        "cancellationCells": 4,
+        "maxFlips": 3
+      },
+      "symmetryKey": 12275
+    },
+    {
+      "course": 15,
+      "difficulty": 3,
+      "question": 4,
+      "board": 5074,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18880
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          2,
+          3,
+          3,
+          1,
+          3,
+          4,
+          4,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 18,
+        "cancellationCells": 8,
+        "maxFlips": 4
+      },
+      "symmetryKey": 5074
+    },
+    {
+      "course": 15,
+      "difficulty": 3,
+      "question": 5,
+      "board": 31887,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        675
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          3,
+          3,
+          1,
+          4,
+          4,
+          4,
+          1,
+          2,
+          2,
+          3,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 19,
+        "cancellationCells": 5,
+        "maxFlips": 4
+      },
+      "symmetryKey": 31887
+    },
+    {
+      "course": 16,
+      "difficulty": 4,
+      "question": 1,
+      "board": 1959,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        21792
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          0,
+          2,
+          3,
+          2,
+          1,
+          3,
+          5,
+          3,
+          2,
+          2,
+          4,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 19,
+        "cancellationCells": 7,
+        "maxFlips": 5
+      },
+      "symmetryKey": 1959
+    },
+    {
+      "course": 16,
+      "difficulty": 4,
+      "question": 2,
+      "board": 13545,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        12836
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          2,
+          3,
+          3,
+          1,
+          4,
+          4,
+          3,
+          0,
+          3,
+          3,
+          2,
+          0
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 20,
+        "cancellationCells": 6,
+        "maxFlips": 4
+      },
+      "symmetryKey": 13545
+    },
+    {
+      "course": 16,
+      "difficulty": 4,
+      "question": 3,
+      "board": 92,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        26120
+      ],
+      "overlap": {
+        "counts": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          2,
+          3,
+          2,
+          2,
+          4,
+          4,
+          2,
+          2,
+          4,
+          4,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 20,
+        "cancellationCells": 10,
+        "maxFlips": 4
+      },
+      "symmetryKey": 92
+    },
+    {
+      "course": 16,
+      "difficulty": 4,
+      "question": 4,
+      "board": 353,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        8912
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          4,
+          4,
+          2,
+          2,
+          2,
+          2,
+          0
+        ],
+        "overlapCells": 14,
+        "overlapTotal": 21,
+        "cancellationCells": 11,
+        "maxFlips": 4
+      },
+      "symmetryKey": 353
+    },
+    {
+      "course": 16,
+      "difficulty": 4,
+      "question": 5,
+      "board": 23593,
+      "minMoves": 5,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        19040
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          1,
+          2,
+          3,
+          4,
+          2,
+          2,
+          4,
+          5,
+          3,
+          1,
+          2,
+          3,
+          2
+        ],
+        "overlapCells": 13,
+        "overlapTotal": 23,
+        "cancellationCells": 9,
+        "maxFlips": 5
+      },
+      "symmetryKey": 23593
+    },
+    {
+      "course": 17,
+      "difficulty": 1,
+      "question": 1,
+      "board": 8635,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        49179
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          3,
+          2,
+          1,
+          3,
+          3,
+          2,
+          1,
+          1,
+          2,
+          2,
+          2,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 15,
+        "cancellationCells": 7,
+        "maxFlips": 3
+      },
+      "symmetryKey": 8635
+    },
+    {
+      "course": 17,
+      "difficulty": 1,
+      "question": 2,
+      "board": 47295,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        37656
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          3,
+          3,
+          2,
+          1,
+          4,
+          4,
+          2,
+          1,
+          3,
+          3,
+          2,
+          1
+        ],
+        "overlapCells": 9,
+        "overlapTotal": 17,
+        "cancellationCells": 5,
+        "maxFlips": 4
+      },
+      "symmetryKey": 47295
+    },
+    {
+      "course": 17,
+      "difficulty": 1,
+      "question": 3,
+      "board": 8177,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        37961
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          2,
+          1,
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          3,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 12,
+        "overlapTotal": 18,
+        "cancellationCells": 6,
+        "maxFlips": 3
+      },
+      "symmetryKey": 8177
+    },
+    {
+      "course": 17,
+      "difficulty": 1,
+      "question": 4,
+      "board": 11643,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18579
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          3,
+          2,
+          1,
+          3,
+          3,
+          3,
+          2,
+          1,
+          2,
+          3,
+          3,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 12,
+        "overlapTotal": 19,
+        "cancellationCells": 5,
+        "maxFlips": 3
+      },
+      "symmetryKey": 11643
+    },
+    {
+      "course": 17,
+      "difficulty": 1,
+      "question": 5,
+      "board": 4814,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        7189
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          3,
+          1,
+          1,
+          2,
+          4,
+          3,
+          3,
+          2,
+          3,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 13,
+        "overlapTotal": 19,
+        "cancellationCells": 9,
+        "maxFlips": 4
+      },
+      "symmetryKey": 4814
+    },
+    {
+      "course": 18,
+      "difficulty": 2,
+      "question": 1,
+      "board": 5559,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        22577
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          3,
+          1,
+          0,
+          3,
+          3,
+          2,
+          1,
+          3,
+          4,
+          3,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 12,
+        "overlapTotal": 20,
+        "cancellationCells": 6,
+        "maxFlips": 4
+      },
+      "symmetryKey": 5559
+    },
+    {
+      "course": 18,
+      "difficulty": 2,
+      "question": 2,
+      "board": 2879,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        34979
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          3,
+          3,
+          1,
+          3,
+          3,
+          4,
+          2,
+          1,
+          1,
+          4,
+          3,
+          0,
+          0,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 21,
+        "cancellationCells": 5,
+        "maxFlips": 4
+      },
+      "symmetryKey": 2879
+    },
+    {
+      "course": 18,
+      "difficulty": 2,
+      "question": 3,
+      "board": 8007,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        49478
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          3,
+          3,
+          2,
+          2,
+          4,
+          3,
+          2,
+          1,
+          3,
+          3,
+          3,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 13,
+        "overlapTotal": 21,
+        "cancellationCells": 7,
+        "maxFlips": 4
+      },
+      "symmetryKey": 8007
+    },
+    {
+      "course": 18,
+      "difficulty": 2,
+      "question": 4,
+      "board": 4746,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        7190
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          3,
+          2,
+          1,
+          2,
+          4,
+          4,
+          3,
+          2,
+          3,
+          2,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 14,
+        "overlapTotal": 21,
+        "cancellationCells": 11,
+        "maxFlips": 4
+      },
+      "symmetryKey": 4746
+    },
+    {
+      "course": 18,
+      "difficulty": 2,
+      "question": 5,
+      "board": 10875,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18609
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          3,
+          2,
+          1,
+          3,
+          3,
+          3,
+          2,
+          2,
+          3,
+          4,
+          3,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 13,
+        "overlapTotal": 22,
+        "cancellationCells": 6,
+        "maxFlips": 4
+      },
+      "symmetryKey": 10875
+    },
+    {
+      "course": 19,
+      "difficulty": 3,
+      "question": 1,
+      "board": 5057,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        34241
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          2,
+          2,
+          2,
+          4,
+          3,
+          3,
+          1,
+          3,
+          4,
+          4,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 13,
+        "overlapTotal": 22,
+        "cancellationCells": 10,
+        "maxFlips": 4
+      },
+      "symmetryKey": 5057
+    },
+    {
+      "course": 19,
+      "difficulty": 3,
+      "question": 2,
+      "board": 10617,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        33964
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          4,
+          3,
+          1,
+          3,
+          5,
+          4,
+          1,
+          2,
+          4,
+          3,
+          0,
+          1,
+          2,
+          2
+        ],
+        "overlapCells": 11,
+        "overlapTotal": 23,
+        "cancellationCells": 7,
+        "maxFlips": 5
+      },
+      "symmetryKey": 10617
+    },
+    {
+      "course": 19,
+      "difficulty": 3,
+      "question": 3,
+      "board": 46589,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        27713
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          1,
+          1,
+          1,
+          3,
+          3,
+          3,
+          1,
+          4,
+          5,
+          4,
+          1,
+          3,
+          4,
+          3
+        ],
+        "overlapCells": 10,
+        "overlapTotal": 24,
+        "cancellationCells": 4,
+        "maxFlips": 5
+      },
+      "symmetryKey": 46589
+    },
+    {
+      "course": 19,
+      "difficulty": 3,
+      "question": 4,
+      "board": 8623,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        11800
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          3,
+          4,
+          3,
+          3,
+          4,
+          4,
+          2,
+          2,
+          3,
+          4,
+          2
+        ],
+        "overlapCells": 12,
+        "overlapTotal": 24,
+        "cancellationCells": 8,
+        "maxFlips": 4
+      },
+      "symmetryKey": 8623
+    },
+    {
+      "course": 19,
+      "difficulty": 3,
+      "question": 5,
+      "board": 5514,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        7220
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          3,
+          2,
+          1,
+          2,
+          4,
+          4,
+          3,
+          3,
+          4,
+          3,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 14,
+        "overlapTotal": 24,
+        "cancellationCells": 10,
+        "maxFlips": 4
+      },
+      "symmetryKey": 5514
+    },
+    {
+      "course": 20,
+      "difficulty": 4,
+      "question": 1,
+      "board": 1853,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        17447
+      ],
+      "overlap": {
+        "counts": [
+          3,
+          4,
+          3,
+          1,
+          3,
+          5,
+          4,
+          2,
+          1,
+          3,
+          3,
+          2,
+          0,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 13,
+        "overlapTotal": 25,
+        "cancellationCells": 7,
+        "maxFlips": 5
+      },
+      "symmetryKey": 1853
+    },
+    {
+      "course": 20,
+      "difficulty": 4,
+      "question": 2,
+      "board": 13470,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        12838
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          3,
+          3,
+          1,
+          3,
+          4,
+          4,
+          1,
+          4,
+          4,
+          3,
+          0,
+          3,
+          3,
+          2,
+          0
+        ],
+        "overlapCells": 12,
+        "overlapTotal": 26,
+        "cancellationCells": 6,
+        "maxFlips": 4
+      },
+      "symmetryKey": 13470
+    },
+    {
+      "course": 20,
+      "difficulty": 4,
+      "question": 3,
+      "board": 5285,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        18912
+      ],
+      "overlap": {
+        "counts": [
+          1,
+          2,
+          3,
+          2,
+          2,
+          3,
+          4,
+          3,
+          2,
+          4,
+          5,
+          4,
+          1,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 14,
+        "overlapTotal": 26,
+        "cancellationCells": 10,
+        "maxFlips": 5
+      },
+      "symmetryKey": 5285
+    },
+    {
+      "course": 20,
+      "difficulty": 4,
+      "question": 4,
+      "board": 390,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        17618
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          3,
+          3,
+          2,
+          2,
+          4,
+          4,
+          3,
+          1,
+          4,
+          4,
+          4,
+          0,
+          2,
+          2,
+          2
+        ],
+        "overlapCells": 14,
+        "overlapTotal": 27,
+        "cancellationCells": 11,
+        "maxFlips": 4
+      },
+      "symmetryKey": 390
+    },
+    {
+      "course": 20,
+      "difficulty": 4,
+      "question": 5,
+      "board": 14714,
+      "minMoves": 6,
+      "shortestSolutionCount": 1,
+      "totalSolutionCount": 1,
+      "shortestSolutions": [
+        17776
+      ],
+      "overlap": {
+        "counts": [
+          2,
+          3,
+          2,
+          1,
+          3,
+          5,
+          3,
+          2,
+          3,
+          6,
+          4,
+          3,
+          1,
+          3,
+          2,
+          2
+        ],
+        "overlapCells": 14,
+        "overlapTotal": 29,
+        "cancellationCells": 7,
+        "maxFlips": 6
+      },
+      "symmetryKey": 14714
+    }
+  ],
+  "symmetricCourseGroups": [],
+  "courseSummary": [
+    {
+      "course": 1,
+      "moves": 2,
+      "difficulty": 1,
+      "overlapMin": 0,
+      "overlapMax": 0,
+      "cancellationMin": 0,
+      "cancellationMax": 0
+    },
+    {
+      "course": 2,
+      "moves": 2,
+      "difficulty": 2,
+      "overlapMin": 0,
+      "overlapMax": 2,
+      "cancellationMin": 0,
+      "cancellationMax": 2
+    },
+    {
+      "course": 3,
+      "moves": 2,
+      "difficulty": 3,
+      "overlapMin": 2,
+      "overlapMax": 4,
+      "cancellationMin": 2,
+      "cancellationMax": 4
+    },
+    {
+      "course": 4,
+      "moves": 2,
+      "difficulty": 4,
+      "overlapMin": 4,
+      "overlapMax": 6,
+      "cancellationMin": 4,
+      "cancellationMax": 6
+    },
+    {
+      "course": 5,
+      "moves": 3,
+      "difficulty": 1,
+      "overlapMin": 0,
+      "overlapMax": 4,
+      "cancellationMin": 0,
+      "cancellationMax": 4
+    },
+    {
+      "course": 6,
+      "moves": 3,
+      "difficulty": 2,
+      "overlapMin": 4,
+      "overlapMax": 6,
+      "cancellationMin": 4,
+      "cancellationMax": 6
+    },
+    {
+      "course": 7,
+      "moves": 3,
+      "difficulty": 3,
+      "overlapMin": 6,
+      "overlapMax": 8,
+      "cancellationMin": 3,
+      "cancellationMax": 7
+    },
+    {
+      "course": 8,
+      "moves": 3,
+      "difficulty": 4,
+      "overlapMin": 8,
+      "overlapMax": 12,
+      "cancellationMin": 2,
+      "cancellationMax": 6
+    },
+    {
+      "course": 9,
+      "moves": 4,
+      "difficulty": 1,
+      "overlapMin": 4,
+      "overlapMax": 8,
+      "cancellationMin": 0,
+      "cancellationMax": 8
+    },
+    {
+      "course": 10,
+      "moves": 4,
+      "difficulty": 2,
+      "overlapMin": 9,
+      "overlapMax": 11,
+      "cancellationMin": 2,
+      "cancellationMax": 8
+    },
+    {
+      "course": 11,
+      "moves": 4,
+      "difficulty": 3,
+      "overlapMin": 11,
+      "overlapMax": 13,
+      "cancellationMin": 4,
+      "cancellationMax": 7
+    },
+    {
+      "course": 12,
+      "moves": 4,
+      "difficulty": 4,
+      "overlapMin": 14,
+      "overlapMax": 18,
+      "cancellationMin": 4,
+      "cancellationMax": 7
+    },
+    {
+      "course": 13,
+      "moves": 5,
+      "difficulty": 1,
+      "overlapMin": 10,
+      "overlapMax": 14,
+      "cancellationMin": 4,
+      "cancellationMax": 10
+    },
+    {
+      "course": 14,
+      "moves": 5,
+      "difficulty": 2,
+      "overlapMin": 14,
+      "overlapMax": 16,
+      "cancellationMin": 6,
+      "cancellationMax": 10
+    },
+    {
+      "course": 15,
+      "moves": 5,
+      "difficulty": 3,
+      "overlapMin": 17,
+      "overlapMax": 19,
+      "cancellationMin": 4,
+      "cancellationMax": 8
+    },
+    {
+      "course": 16,
+      "moves": 5,
+      "difficulty": 4,
+      "overlapMin": 19,
+      "overlapMax": 23,
+      "cancellationMin": 6,
+      "cancellationMax": 11
+    },
+    {
+      "course": 17,
+      "moves": 6,
+      "difficulty": 1,
+      "overlapMin": 15,
+      "overlapMax": 19,
+      "cancellationMin": 5,
+      "cancellationMax": 9
+    },
+    {
+      "course": 18,
+      "moves": 6,
+      "difficulty": 2,
+      "overlapMin": 20,
+      "overlapMax": 22,
+      "cancellationMin": 5,
+      "cancellationMax": 11
+    },
+    {
+      "course": 19,
+      "moves": 6,
+      "difficulty": 3,
+      "overlapMin": 22,
+      "overlapMax": 24,
+      "cancellationMin": 4,
+      "cancellationMax": 10
+    },
+    {
+      "course": 20,
+      "moves": 6,
+      "difficulty": 4,
+      "overlapMin": 25,
+      "overlapMax": 29,
+      "cancellationMin": 6,
+      "cancellationMax": 11
+    }
+  ]
+}
