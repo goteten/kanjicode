@@ -21,6 +21,7 @@
     .course.complete { background:#a8dcae; color:#111; border-color:#8bc493; }
     .progress { display:flex; justify-content:space-between; align-items:center; padding:0 4px 18px; font-size:18px; }
     #course-number { background:none; border:0; padding:8px; color:#111; }
+    #reset { border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:7px 10px; font-size:12px; }
     #back { position:fixed; top:16px; left:16px; z-index:1; border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:8px 12px; font-size:14px; }
     #game { padding-top:44px; }
     .board { display:grid; aspect-ratio:1; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(4,minmax(0,1fr)); gap:2px; }
@@ -49,6 +50,7 @@
     <button id="back" type="button">戻る</button>
     <div class="progress">
       <span id="course-number"></span>
+      <button id="reset" type="button">やり直す</button>
     </div>
     <div id="board-frame" class="board-frame">
       <div id="board" class="board" aria-label="操作するパネル"></div>
@@ -66,6 +68,7 @@
   let course = 0, question = 0, current = 0, remaining = 0, state = 'menu';
   let pressedMask = 0;
   let endlessMoves = 0, endlessClears = 0, activePuzzle = null;
+  let activePuzzleCleared = false;
   let completed = [];
   try {
     const saved = JSON.parse(localStorage.getItem('panel-problems-v3'));
@@ -221,6 +224,7 @@
   function startQuestion() {
     const puzzle = endlessMoves ? randomPuzzle(endlessMoves, activePuzzle ? activePuzzle.board : -1) : courses[course][question];
     activePuzzle = puzzle;
+    activePuzzleCleared = false;
     if (endlessMoves) $('course-number').textContent = endlessMoves + '手 · エンドレス · ' + endlessClears;
     current = puzzle.board; remaining = puzzle.moves; state = 'playing';
     pressedMask = 0;
@@ -234,6 +238,12 @@
     tile.disabled = pressed && state === 'playing';
     tile.textContent = black ? '×' : '○';
     tile.setAttribute('aria-label', (Math.floor(index / size) + 1) + '行' + (index % size + 1) + '列：' + (black ? '黒' : '白') + (pressed ? '、押したパネル' : ''));
+  }
+  function resetPuzzle() {
+    if (state === 'menu' || !activePuzzle) return;
+    current = activePuzzle.board; remaining = activePuzzle.moves;
+    pressedMask = 0; state = 'playing';
+    draw(); announce('');
   }
   function highlight(index, on) {
     for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.toggle('affected', on && state === 'playing');
@@ -256,9 +266,7 @@
     if (state === 'menu') return;
     if (state === 'complete') { if (endlessMoves) startQuestion(); else menu(); return; }
     if (state === 'failed') {
-      current = activePuzzle.board; remaining = activePuzzle.moves;
-      pressedMask = 0;
-      state = 'playing'; draw(); announce(''); return;
+      resetPuzzle(); return;
     }
     if (pressedMask & (1 << index)) return;
     pressedMask |= 1 << index;
@@ -268,7 +276,8 @@
     if (current === 0) {
       state = 'complete';
       if (endlessMoves) {
-        endlessClears++;
+        if (!activePuzzleCleared) endlessClears++;
+        activePuzzleCleared = true;
         $('course-number').textContent = endlessMoves + '手 · エンドレス · ' + endlessClears;
         announce('タップで次の問題へ');
       } else {
@@ -283,6 +292,7 @@
     } else announce('');
   }
   $('back').addEventListener('click', menu);
+  $('reset').addEventListener('click', resetPuzzle);
   menu();
 </script>
 </body>
