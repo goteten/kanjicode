@@ -130,15 +130,25 @@ function buildAllProblems() {
   return groups;
 }
 const groups = buildAllProblems();
+function adjacentQuestion(direction) {
+  const onlyUnsolved = $('visibility-filter').value === 'unsolved';
+  for (let i = question + direction; i >= 0 && i < groups[moves].length; i += direction) {
+    if (!onlyUnsolved || !completed.has(groups[moves][i].board)) return i;
+  }
+  return -1;
+}
 function announce(text) {
   $('cleared-label').hidden = !activePuzzle || !completed.has(activePuzzle.board);
   $('board-frame').classList.toggle('cleared',state==='complete');
   $('board-frame').classList.toggle('failed',state==='failed');
   $('moves').textContent = '残り ' + remaining + ' 手';
   $('message').textContent = text;
-  $('previous').disabled = randomMode || question === 0;
+  const onlyUnsolved = $('visibility-filter').value === 'unsolved';
+  $('previous').textContent = onlyUnsolved ? '前の未クリア問題へ' : '前の問題へ';
+  $('next').textContent = (onlyUnsolved || randomMode) ? '次の未クリア問題へ' : '次の問題へ';
+  $('previous').disabled = randomMode || adjacentQuestion(-1) === -1;
   const unsolved = groups[moves].some(p=>!completed.has(p.board) && (!activePuzzle || p.board !== activePuzzle.board));
-  $('next').disabled = randomMode ? !unsolved : question === groups[moves].length - 1;
+  $('next').disabled = randomMode ? !unsolved : adjacentQuestion(1) === -1;
   if (state !== 'playing') for (const slot of $('board').children) {
     slot.firstElementChild.classList.remove('affected'); slot.firstElementChild.disabled = false;
   }
@@ -256,8 +266,8 @@ $('visibility-filter').addEventListener('change',()=>{
 $('back').addEventListener('click',()=>{if(state==='list') menu();else showList();});
 $('random-unsolved').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;activePuzzle=null;nextRandom();});
 $('reset').addEventListener('click',resetPuzzle);
-$('previous').addEventListener('click',()=>{if(!randomMode && question>0){question--;startQuestion();}});
-$('next').addEventListener('click',()=>{if(randomMode){nextRandom();return;}if(question+1<groups[moves].length){question++;startQuestion();}});
+$('previous').addEventListener('click',()=>{if(randomMode)return;const index=adjacentQuestion(-1);if(index!==-1){question=index;startQuestion();}});
+$('next').addEventListener('click',()=>{if(randomMode){nextRandom();return;}const index=adjacentQuestion(1);if(index!==-1){question=index;startQuestion();}});
 menu();
 </script>
 </body>
