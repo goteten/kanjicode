@@ -12,7 +12,7 @@
 <body>
 <main>
 <header id="intro"><h1>カーリング四目並べ</h1></header>
-<section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option></select></label><label>AIレベル<select id="ai-level"><option value="1">1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5" selected>5 · 最強</option></select></label><button id="start-game">この設定ではじめる</button></section>
+<section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option></select></label><label>AIレベル<select id="ai-level"><option value="1" selected>1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5">5 · 最強</option></select></label><button id="start-game">この設定ではじめる</button></section>
 <div class="layout" id="game" hidden>
 <div class="rink"><canvas id="rink" width="640" height="760" tabindex="0" aria-label="カーリングの盤面。下の石を後ろに引いて離すと投石できます。投げる位置は下のスライダーで調整できます。矢印キーで角度と強さを調整し、Enterでも投げられます。"></canvas><div class="launch-position"><label>投げる位置 <output id="position-value"></output><input id="position" type="range" min="80" max="560" value="320" step="1"></label><button id="power-mode" type="button" aria-pressed="false">パワーモード</button></div></div>
 <p id="status" class="sr-only" role="status" aria-live="polite"></p>
