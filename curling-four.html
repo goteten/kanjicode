@@ -96,7 +96,7 @@ function outcomeFor(list,shotCount){
  return null;
 }
 function createShotState(initial,shot,player){
- const list=initial.filter(s=>Math.abs(s.y-690)>=R*2).map(s=>({...s,vx:0,vy:0}));
+ const list=initial.map(s=>({...s,vx:0,vy:0}));
  list.push({x:shot.x,y:690,vx:Math.sin(shot.angle)*shot.power,vy:-Math.cos(shot.angle)*shot.power,player,entered:true});
  return {stones:list,time:0,done:false};
 }
@@ -133,6 +133,7 @@ function stepPhysics(state,dt){
  state.stones=list;
  state.done=state.stones.every(s=>Math.hypot(s.vx,s.vy)<1)||state.time>20;
 }
+function clearLaunchStones(list){return list.filter(s=>Math.abs(s.y-690)>=R*2);}
 function simulateShot(initial,shot,player,deadline=Infinity){
  const state=createShotState(initial,shot,player);
  for(let step=0;!state.done;step++){
@@ -140,17 +141,18 @@ function simulateShot(initial,shot,player,deadline=Infinity){
   if(step%16===0&&performance.now()>=deadline)return null;
   stepPhysics(state,1/120);
  }
- return settleStones(state.stones);
+ return clearLaunchStones(settleStones(state.stones));
 }
 function finishShot(){
- stones=settleStones(stones);moving=false;result=outcomeFor(stones,shots);
+ stones=settleStones(stones);
+ fadingStones=stones.filter(s=>Math.abs(s.y-690)<R*2).map(s=>({...s,age:0}));
+ stones=clearLaunchStones(stones);moving=false;result=outcomeFor(stones,shots);
  if(!result)turn=1-turn;
  updateUI();startAI();
 }
 function launch(shot=settings(),fromAI=false){
  if(!gameStarted||moving||result||(!fromAI&&isAITurn()))return;
  history.push({stones:stones.map(s=>({...s})),turn,shots});
- fadingStones=stones.filter(s=>Math.abs(s.y-690)<R*2).map(s=>({...s,age:0}));
  gameMotion=createShotState(stones,shot,turn);stones=gameMotion.stones;
  shots++;moving=true;motionTime=0;accumulator=0;drag=null;updateUI();
 }
@@ -249,7 +251,7 @@ function searchBestShot(initial,player,shotCount,budgetMs){
 }
 function workerSource(){
  const constants='const N='+N+',START='+START+',GAP='+GAP+',R='+R+',LEFT='+LEFT+',RIGHT='+RIGHT+',TOP='+TOP+',BOTTOM='+BOTTOM+';';
- const shared=[cellOf,occupiedPoints,boardState,winningLines,settleStones,outcomeFor,createShotState,stepPhysics,simulateShot,evaluateBoard,evaluatePosition,normalizeShot,searchBestShot].map(fn=>fn.toString()).join('\n');
+ const shared=[cellOf,occupiedPoints,boardState,winningLines,settleStones,outcomeFor,createShotState,stepPhysics,clearLaunchStones,simulateShot,evaluateBoard,evaluatePosition,normalizeShot,searchBestShot].map(fn=>fn.toString()).join('\n');
  return constants+'\n'+shared+'\nself.onmessage=event=>{const d=event.data;self.postMessage(searchBestShot(d.stones,d.player,d.shots,d.budgetMs));};';
 }
 function cancelAI(){

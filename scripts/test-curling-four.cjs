@@ -180,8 +180,8 @@ for(const shot of [{x:320,angle:0,power:300},{x:140,angle:.4,power:470},{x:520,a
  context.previewShot=shot;
  const preview=JSON.parse(run('JSON.stringify(emptyRinkPreview(previewShot))'));
  const predicted=JSON.parse(run('JSON.stringify(simulateShot([],previewShot,0))'));
- if(!preview.hitWall){assert.equal(preview.end.x,predicted[0].x);assert.equal(preview.end.y,predicted[0].y);}
- else assert.ok(preview.end.x===80||preview.end.x===560||preview.end.y===80||preview.end.y===710);
+ if(!preview.hitWall&&predicted.length){assert.equal(preview.end.x,predicted[0].x);assert.equal(preview.end.y,predicted[0].y);}
+ else if(preview.hitWall)assert.ok(preview.end.x===80||preview.end.x===560||preview.end.y===80||preview.end.y===710);
  for(let i=1;i<preview.points.length;i++){const a=preview.points[i-1],b=preview.points[i];assert.ok((b.x-a.x)*Math.sin(shot.angle)-(b.y-a.y)*Math.cos(shot.angle)>=-1e-8);}
  assert.ok(preview.points.length>2);
  assert.equal(run('emptyRinkPreview(previewShot)===emptyRinkPreview(previewShot)'),true);
@@ -192,28 +192,27 @@ reset();run('draw()');
 assert.ok(run('createShotState([], {x:320,angle:0,power:140},0).stones[0].y+R<=BOTTOM'));
 for(const angle of [-65,0,65]){
  context.weakAngle=angle*Math.PI/180;
- assert.equal(run('simulateShot([], {x:320,angle:weakAngle,power:140},0).length'),1);
+ assert.ok(run('simulateShot([], {x:320,angle:weakAngle,power:140},0).every(s=>Math.abs(s.y-690)>=R*2)'));
 }
 context.floorShot={x:320,angle:0,power:140};
 const lowPrediction=JSON.parse(run('JSON.stringify(emptyRinkPreview(floorShot))'));
 assert.ok(lowPrediction.end.y>590&&lowPrediction.end.y<=710);
 reset();run('draw()');
-// Launch overlap removes only overlapping stones, is shared with AI, and undoes.
-reset();setStones([stone(320,690,1),stone(260,690,0),stone(400,600,1)]);
-context.removalShot={x:320,angle:0,power:300};
-assert.equal(run('createShotState(stones,{x:560,angle:0,power:300},0).stones.length'),2);
-assert.equal(run('createShotState(stones,{x:80,angle:0,power:300},0).stones.length'),2);
-assert.equal(run('createShotState(stones,removalShot,0).stones.length'),2);
-run('launch(removalShot)');assert.equal(run('fadingStones.length'),2);assert.equal(run('fadingStones[0].player'),1);
-run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');assert.equal(run('stones.length'),2);
-element('undo').events.click();assert.equal(run('stones.length'),3);assert.equal(run('stones[0].y'),690);assert.equal(run('fadingStones.length'),0);
-run('launch(removalShot);lastTime=0;for(let n=1;n<=60;n++)frame(n*16);');assert.equal(run('fadingStones.length'),0);
+// The launch strip is cleared when the shot stops, before the next turn.
+reset();context.removalShot={x:320,angle:0,power:30};
+run('launch(removalShot)');assert.equal(run('fadingStones.length'),0);assert.equal(run('stones.length'),1);
+run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');
+assert.equal(run('turn'),1);assert.equal(run('stones.length'),0);assert.equal(run('fadingStones.length'),1);
+assert.equal(run('simulateShot([],removalShot,0).length'),0);
+element('undo').events.click();assert.equal(run('turn'),0);assert.equal(run('stones.length'),0);assert.equal(run('fadingStones.length'),0);
+setStones([stone(80,680,0),stone(560,680,1),stone(320,400,0)]);run('finishShot()');assert.equal(run('stones.length'),1);assert.equal(run('fadingStones.length'),2);
+run('lastTime=0;for(let n=1;n<=60;n++)frame(n*16);');assert.equal(run('fadingStones.length'),0);
 element('restart').events.click();assert.equal(run('fadingStones.length'),0);
 reset();element('delicate-mode').events.click();assert.equal(run('delicateMode'),true);assert.equal(run('powerMode'),false);
 element('power').value=20;assert.equal(run('settings().power'),30);element('power').value=400;assert.equal(run('settings().power'),260);
 element('power-mode').events.click();assert.equal(run('delicateMode'),false);assert.equal(run('powerMode'),true);
 element('delicate-mode').events.click();assert.equal(run('delicateMode'),true);assert.equal(run('powerMode'),false);
-element('power').value=30;context.softShot={x:320,angle:0,power:30};assert.equal(run('simulateShot([],softShot,0).length'),1);
+element('power').value=30;context.softShot={x:320,angle:0,power:30};assert.equal(run('simulateShot([],softShot,0).length'),0);
 element('delicate-mode').events.click();assert.equal(Number(element('power').value),140);
 element('delicate-mode').events.click();element('restart').events.click();assert.equal(run('delicateMode'),false);
 
