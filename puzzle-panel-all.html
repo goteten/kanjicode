@@ -54,7 +54,8 @@
 #empty-list { color:#666; font-size:14px; }
 .navigation { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
 .navigation button { border:1px solid #bbb; border-radius:8px; padding:8px 12px; background:#eee; color:#555; font-size:14px; justify-self:start; }
-.navigation #next { justify-self:end; }
+.navigation #next, .navigation #next-unsolved { justify-self:end; }
+.navigation.unsolved-navigation { margin-top:8px; grid-template-columns:1fr 1fr; }
 .navigation button:disabled { opacity:.4; cursor:default; }
 #save-panel { margin-top:24px; color:#555; font-size:14px; }
 #save-panel summary { cursor:pointer; }
@@ -104,6 +105,10 @@
         <button id="previous" type="button">前の問題へ</button>
         <p id="moves"></p>
         <button id="next" type="button">次の問題へ</button>
+      </div>
+      <div id="unsolved-navigation" class="navigation unsolved-navigation">
+        <button id="previous-unsolved" type="button">前の未クリア問題へ</button>
+        <button id="next-unsolved" type="button">次の未クリア問題へ</button>
       </div>
       <p id="message" role="status" aria-live="polite"></p>
     </div>
@@ -157,8 +162,8 @@ function buildAllProblems() {
   return groups;
 }
 const groups = buildAllProblems();
-function adjacentQuestion(direction) {
-  const onlyUnsolved = $('visibility-filter').value === 'unsolved';
+function adjacentQuestion(direction, forceUnsolved = false) {
+  const onlyUnsolved = forceUnsolved || $('visibility-filter').value === 'unsolved';
   for (let i = question + direction; i >= 0 && i < groups[moves].length; i += direction) {
     if (!onlyUnsolved || !completed.has(groups[moves][i].board)) return i;
   }
@@ -174,6 +179,9 @@ function announce(text) {
   $('previous').textContent = onlyUnsolved ? '前の未クリア問題へ' : '前の問題へ';
   $('next').textContent = (randomMode ? !randomIncludesSolved : onlyUnsolved) ? '次の未クリア問題へ' : '次の問題へ';
   $('previous').disabled = randomMode || adjacentQuestion(-1) === -1;
+  $('unsolved-navigation').hidden = onlyUnsolved || randomMode;
+  $('previous-unsolved').disabled = adjacentQuestion(-1, true) === -1;
+  $('next-unsolved').disabled = adjacentQuestion(1, true) === -1;
   const unsolved = groups[moves].some(p=>(randomIncludesSolved || !completed.has(p.board)) && (!activePuzzle || p.board !== activePuzzle.board));
   $('next').disabled = randomMode ? !unsolved : adjacentQuestion(1) === -1;
   if (state !== 'playing') for (const slot of $('board').children) {
@@ -328,6 +336,13 @@ $('back').addEventListener('click',()=>{if(state==='list') menu();else showList(
 $('random-unsolved').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=false;activePuzzle=null;nextRandom();});
 $('random-all').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=true;activePuzzle=null;nextRandom();});
 $('reset').addEventListener('click',resetPuzzle);
+function moveToUnsolved(direction) {
+  if (randomMode) return;
+  const index = adjacentQuestion(direction, true);
+  if (index !== -1) {question=index;startQuestion();}
+}
+$('previous-unsolved').addEventListener('click',()=>moveToUnsolved(-1));
+$('next-unsolved').addEventListener('click',()=>moveToUnsolved(1));
 $('previous').addEventListener('click',()=>{if(randomMode)return;const index=adjacentQuestion(-1);if(index!==-1){question=index;startQuestion();}});
 $('next').addEventListener('click',()=>{if(randomMode){nextRandom();return;}const index=adjacentQuestion(1);if(index!==-1){question=index;startQuestion();}});
 menu();
