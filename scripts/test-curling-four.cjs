@@ -13,6 +13,7 @@ function element(id) {
   style: {}, classList: {toggle:noop}, events: {},
   addEventListener(name, fn) { this.events[name] = fn; },
   getContext() { return drawing; },
+  setAttribute(name,value) {this[name]=value;},
  });
  return elements.get(id);
 }
@@ -155,5 +156,9 @@ element('ai-level').value='2';element('start-game').events.click();assert.equal(
 prepareAI();workers.at(-1).onerror();assert.equal(run('gameStarted'),false);assert.equal(run('aiThinking'),false);assert.match(element('setup-note').textContent,/起動できません/);
 element('position').value=80;element('angle').value=65;element('power').value=1400;element('restart').events.click();
 assert.equal(Number(element('position').value),320);assert.equal(Number(element('angle').value),0);assert.equal(Number(element('power').value),300);
+reset();element('power').value=1400;assert.equal(run('settings().power'),470);
+element('power-mode').events.click();assert.equal(run('settings().power'),1400);assert.equal(element('power-mode')['aria-pressed'],'true');
+element('power-mode').events.click();assert.equal(run('settings().power'),470);assert.equal(Number(element('power').value),470);
+element('power-mode').events.click();element('restart').events.click();assert.equal(run('powerMode'),false);
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');
