@@ -9,7 +9,7 @@ const drawing = new Proxy({}, {get: (o,k) => o[k] ?? noop, set: (o,k,v) => (o[k]
 const elements = new Map();
 function element(id) {
  if (!elements.has(id)) elements.set(id, {
-  value: ({position:320, angle:0, power:300, opponent:'human', 'ai-level':'5'})[id] ?? '',
+  value: ({position:320, angle:0, power:300, opponent:'human', 'ai-level':'5','red-ai-level':'5','blue-ai-level':'5'})[id] ?? '',
   style: {}, classList: {toggle:noop}, events: {},
   addEventListener(name, fn) { this.events[name] = fn; },
   getContext() { return drawing; },
@@ -219,7 +219,7 @@ element('delicate-mode').events.click();element('restart').events.click();assert
 // Spectator mode forces both players to level 5 and runs automatically.
 element('restart').events.click();element('opponent').value='watch';element('ai-level').value='1';element('opponent').events.change();
 assert.equal(element('ai-level-label').hidden,true);element('start-game').events.click();
-assert.equal(run('matchConfig.level'),5);assert.equal(run('aiBudget()'),2000);assert.equal(run('aiThinking'),true);
+assert.equal(run('activeAILevel()'),5);assert.equal(run('aiBudget()'),2000);assert.equal(run('aiThinking'),true);
 assert.equal(element('launch-controls').hidden,true);assert.equal(element('stop-watch').hidden,false);
 const redWorker=workers.at(-1);assert.equal(redWorker.request.player,0);assert.equal(redWorker.request.budgetMs,2000);
 run('launch()');assert.equal(run('shots'),0);
@@ -229,5 +229,13 @@ assert.equal(run('turn'),1);assert.equal(run('aiThinking'),true);const blueWorke
 blueWorker.onmessage({data:watchReply});run('for(let n=0;n<2600&&moving;n++)physics(1/120);');assert.equal(run('turn'),0);assert.equal(run('aiThinking'),true);
 const nextRed=workers.at(-1);element('stop-watch').events.click();assert.equal(nextRed.terminated,true);assert.equal(run('gameStarted'),false);
 nextRed.onmessage({data:watchReply});assert.equal(run('shots'),0);assert.equal(run('moving'),false);
+// Spectators can independently set and lock the two AI levels.
+element('restart').events.click();element('opponent').value='watch';element('red-ai-level').value='2';element('blue-ai-level').value='4';element('start-game').events.click();
+assert.equal(run('activeAILevel()'),2);assert.equal(workers.at(-1).request.budgetMs,8);
+assert.equal(element('red-ai-level').disabled,true);assert.equal(element('blue-ai-level').disabled,true);
+element('red-ai-level').value='5';element('red-ai-level').events.change();assert.equal(run('activeAILevel()'),2);
+workers.at(-1).onmessage({data:watchReply});run('for(let n=0;n<2600&&moving;n++)physics(1/120);');
+assert.equal(run('turn'),1);assert.equal(run('activeAILevel()'),4);assert.equal(workers.at(-1).request.budgetMs,30);
+element('stop-watch').events.click();assert.equal(run('gameStarted'),false);
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');

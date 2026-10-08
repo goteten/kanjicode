@@ -12,7 +12,7 @@
 <body>
 <main>
 <header id="intro"><h1>カーリング四目並べ</h1></header>
-<section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option><option value="watch">最強AI同士を観戦</option></select></label><label id="ai-level-label">AIレベル<select id="ai-level"><option value="1" selected>1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5">5 · 最強</option></select></label><button id="start-game">この設定ではじめる</button></section>
+<section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option><option value="watch">AI同士を観戦</option></select></label><label id="ai-level-label">AIレベル<select id="ai-level"><option value="1" selected>1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5">5 · 最強</option></select></label><div id="watch-levels" hidden><label>赤のAIレベル<select id="red-ai-level"><option value="1">1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5" selected>5 · 最強</option></select></label><label>青のAIレベル<select id="blue-ai-level"><option value="1">1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5" selected>5 · 最強</option></select></label></div><button id="start-game">この設定ではじめる</button></section>
 <div class="layout" id="game" hidden>
 <div class="rink"><canvas id="rink" width="640" height="760" tabindex="0" aria-label="カーリングの盤面。下の石を後ろに引いて離すと投石できます。投げる位置は下のスライダーで調整できます。矢印キーで角度と強さを調整し、Enterでも投げられます。"></canvas><div class="launch-position" id="launch-controls"><label>投げる位置 <output id="position-value"></output><input id="position" type="range" min="80" max="560" value="320" step="1"></label><div class="shot-modes"><button id="delicate-mode" type="button" aria-pressed="false">繊細モード</button><button id="power-mode" type="button" aria-pressed="false">パワーモード</button></div></div></div>
 <button id="stop-watch" type="button" hidden>観戦を終了</button>
@@ -34,7 +34,11 @@ function humanPowerLimit(){return delicateMode?260:powerMode?1400:470;}
 function humanPowerMinimum(){return delicateMode?30:140;}
 function opponentMode(){return matchConfig?matchConfig.opponent:$('opponent').value;}
 let aiThinking=false,aiWorker=null,aiGeneration=0,aiSummary="青のAIは選んだレベルに応じて投石を考えます。",gameMotion=null;
-function aiBudget(){if(opponentMode()==='watch')return 2000;return [3,8,15,30,2000][Math.max(0,Math.min(4,Number(matchConfig?matchConfig.level:$('ai-level').value)-1))]||2000;}
+function activeAILevel(){
+ if(opponentMode()==='watch')return Number(matchConfig?(turn===0?matchConfig.redLevel:matchConfig.blueLevel):$(turn===0?'red-ai-level':'blue-ai-level').value);
+ return Number(matchConfig?matchConfig.level:$('ai-level').value);
+}
+function aiBudget(){return [3,8,15,30,2000][Math.max(0,Math.min(4,activeAILevel()-1))]||2000;}
 function isAITurn(){return opponentMode()==='watch'||(opponentMode()==='ai'&&turn===1);}
 const inputs=['position','angle','power'].map($);
 function settings(){return {x:Number($('position').value),angle:Number($('angle').value)*Math.PI/180,power:Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Number($('power').value)))};}
@@ -44,6 +48,8 @@ function updateUI(){
  $('stop-watch').hidden=!gameStarted||opponentMode()!=='watch'||!!result;
  $('launch-controls').hidden=gameStarted&&opponentMode()==='watch';
  $('ai-level-label').hidden=opponentMode()==='watch';
+ $('watch-levels').hidden=opponentMode()!=='watch';
+ $('red-ai-level').disabled=gameStarted;$('blue-ai-level').disabled=gameStarted;
  $('undo').hidden=opponentMode()==='watch';
  $('power-mode').disabled=!gameStarted||moving||!!result||isAITurn()||!!drag;
  $('power-mode').setAttribute('aria-pressed',String(powerMode));
@@ -274,7 +280,7 @@ function startAI(){
    const answer=event.data;cancelAI();
    aiSummary='前の探索：'+(answer.elapsed/1000).toFixed(2)+'秒 · '+answer.evaluated+'候補';
    // The AI shot must not overwrite the human player's launch controls.
-   const shot=inaccurateAIShot(answer.shot,opponentMode()==='watch'?5:matchConfig.level);
+   const shot=inaccurateAIShot(answer.shot,activeAILevel());
    launch(shot,true);
   };
   aiWorker.onerror=()=>{if(generation===aiGeneration)aiFailed();};
@@ -408,7 +414,7 @@ function resetToSetup(){
 }
 $('start-game').addEventListener('click',()=>{
  if(gameStarted)return;
- matchConfig=Object.freeze({opponent:$('opponent').value,level:$('opponent').value==='watch'?5:Number($('ai-level').value)});
+ matchConfig=Object.freeze({opponent:$('opponent').value,level:Number($('ai-level').value),redLevel:Number($('red-ai-level').value),blueLevel:Number($('blue-ai-level').value)});
  gameStarted=true;updateUI();startAI();
 });
 $('power-mode').addEventListener('click',()=>{
@@ -422,11 +428,13 @@ $('delicate-mode').addEventListener('click',()=>{
 $('restart').addEventListener('click',resetToSetup);
 $('stop-watch').addEventListener('click',resetToSetup);
 function setupChanged(){
- if(gameStarted){$('opponent').value=matchConfig.opponent;$('ai-level').value=matchConfig.level;return;}
+ if(gameStarted){$('opponent').value=matchConfig.opponent;$('ai-level').value=matchConfig.level;$('red-ai-level').value=matchConfig.redLevel;$('blue-ai-level').value=matchConfig.blueLevel;return;}
  updateUI();
 }
 $('opponent').addEventListener('change',setupChanged);
 $('ai-level').addEventListener('change',setupChanged);
+$('red-ai-level').addEventListener('change',setupChanged);
+$('blue-ai-level').addEventListener('change',setupChanged);
 window.addEventListener('pagehide',cancelAI);
 window.addEventListener('pageshow',startAI);
 function frame(time){
