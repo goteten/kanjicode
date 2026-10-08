@@ -373,7 +373,7 @@ function draw(){
  }
 }
 function drawFlames(s){
- const orbits=[{speed:.8,radius:42,size:18,phase:0},{speed:-1.35,radius:48,size:15,phase:1.1},{speed:2.1,radius:40,size:20,phase:2.4},{speed:-2.8,radius:51,size:14,phase:3.5},{speed:1.65,radius:45,size:17,phase:4.8},{speed:-.65,radius:43,size:16,phase:5.7}];
+ const orbits=Array.from({length:18},(_,i)=>({speed:(i%2===0?1:-1)*(2.4+(i%6)*1.2),radius:40+(i%4)*4,size:14+(i%4)*2,phase:i*Math.PI*2/18}));
  ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
  for(const orbit of orbits){
   const angle=flameTime*orbit.speed+orbit.phase;
