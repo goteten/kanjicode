@@ -15,3 +15,5 @@ Run `node scripts/analyze-puzzle-panel.cjs` to enumerate all 65,536 press subset
 Open `color-orbit.html` to turn an image into a circular color distribution.
 
 Each move group also offers an endless mode drawing from all boards with that exact minimum move count. Failed puzzles can be retried; cleared puzzles lead to a new random board.
+
+Open `puzzle-panel-all.html` for all 6,748 boards requiring exactly 3, 4, or 5 moves (560 / 1,820 / 4,368). Rotations and reflections are included. Select any problem by number; solve it to enable Next, with Previous below it. Completion is saved separately.

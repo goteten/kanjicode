@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Puzzle — 全3・4・5手問題</title>
+  <style>
+    :root { color-scheme:light; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px 16px; background:#eee; color:#111; font-family:"Segoe UI",sans-serif; }
+    main { width:min(100%,380px); }
+    button { touch-action:manipulation; cursor:pointer; font:inherit; }
+    button:focus-visible { outline:3px solid #888; outline-offset:3px; }
+    #courses { display:grid; gap:18px; }
+    .course-group h2 { margin:0 0 8px; font-size:14px; font-weight:400; color:#666; }
+    .group-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .group-heading h2 { margin:0; }
+    .endless { border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; padding:7px 12px; font-size:12px; }
+    .course-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+    .course { aspect-ratio:1; border:1px solid #bbb; border-radius:10px; background:#fff; color:#111; font-size:22px; }
+    .course.complete { background:#a8dcae; color:#111; border-color:#8bc493; }
+    .progress { display:flex; justify-content:space-between; align-items:center; padding:0 4px 18px; font-size:18px; }
+    #course-number { background:none; border:0; padding:8px; color:#111; }
+    #reset { border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:7px 10px; font-size:12px; }
+    #back { position:fixed; top:16px; left:16px; z-index:1; border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:8px 12px; font-size:14px; }
+    #game { padding-top:44px; }
+    .board { display:grid; aspect-ratio:1; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(4,minmax(0,1fr)); gap:2px; }
+    .tile-slot { min-width:0; min-height:0; padding:5px; border-radius:15px; background:transparent; }
+    .tile-slot.pressed { background:#bdbdbd; }
+    .board-frame { padding:12px; margin:0 -12px; border-radius:20px; background:transparent; transition:background .25s ease; }
+    .board-frame.cleared { background:#a8dcae; }
+    .board-frame.failed { background:#f2c5c5; }
+    .tile { width:100%; height:100%; min-width:0; min-height:0; appearance:none; margin:0; border-radius:10px; border:1px solid #bbb; background:#fff; color:#888; font-size:clamp(24px,7vw,36px); line-height:1; display:grid; place-items:center; padding:0; }
+    .tile.black { background:#111; }
+    .tile.affected { outline:2px solid #888; outline-offset:1px; }
+    .tile:disabled { cursor:default; }
+    .tile.flip { animation:flip .22s ease; }
+    @keyframes flip { 50% { transform:scaleX(.3); } }
+    .status { margin-top:16px; text-align:center; font-size:14px; }
+    #moves { margin:0; font-variant-numeric:tabular-nums; }
+    #message { min-height:44px; margin:8px 0 0; color:#666; line-height:1.6; }
+    [hidden] { display:none !important; }
+    @media(prefers-reduced-motion:reduce) { .tile.flip { animation:none; } .board-frame { transition:none; } }
+
+.pick { border:1px solid #bbb; border-radius:10px; background:#fff; padding:20px; font-size:18px; color:#111; }
+.selector { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+#problem-select { flex:1; min-width:0; padding:8px; border:1px solid #bbb; border-radius:8px; background:#fff; font:inherit; }
+.navigation { display:grid; gap:10px; margin-top:12px; }
+.navigation button { border:1px solid #bbb; border-radius:8px; padding:12px; background:#fff; color:#111; }
+.navigation button:disabled { opacity:.4; cursor:default; }
+  </style>
+</head>
+<body>
+<main>
+  <div id="courses" aria-label="問題選択"></div>
+  <section id="game" hidden aria-label="パズル">
+    <button id="back" type="button">戻る</button>
+    <div class="progress">
+      <span id="course-number"></span>
+      <button id="reset" type="button">やり直す</button>
+    </div>
+    <div class="selector"><select id="problem-select" aria-label="問題番号"></select></div>
+    <div id="board-frame" class="board-frame">
+      <div id="board" class="board" aria-label="操作するパネル"></div>
+    </div>
+    <div class="status">
+      <p id="moves"></p>
+      <p id="message" role="status" aria-live="polite"></p>
+    </div>
+    <div class="navigation">
+      <button id="next" type="button">次の問題へ</button>
+      <button id="previous" type="button">前の問題へ</button>
+    </div>
+  </section>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const size = 4;
+let moves = 3, question = 0, current = 0, remaining = 0, pressedMask = 0, state = 'menu', activePuzzle = null;
+let completed = new Set();
+try { const saved = JSON.parse(localStorage.getItem('panel-all-345-v1')); if (Array.isArray(saved)) completed = new Set(saved.filter(n => Number.isInteger(n) && n >= 0 && n < 65536)); } catch {}
+  function neighbors(index) {
+    const row = Math.floor(index / size), col = index % size, cells = [];
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const r = row + dr, c = col + dc;
+      if (r >= 0 && r < size && c >= 0 && c < size) cells.push(r * size + c);
+    }
+    return cells;
+  }
+  const flips = Array.from({length:16}, (_, i) => neighbors(i).reduce((mask, cell) => mask | (1 << cell), 0));
+  function countBits(mask) {
+    let count = 0;
+    while (mask) { mask &= mask - 1; count++; }
+    return count;
+  }
+
+function buildAllProblems() {
+  const groups = {3:[],4:[],5:[]};
+  for (let solution = 0; solution < 65536; solution++) {
+    const steps = countBits(solution);
+    if (steps < 3 || steps > 5) continue;
+    let board = 0;
+    for (let i = 0; i < 16; i++) if (solution & (1 << i)) board ^= flips[i];
+    groups[steps].push({board, moves:steps, solution});
+  }
+  for (const group of Object.values(groups)) group.sort((a,b) => a.board - b.board);
+  return groups;
+}
+const groups = buildAllProblems();
+function announce(text) {
+  $('board-frame').classList.toggle('cleared',state==='complete');
+  $('board-frame').classList.toggle('failed',state==='failed');
+  $('moves').textContent = '残り ' + remaining + ' 手';
+  $('message').textContent = text;
+  $('previous').disabled = question === 0;
+  $('next').disabled = state !== 'complete' || question === groups[moves].length - 1;
+  if (state !== 'playing') for (const slot of $('board').children) {
+    slot.firstElementChild.classList.remove('affected'); slot.firstElementChild.disabled = false;
+  }
+}
+function menu() {
+  state='menu'; $('game').hidden=true; $('courses').hidden=false;
+  $('courses').replaceChildren();
+  for (const steps of [3,4,5]) {
+    const button=document.createElement('button'); button.type='button'; button.className='pick';
+    const solved=groups[steps].filter(p=>completed.has(p.board)).length;
+    button.textContent=steps+'手 · '+solved+' / '+groups[steps].length+'問';
+    button.addEventListener('click',()=>startGroup(steps)); $('courses').append(button);
+  }
+}
+function startGroup(steps) {
+  moves=steps; question=0; $('courses').hidden=true; $('game').hidden=false;
+  $('problem-select').replaceChildren();
+  groups[moves].forEach((p,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=(i+1)+' / '+groups[moves].length+(completed.has(p.board)?' 済':'');$('problem-select').append(option);});
+  startQuestion();
+}
+function startQuestion() {
+  activePuzzle=groups[moves][question]; current=activePuzzle.board;remaining=moves;pressedMask=0;state='playing';
+  $('course-number').textContent=moves+'手'; $('problem-select').value=String(question);
+  draw();announce('');
+}
+  function paint(tile, index) {
+    const black = Boolean(current & (1 << index));
+    const pressed = Boolean(pressedMask & (1 << index));
+    tile.className = 'tile' + (black ? ' black' : '');
+    tile.parentElement.classList.toggle('pressed', pressed);
+    tile.disabled = pressed && state === 'playing';
+    tile.textContent = black ? '×' : '○';
+    tile.setAttribute('aria-label', (Math.floor(index / size) + 1) + '行' + (index % size + 1) + '列：' + (black ? '黒' : '白') + (pressed ? '、押したパネル' : ''));
+  }
+  function resetPuzzle() {
+    if (state === 'menu' || !activePuzzle) return;
+    current = activePuzzle.board; remaining = activePuzzle.moves;
+    pressedMask = 0; state = 'playing';
+    draw(); announce('');
+  }
+  function highlight(index, on) {
+    for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.toggle('affected', on && state === 'playing');
+  }
+  function draw() {
+    $('board').replaceChildren();
+    for (let i = 0; i < 16; i++) {
+      const slot = document.createElement('div'); slot.className = 'tile-slot';
+      const tile = document.createElement('button'); tile.type = 'button';
+      slot.append(tile); paint(tile, i);
+      tile.addEventListener('click', () => play(i));
+      tile.addEventListener('pointerenter', () => highlight(i, true));
+      tile.addEventListener('pointerleave', () => highlight(i, false));
+      tile.addEventListener('focus', () => highlight(i, true));
+      tile.addEventListener('blur', () => highlight(i, false));
+      $('board').append(slot);
+    }
+  }
+
+function play(index) {
+  if (state==='menu' || state==='complete') return;
+  if (state==='failed') {resetPuzzle();return;}
+  if (pressedMask & (1 << index)) return;
+  pressedMask |= 1 << index; current ^= flips[index];remaining--;
+  Array.from($('board').children).forEach((slot,i)=>paint(slot.firstElementChild,i));
+  for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.add('flip');
+  if (current===0) {
+    state='complete';completed.add(activePuzzle.board);
+    try {localStorage.setItem('panel-all-345-v1',JSON.stringify([...completed]));} catch {}
+    $('problem-select').children[question].textContent=(question+1)+' / '+groups[moves].length+' 済';
+    announce(question===groups[moves].length-1?'最後の問題です':'');
+  } else if (remaining===0) {state='failed';announce('手数切れ。タップで再挑戦');}
+  else announce('');
+}
+$('back').addEventListener('click',menu);
+$('reset').addEventListener('click',resetPuzzle);
+$('problem-select').addEventListener('change',()=>{const index=Number($('problem-select').value);if(Number.isInteger(index)&&index>=0&&index<groups[moves].length){question=index;startQuestion();}});
+$('previous').addEventListener('click',()=>{if(question>0){question--;startQuestion();}});
+$('next').addEventListener('click',()=>{if(state==='complete'&&question+1<groups[moves].length){question++;startQuestion();}});
+menu();
+</script>
+</body>
+</html>
