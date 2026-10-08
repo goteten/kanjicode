@@ -216,5 +216,18 @@ element('power').value=30;context.softShot={x:320,angle:0,power:30};assert.equal
 element('delicate-mode').events.click();assert.equal(Number(element('power').value),140);
 element('delicate-mode').events.click();element('restart').events.click();assert.equal(run('delicateMode'),false);
 
+// Spectator mode forces both players to level 5 and runs automatically.
+element('restart').events.click();element('opponent').value='watch';element('ai-level').value='1';element('opponent').events.change();
+assert.equal(element('ai-level-label').hidden,true);element('start-game').events.click();
+assert.equal(run('matchConfig.level'),5);assert.equal(run('aiBudget()'),2000);assert.equal(run('aiThinking'),true);
+assert.equal(element('launch-controls').hidden,true);assert.equal(element('stop-watch').hidden,false);
+const redWorker=workers.at(-1);assert.equal(redWorker.request.player,0);assert.equal(redWorker.request.budgetMs,2000);
+run('launch()');assert.equal(run('shots'),0);
+const watchReply={shot:{x:320,angle:0,power:300},elapsed:2000,evaluated:10};
+redWorker.onmessage({data:watchReply});run('for(let n=0;n<2600&&moving;n++)physics(1/120);');
+assert.equal(run('turn'),1);assert.equal(run('aiThinking'),true);const blueWorker=workers.at(-1);assert.equal(blueWorker.request.player,1);
+blueWorker.onmessage({data:watchReply});run('for(let n=0;n<2600&&moving;n++)physics(1/120);');assert.equal(run('turn'),0);assert.equal(run('aiThinking'),true);
+const nextRed=workers.at(-1);element('stop-watch').events.click();assert.equal(nextRed.terminated,true);assert.equal(run('gameStarted'),false);
+nextRed.onmessage({data:watchReply});assert.equal(run('shots'),0);assert.equal(run('moving'),false);
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');

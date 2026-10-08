@@ -6,15 +6,16 @@
 <meta name="description" content="石を滑らせ、黒い格子点に石を乗せて4つ並べる、AI・2人対戦のカーリング四目並べ。">
 <title>カーリング四目並べ</title>
 <style>
-:root{color-scheme:light;font-family:"Yu Gothic","YuGothic","Hiragino Kaku Gothic ProN","Meiryo",sans-serif;font-weight:500;line-height:1.6;color:#243741;background:#f5f7f8}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;min-height:100vh;background:#f5f7f8}main{max-width:664px;margin:auto;padding:12px}header{margin:16px 0 24px}h1{font-weight:700;font-size:clamp(24px,4vw,36px);margin:0 0 8px}header p{color:#a6c5d5;line-height:1.7}.eyebrow{color:#7ed4e2;font-size:12px;letter-spacing:.18em;margin-bottom:12px}.setup{max-width:480px;margin:36px auto;border:1px solid #d3dce1;border-radius:10px;background:#ffffff;padding:20px}.setup h2{font-size:24px;margin:0}.setup p{color:#61727d;line-height:1.8}.setup button{width:100%;background:#187b89;color:#ffffff;font-weight:700;margin-top:12px}.layout{display:grid;gap:12px}.rink{border:1px solid #cad5db;border-radius:10px;overflow:hidden;background:#dff0f5;box-shadow:none}canvas{display:block;width:100%;height:auto;touch-action:none;outline-offset:-5px}.launch-position{padding:12px 12.5% 16px;background:#ffffff;border-top:1px solid #cad5db}.shot-modes{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}.shot-modes button{padding:7px 14px;font-size:13px}.shot-modes #delicate-mode[aria-pressed="true"]{background:#d9eef0;color:#185560;border-color:#9acbd0}.launch-position #power-mode[aria-pressed="true"]{background:#e8a15d;color:#241409;border-color:#ffd099}.launch-position label{margin:0}.launch-position input{margin:0;min-height:28px}label{display:grid;grid-template-columns:1fr auto;gap:8px;margin:16px 0;font-size:14px}output{color:#187b89;font-variant-numeric:tabular-nums}input{grid-column:1/-1;width:100%;accent-color:#187b89}button,select{font:inherit;border:1px solid #cad5db;border-radius:10px;padding:11px 14px;background:#ffffff;color:#243741}button{cursor:pointer}select{width:100%;grid-column:1/-1}button:disabled{opacity:.4;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #187b89;outline-offset:3px}.end-actions{display:flex;gap:12px}.end-actions button{flex:1}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+:root{color-scheme:light;font-family:"Yu Gothic","YuGothic","Hiragino Kaku Gothic ProN","Meiryo",sans-serif;font-weight:500;line-height:1.6;color:#243741;background:#f5f7f8}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;min-height:100vh;background:#f5f7f8}main{max-width:664px;margin:auto;padding:12px}header{margin:16px 0 24px}h1{font-weight:700;font-size:clamp(24px,4vw,36px);margin:0 0 8px}header p{color:#a6c5d5;line-height:1.7}.eyebrow{color:#7ed4e2;font-size:12px;letter-spacing:.18em;margin-bottom:12px}.setup{max-width:480px;margin:36px auto;border:1px solid #d3dce1;border-radius:10px;background:#ffffff;padding:20px}.setup h2{font-size:24px;margin:0}.setup p{color:#61727d;line-height:1.8}.setup button{width:100%;background:#187b89;color:#ffffff;font-weight:700;margin-top:12px}.layout{display:grid;gap:12px}.rink{border:1px solid #cad5db;border-radius:10px;overflow:hidden;background:#dff0f5;box-shadow:none}canvas{display:block;width:100%;height:auto;touch-action:none;outline-offset:-5px}.launch-position{padding:12px 12.5% 16px;background:#ffffff;border-top:1px solid #cad5db}.shot-modes{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}.shot-modes button{padding:7px 14px;font-size:13px}.shot-modes #delicate-mode[aria-pressed="true"]{background:#d9eef0;color:#185560;border-color:#9acbd0}.launch-position #power-mode[aria-pressed="true"]{background:#e8a15d;color:#241409;border-color:#ffd099}.launch-position label{margin:0}.launch-position input{margin:0;min-height:28px}label{display:grid;grid-template-columns:1fr auto;gap:8px;margin:16px 0;font-size:14px}output{color:#187b89;font-variant-numeric:tabular-nums}input{grid-column:1/-1;width:100%;accent-color:#187b89}button,select{font:inherit;border:1px solid #cad5db;border-radius:10px;padding:11px 14px;background:#ffffff;color:#243741}button{cursor:pointer}select{width:100%;grid-column:1/-1}button:disabled{opacity:.4;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #187b89;outline-offset:3px}#stop-watch{justify-self:center}.end-actions{display:flex;gap:12px}.end-actions button{flex:1}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 </style>
 </head>
 <body>
 <main>
 <header id="intro"><h1>カーリング四目並べ</h1></header>
-<section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option></select></label><label>AIレベル<select id="ai-level"><option value="1" selected>1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5">5 · 最強</option></select></label><button id="start-game">この設定ではじめる</button></section>
+<section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option><option value="watch">最強AI同士を観戦</option></select></label><label id="ai-level-label">AIレベル<select id="ai-level"><option value="1" selected>1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5">5 · 最強</option></select></label><button id="start-game">この設定ではじめる</button></section>
 <div class="layout" id="game" hidden>
-<div class="rink"><canvas id="rink" width="640" height="760" tabindex="0" aria-label="カーリングの盤面。下の石を後ろに引いて離すと投石できます。投げる位置は下のスライダーで調整できます。矢印キーで角度と強さを調整し、Enterでも投げられます。"></canvas><div class="launch-position"><label>投げる位置 <output id="position-value"></output><input id="position" type="range" min="80" max="560" value="320" step="1"></label><div class="shot-modes"><button id="delicate-mode" type="button" aria-pressed="false">繊細モード</button><button id="power-mode" type="button" aria-pressed="false">パワーモード</button></div></div></div>
+<div class="rink"><canvas id="rink" width="640" height="760" tabindex="0" aria-label="カーリングの盤面。下の石を後ろに引いて離すと投石できます。投げる位置は下のスライダーで調整できます。矢印キーで角度と強さを調整し、Enterでも投げられます。"></canvas><div class="launch-position" id="launch-controls"><label>投げる位置 <output id="position-value"></output><input id="position" type="range" min="80" max="560" value="320" step="1"></label><div class="shot-modes"><button id="delicate-mode" type="button" aria-pressed="false">繊細モード</button><button id="power-mode" type="button" aria-pressed="false">パワーモード</button></div></div></div>
+<button id="stop-watch" type="button" hidden>観戦を終了</button>
 <p id="status" class="sr-only" role="status" aria-live="polite"></p>
 <div hidden><input id="angle" type="range" min="-65" max="65" value="0"><input id="power" type="range" min="30" max="1400" value="300"><button id="shoot">石を投げる</button></div>
 <div class="end-actions" id="end-actions" hidden><button id="undo">戻す</button><button id="restart">もう一度遊ぶ</button></div>
@@ -33,13 +34,17 @@ function humanPowerLimit(){return delicateMode?260:powerMode?1400:470;}
 function humanPowerMinimum(){return delicateMode?30:140;}
 function opponentMode(){return matchConfig?matchConfig.opponent:$('opponent').value;}
 let aiThinking=false,aiWorker=null,aiGeneration=0,aiSummary="青のAIは選んだレベルに応じて投石を考えます。",gameMotion=null;
-function aiBudget(){return [3,8,15,30,2000][Math.max(0,Math.min(4,Number(matchConfig?matchConfig.level:$('ai-level').value)-1))]||2000;}
-function isAITurn(){return opponentMode()==='ai'&&turn===1;}
+function aiBudget(){if(opponentMode()==='watch')return 2000;return [3,8,15,30,2000][Math.max(0,Math.min(4,Number(matchConfig?matchConfig.level:$('ai-level').value)-1))]||2000;}
+function isAITurn(){return opponentMode()==='watch'||(opponentMode()==='ai'&&turn===1);}
 const inputs=['position','angle','power'].map($);
 function settings(){return {x:Number($('position').value),angle:Number($('angle').value)*Math.PI/180,power:Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Number($('power').value)))};}
 function updateUI(){
  $('setup').hidden=gameStarted; $('game').hidden=!gameStarted; $('intro').hidden=gameStarted;
  $('end-actions').hidden=!gameStarted||!result;
+ $('stop-watch').hidden=!gameStarted||opponentMode()!=='watch'||!!result;
+ $('launch-controls').hidden=gameStarted&&opponentMode()==='watch';
+ $('ai-level-label').hidden=opponentMode()==='watch';
+ $('undo').hidden=opponentMode()==='watch';
  $('power-mode').disabled=!gameStarted||moving||!!result||isAITurn()||!!drag;
  $('power-mode').setAttribute('aria-pressed',String(powerMode));
  $('power-mode').textContent=powerMode?'パワーモード ON':'パワーモード';
@@ -269,7 +274,7 @@ function startAI(){
    const answer=event.data;cancelAI();
    aiSummary='前の探索：'+(answer.elapsed/1000).toFixed(2)+'秒 · '+answer.evaluated+'候補';
    // The AI shot must not overwrite the human player's launch controls.
-   const shot=inaccurateAIShot(answer.shot,matchConfig.level);
+   const shot=inaccurateAIShot(answer.shot,opponentMode()==='watch'?5:matchConfig.level);
    launch(shot,true);
   };
   aiWorker.onerror=()=>{if(generation===aiGeneration)aiFailed();};
@@ -403,7 +408,7 @@ function resetToSetup(){
 }
 $('start-game').addEventListener('click',()=>{
  if(gameStarted)return;
- matchConfig=Object.freeze({opponent:$('opponent').value,level:Number($('ai-level').value)});
+ matchConfig=Object.freeze({opponent:$('opponent').value,level:$('opponent').value==='watch'?5:Number($('ai-level').value)});
  gameStarted=true;updateUI();startAI();
 });
 $('power-mode').addEventListener('click',()=>{
@@ -415,6 +420,7 @@ $('delicate-mode').addEventListener('click',()=>{
  delicateMode=!delicateMode;powerMode=false;$('power').value=Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Number($('power').value)));updateUI();
 });
 $('restart').addEventListener('click',resetToSetup);
+$('stop-watch').addEventListener('click',resetToSetup);
 function setupChanged(){
  if(gameStarted){$('opponent').value=matchConfig.opponent;$('ai-level').value=matchConfig.level;return;}
  updateUI();
