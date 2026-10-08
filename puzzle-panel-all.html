@@ -56,11 +56,26 @@
 .navigation button { border:1px solid #bbb; border-radius:8px; padding:8px 12px; background:#eee; color:#555; font-size:14px; justify-self:start; }
 .navigation #next { justify-self:end; }
 .navigation button:disabled { opacity:.4; cursor:default; }
+#save-panel { margin-top:24px; color:#555; font-size:14px; }
+#save-panel summary { cursor:pointer; }
+#save-text { display:block; width:100%; min-height:100px; margin:12px 0; border:1px solid #bbb; border-radius:8px; padding:10px; font:12px monospace; resize:vertical; }
+.save-actions { display:flex; gap:8px; }
+.save-actions button { border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; padding:8px 12px; font-size:14px; }
+#save-status { line-height:1.6; }
   </style>
 </head>
 <body>
 <main>
   <div id="courses" aria-label="問題選択"></div>
+  <details id="save-panel">
+    <summary>セーブデータ</summary>
+    <textarea id="save-text" aria-label="セーブデータの文字列" placeholder="書き出した文字列をコピーして保管するか、読み込みたい文字列を貼り付けてください" spellcheck="false"></textarea>
+    <div class="save-actions">
+      <button id="save-export" type="button">書き出す</button>
+      <button id="save-import" type="button">読み込む</button>
+    </div>
+    <p id="save-status" role="status" aria-live="polite"></p>
+  </details>
   <button id="back" type="button" hidden>戻る</button>
   <section id="problem-list" hidden aria-label="全問題一覧">
     <h2 id="list-title"></h2>
@@ -166,6 +181,7 @@ function announce(text) {
   }
 }
 function menu() {
+  $('save-panel').hidden=false;
   state='menu'; $('game').hidden=true; $('problem-list').hidden=true; $('back').hidden=true; $('courses').hidden=false;
   $('courses').replaceChildren();
   for (const steps of [3,4,5]) {
@@ -186,6 +202,7 @@ function applyFilter() {
   $('random-unsolved').disabled = groups[moves].every(p=>completed.has(p.board));
 }
 function showList() {
+  $('save-panel').hidden=true;
   randomMode=false;
   state='list'; $('game').hidden=true; $('courses').hidden=true; $('problem-list').hidden=false; $('back').hidden=false;
   applyFilter();
@@ -271,6 +288,38 @@ function play(index) {
   } else if (remaining===0) {state='failed';announce('手数切れ。タップで再挑戦');}
   else announce('');
 }
+const validBoards = new Set(Object.values(groups).flat().map(p=>p.board));
+function exportSave() {
+  const data={format:'puzzle-panel-all',version:1,completed:[...completed].filter(board=>validBoards.has(board)).sort((a,b)=>a-b),filter:$('visibility-filter').value==='unsolved'?'unsolved':'all'};
+  $('save-text').value=JSON.stringify(data);
+  $('save-text').focus();$('save-text').select();
+  $('save-status').textContent=data.completed.length+'問の記録を書き出しました。文字列をコピーして保管してください。';
+}
+function importSave() {
+  let data;
+  try {
+    const text=$('save-text').value.trim();
+    if(text.length>100000) throw new Error();
+    data=JSON.parse(text);
+    if(!data || data.format!=='puzzle-panel-all' || data.version!==1 || !Array.isArray(data.completed) || data.completed.length>6748 || !['all','unsolved'].includes(data.filter)) throw new Error();
+    if(data.completed.some(board=>!Number.isInteger(board)||!validBoards.has(board))) throw new Error();
+  } catch {
+    $('save-status').textContent='読み込めませんでした。全問題ページのセーブ文字列を確認してください。';return;
+  }
+  const merged=new Set([...completed,...data.completed]);
+  try {
+    localStorage.setItem('panel-all-345-v1',JSON.stringify([...merged]));
+  } catch {
+    $('save-status').textContent='ブラウザに保存できませんでした。記録は変更していません。';return;
+  }
+  const added=merged.size-completed.size;
+  completed=merged;$('visibility-filter').value=data.filter;
+  try {localStorage.setItem('panel-all-345-filter',data.filter);} catch {}
+  menu();
+  $('save-status').textContent=added+'問の記録を追加しました。クリア済みは合計'+completed.size+'問です。';
+}
+$('save-export').addEventListener('click',exportSave);
+$('save-import').addEventListener('click',importSave);
 $('visibility-filter').addEventListener('change',()=>{
   try { localStorage.setItem('panel-all-345-filter',$('visibility-filter').value); } catch {}
   applyFilter();
