@@ -175,5 +175,16 @@ for(const [i,errors] of [[90,20,.45],[65,14,.32],[40,9,.22],[12,3,.06],[0,0,0]].
 }
 context.edgeAim={x:80,angle:-65*Math.PI/180,power:140};
 const bounded=JSON.parse(run('JSON.stringify(inaccurateAIShot(edgeAim,1,()=>0))'));assert.equal(bounded.x,80);assert.equal(bounded.power,140);assert.ok(bounded.angle>=-65*Math.PI/180);
+// Aim preview ignores existing stones and follows the exact shared physics.
+for(const shot of [{x:320,angle:0,power:300},{x:140,angle:.4,power:470},{x:520,angle:-.7,power:1400}]){
+ context.previewShot=shot;
+ const preview=JSON.parse(run('JSON.stringify(emptyRinkPreview(previewShot))'));
+ const predicted=JSON.parse(run('JSON.stringify(simulateShot([],previewShot,0))'));
+ assert.equal(preview.end.x,predicted[0].x);assert.equal(preview.end.y,predicted[0].y);
+ assert.ok(preview.points.length>2);
+ assert.equal(run('emptyRinkPreview(previewShot)===emptyRinkPreview(previewShot)'),true);
+ setStones([stone(320,400,1)]);assert.equal(run('emptyRinkPreview(previewShot).end.x'),preview.end.x);
+}
+reset();run('draw()');
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');

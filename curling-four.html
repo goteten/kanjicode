@@ -274,7 +274,22 @@ function aiFailed(){
  resetToSetup();$('setup-note').textContent='AIを起動できませんでした。対戦相手を選び直してください。';
 }
 function circle(x,y,r,fill,stroke,width=1){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}}
+let aimPreviewCache=null;
+function emptyRinkPreview(shot){
+ const key=[shot.x,shot.angle,shot.power].join(':');
+ if(aimPreviewCache&&aimPreviewCache.key===key)return aimPreviewCache;
+ const state=createShotState([],shot,0),points=[{x:shot.x,y:690}];
+ while(!state.done){
+  stepPhysics(state,1/120);
+  const s=state.stones[0],last=points[points.length-1];
+  if(Math.hypot(s.x-last.x,s.y-last.y)>=2||state.done)points.push({x:s.x,y:s.y});
+ }
+ const s=state.stones[0];
+ aimPreviewCache={key,points,end:{x:s.x,y:s.y}};
+ return aimPreviewCache;
+}
 function draw(){
+ let prediction=null;
  ctx.clearRect(0,0,640,760);ctx.fillStyle='#e7f4f7';ctx.fillRect(0,0,640,760);
  ctx.fillStyle='#c8e4ed';ctx.fillRect(LEFT,TOP,RIGHT-LEFT,BOTTOM-TOP);
  ctx.strokeStyle='#adcdd7';ctx.lineWidth=1;
@@ -296,13 +311,22 @@ function draw(){
  for(let i=0;i<N;i++){ctx.fillText(String(i+1),START+i*GAP,34);ctx.fillText('ABCDEFGHI'[i],30,START+i*GAP+4);}
 
  if(gameStarted&&!moving&&!result&&!isAITurn()){
-  const {x,angle,power}=settings(),length=60+power*.22;
-  ctx.strokeStyle=colors[turn]+'99';ctx.lineWidth=3;ctx.setLineDash([8,7]);ctx.beginPath();ctx.moveTo(x,690);ctx.lineTo(x+Math.sin(angle)*length,690-Math.cos(angle)*length);ctx.stroke();ctx.setLineDash([]);
+  const shot=settings(),{x}=shot;prediction=emptyRinkPreview(shot);
+  ctx.strokeStyle=colors[turn]+'99';ctx.lineWidth=2;ctx.setLineDash([3,7]);ctx.beginPath();
+  ctx.moveTo(prediction.points[0].x,prediction.points[0].y);
+  for(let i=1;i<prediction.points.length;i++)ctx.lineTo(prediction.points[i].x,prediction.points[i].y);
+  ctx.stroke();ctx.setLineDash([]);
   drawStone({x,y:690,player:turn},true);
 
   if(drag){ctx.strokeStyle=colors[turn];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,690);ctx.lineTo(drag.x,drag.y);ctx.stroke();circle(drag.x,drag.y,7,colors[turn]+'60');}
  }
  for(const s of stones)drawStone(s,false);
+ if(prediction){
+  const {x,y}=prediction.end;
+  ctx.setLineDash([5,5]);circle(x,y,R,colors[turn]+'12',colors[turn]+'cc',2);ctx.setLineDash([]);
+  ctx.strokeStyle=colors[turn];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-6,y);ctx.lineTo(x+6,y);ctx.moveTo(x,y-6);ctx.lineTo(x,y+6);ctx.stroke();
+  ctx.font='12px system-ui';ctx.fillStyle='#3b6174';ctx.textAlign='center';ctx.fillText('石なしの停止位置',x,y+R+15);
+ }
  if(result){
   ctx.strokeStyle=result.draw?'#82658c':'#f2b63e';ctx.lineWidth=7;ctx.lineCap='round';
   for(const line of result.lines){ctx.beginPath();ctx.moveTo(START+line[0].c*GAP,START+line[0].r*GAP);ctx.lineTo(START+line[3].c*GAP,START+line[3].r*GAP);ctx.stroke();}ctx.lineCap='butt';
