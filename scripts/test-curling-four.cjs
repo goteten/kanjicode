@@ -254,5 +254,9 @@ element('power-mode').events.click();assert.equal(run('settings().power'),1400);
 element('delicate-mode').events.click();assert.equal(run('settings().power'),250);
 element('delicate-mode').events.click();assert.equal(run('settings().power'),470);
 element('power-mode').events.click();assert.equal(run('settings().power'),1400);
+// Power-mode flames follow the launched stone, then end when it stops.
+reset();element('power-mode').events.click();run('draw();launch();');assert.equal(run('flameStone===stones[stones.length-1]'),true);
+run('frame(100);draw();for(let n=0;n<2600&&moving;n++)physics(1/120);');assert.equal(run('flameStone'),null);
+reset();run('launch()');assert.equal(run('flameStone'),null);element('restart').events.click();
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');

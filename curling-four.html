@@ -31,7 +31,7 @@ let stones=[],turn=0,shots=0,moving=false,result=null,history=[],drag=null,lastT
 let gameStarted=false,matchConfig=null,powerMode=false,delicateMode=false,fadingStones=[];
 function humanPowerLimit(){return delicateMode?260:powerMode?1400:470;}
 function humanPowerMinimum(){return delicateMode?30:140;}
-let aimPullLength=60;
+let aimPullLength=60,flameStone=null,flameTime=0;
 function humanPowerGain(){return delicateMode?2.5:powerMode?14:5;}
 function powerFromPull(){return Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Math.round(aimPullLength*humanPowerGain())));}
 function opponentMode(){return matchConfig?matchConfig.opponent:$('opponent').value;}
@@ -165,7 +165,7 @@ function simulateShot(initial,shot,player,deadline=Infinity){
 function finishShot(){
  stones=settleStones(stones);
  fadingStones=stones.filter(s=>Math.abs(s.y-650)<R*2).map(s=>({...s,age:0}));
- stones=clearLaunchStones(stones);moving=false;result=outcomeFor(stones,shots);
+ stones=clearLaunchStones(stones);flameStone=null;moving=false;result=outcomeFor(stones,shots);
  if(!result)turn=1-turn;
  updateUI();startAI();
 }
@@ -173,6 +173,7 @@ function launch(shot=settings(),fromAI=false){
  if(!gameStarted||moving||result||(!fromAI&&isAITurn()))return;
  history.push({stones:stones.map(s=>({...s})),turn,shots});
  gameMotion=createShotState(stones,shot,turn);stones=gameMotion.stones;
+ flameStone=(!fromAI&&powerMode)||(fromAI&&shot.power>470)?stones[stones.length-1]:null;
  shots++;moving=true;motionTime=0;accumulator=0;drag=null;updateUI();
 }
 function physics(dt){
@@ -371,12 +372,24 @@ function draw(){
   ctx.fillStyle='#ffffff';ctx.fillRect(50,650,540,62);ctx.fillStyle='#243741';ctx.font='700 24px "Yu Gothic", "YuGothic", "Meiryo", sans-serif';ctx.fillText(result.draw?'引き分け！':(result.player===0?'赤':'青')+'の勝ち！',320,689);
  }
 }
+function drawFlames(s){
+ const orbits=[{speed:.8,radius:42,size:18,phase:0},{speed:-1.35,radius:48,size:15,phase:1.1},{speed:2.1,radius:40,size:20,phase:2.4},{speed:-2.8,radius:51,size:14,phase:3.5},{speed:1.65,radius:45,size:17,phase:4.8},{speed:-.65,radius:43,size:16,phase:5.7}];
+ ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+ for(const orbit of orbits){
+  const angle=flameTime*orbit.speed+orbit.phase;
+  const radius=orbit.radius+Math.sin(flameTime*2+orbit.phase)*2;
+  ctx.font=orbit.size+'px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+  ctx.fillText('🔥',s.x+Math.cos(angle)*radius,s.y+Math.sin(angle)*radius);
+ }
+ ctx.restore();
+}
 function drawStone(s,preview){
  circle(s.x,s.y,R,s.player===0?'#ed7770':'#5b9cdf','#fff',2);
  circle(s.x,s.y,R-6,colors[s.player],'#ffffff70',1);
  ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(s.x-8,s.y);ctx.lineTo(s.x+8,s.y);ctx.stroke();ctx.lineCap='butt';
  if(s.player===1){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(s.x,s.y-7);ctx.lineTo(s.x+7,s.y);ctx.lineTo(s.x,s.y+7);ctx.lineTo(s.x-7,s.y);ctx.closePath();ctx.stroke();}
  if(preview)circle(s.x,s.y,R+6,null,colors[s.player]+'60',2);
+ if((preview&&powerMode)||(moving&&s===flameStone))drawFlames(s);
 }
 function point(event){const rect=canvas.getBoundingClientRect();return {x:(event.clientX-rect.left)*640/rect.width,y:(event.clientY-rect.top)*720/rect.height};}
 canvas.addEventListener('pointerdown',event=>{
@@ -416,7 +429,7 @@ $('undo').addEventListener('click',()=>{
  result=null;gameMotion=null;fadingStones=[];aiSummary='青のAIは選んだレベルに応じて投石を考えます。';updateUI();startAI();
 });
 function resetToSetup(){
- cancelAI();cancelDrag();gameStarted=false;matchConfig=null;gameMotion=null;powerMode=false;delicateMode=false;fadingStones=[];
+ cancelAI();cancelDrag();gameStarted=false;matchConfig=null;gameMotion=null;flameStone=null;powerMode=false;delicateMode=false;fadingStones=[];
  aiSummary='青のAIは選んだレベルに応じて投石を考えます。';stones=[];turn=0;shots=0;moving=false;result=null;history=[];accumulator=0;
  $('position').value=320;$('angle').value=0;$('power').value=300;aimPullLength=60;aimPreviewCache=null;
  $('setup-note').textContent='相手とレベルを選んでください。';updateUI();
@@ -449,6 +462,7 @@ $('blue-ai-level').addEventListener('change',setupChanged);
 window.addEventListener('pagehide',cancelAI);
 window.addEventListener('pageshow',startAI);
 function frame(time){
+ flameTime=time/1000;
  if(lastTime===null)lastTime=time;const elapsed=Math.min((time-lastTime)/1000,.05);lastTime=time;
  fadingStones=fadingStones.filter(s=>(s.age+=elapsed)<.65);
  if(moving){accumulator+=elapsed;while(accumulator>=1/120&&moving){physics(1/120);accumulator-=1/120;}}
