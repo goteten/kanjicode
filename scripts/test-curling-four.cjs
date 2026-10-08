@@ -30,7 +30,7 @@ const context = vm.createContext({
 });
 const run = code => vm.runInContext(code, context);
 run(source);
-const reset = () => {element('opponent').value='human'; element('restart').events.click();};
+const reset = () => {element('restart').events.click();element('opponent').value='human';element('start-game').events.click();};
 const stone = (x,y,player) => ({x,y,player,vx:0,vy:0,entered:true});
 function setStones(list) { context.fixture = list; run('stones=fixture.map(s=>({...s}));'); }
 function animate(shot) {
@@ -113,6 +113,7 @@ context.threatFixture=threatFixture;context.defense=defense;
 assert.ok(defense.score>run('evaluatePosition(threatFixture,1,5)')+5000);
 assert.equal(run('outcomeFor(simulateShot(threatFixture,defense.shot,1),6)?.player'),undefined);
 // Each difficulty uses its own budget and completes actual candidates.
+element('restart').events.click();
 for(const [index,budget] of [3,8,15,30,2000].entries()){
  element('ai-level').value=String(index+1);assert.equal(run('aiBudget()'),budget);
  const candidate=workerSearch(openingFixture,1,budget);
@@ -120,34 +121,35 @@ for(const [index,budget] of [3,8,15,30,2000].entries()){
  assert.ok(candidate.elapsed<budget+300,'Level '+(index+1)+' budget exceeded');
 }
 element('ai-level').value='5';
-// Turning AI on schedules a worker; human input cannot throw for blue.
-reset();setStones(openingFixture);run('turn=1;shots=1;history=[{stones:[],turn:0,shots:0}];');
-element('opponent').value='ai';element('opponent').events.change();
-assert.equal(run('aiThinking'),true);assert.equal(element('shoot').disabled,true);
-const pending=workers.at(-1);assert.equal(pending.request.budgetMs,2000);
+// The initial screen gates launch, and match configuration stays locked.
+element('restart').events.click();
+assert.equal(run('gameStarted'),false);assert.equal(element('setup').hidden,false);assert.equal(element('game').hidden,true);
+run('launch()');assert.equal(run('shots'),0);
+element('opponent').value='ai';element('ai-level').value='4';element('start-game').events.click();
+assert.equal(run('gameStarted'),true);assert.equal(element('setup').hidden,true);assert.equal(element('game').hidden,false);
+assert.equal(element('opponent').disabled,true);assert.equal(element('ai-level').disabled,true);assert.equal(run('aiBudget()'),30);
+element('ai-level').value='1';element('ai-level').events.change();assert.equal(run('aiBudget()'),30);assert.equal(Number(element('ai-level').value),4);
+element('opponent').value='human';element('opponent').events.change();assert.equal(run('opponentMode()'),'ai');
+function prepareAI(){
+ element('restart').events.click();element('opponent').value='ai';element('ai-level').value='5';element('start-game').events.click();
+ setStones(openingFixture);run('turn=1;shots=1;history=[{stones:[],turn:0,shots:0}];startAI();');
+}
+prepareAI();assert.equal(run('aiThinking'),true);const pending=workers.at(-1);assert.equal(pending.request.budgetMs,2000);
 run('launch()');assert.equal(run('shots'),1);
-// Canceling must reject even a queued response from the old worker.
-element('undo').events.click();assert.equal(pending.terminated,true);
-pending.onmessage({data:opening});assert.equal(run('shots'),0);assert.equal(run('turn'),0);assert.equal(run('moving'),false);
-// A current response actually launches and matches the prediction.
-reset();setStones(openingFixture);run('turn=1;shots=1;history=[{stones:[],turn:0,shots:0}];');element('opponent').value='ai';element('opponent').events.change();
-element('position').value=365;element('angle').value=-12;element('power').value=620;
-const current=workers.at(-1);current.onmessage({data:opening});
-assert.equal(Number(element('position').value),365);assert.equal(Number(element('angle').value),-12);assert.equal(Number(element('power').value),620);assert.equal(current.terminated,true);assert.equal(run('moving'),true);
-run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');
-assert.equal(run('turn'),0);assert.equal(run('aiThinking'),false);
+element('undo').events.click();assert.equal(pending.terminated,true);pending.onmessage({data:opening});assert.equal(run('shots'),0);assert.equal(run('moving'),false);
+assert.equal(run('gameStarted'),true);assert.equal(run('aiBudget()'),2000);
+prepareAI();element('position').value=365;element('angle').value=-12;element('power').value=620;
+const current=workers.at(-1);current.onmessage({data:opening});assert.equal(current.terminated,true);assert.equal(run('moving'),true);
+run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');assert.equal(run('turn'),0);assert.equal(run('aiThinking'),false);
 assert.equal(Number(element('position').value),365);assert.equal(Number(element('angle').value),-12);assert.equal(Number(element('power').value),620);
 context.testShot=opening.shot;context.openingFixture=openingFixture;
 assert.equal(run('JSON.stringify(stones)'),run('JSON.stringify(simulateShot(openingFixture,testShot,1))'));
-// AI undo removes both the AI move and the preceding human move.
-element('undo').events.click();assert.equal(run('stones.length'),0);assert.equal(run('shots'),0);assert.equal(run('turn'),0);
-reset();run('turn=1;');element('opponent').value='ai';element('opponent').events.change();const restartWorker=workers.at(-1);element('restart').events.click();restartWorker.onmessage({data:opening});assert.equal(run('moving'),false);assert.equal(run('shots'),0);
-reset();run('turn=1;');element('opponent').value='ai';element('opponent').events.change();const oldLevelWorker=workers.at(-1);
-element('ai-level').value='2';element('ai-level').events.change();assert.equal(oldLevelWorker.terminated,true);assert.equal(workers.at(-1).request.budgetMs,8);
-oldLevelWorker.onmessage({data:opening});assert.equal(run('moving'),false);assert.equal(run('aiThinking'),true);
-element('restart').events.click();element('ai-level').value='5';
-reset();run('turn=1;');element('opponent').value='ai';element('opponent').events.change();const modeWorker=workers.at(-1);element('opponent').value='human';element('opponent').events.change();modeWorker.onmessage({data:opening});assert.equal(run('aiThinking'),false);assert.equal(run('moving'),false);assert.equal(element('shoot').disabled,false);
-reset();run('turn=1;');element('opponent').value='ai';element('opponent').events.change();workers.at(-1).onerror();assert.equal(element('opponent').value,'human');assert.equal(run('aiThinking'),false);assert.match(element('ai-info').textContent,/起動できません/);
+element('undo').events.click();assert.equal(run('stones.length'),0);assert.equal(run('shots'),0);assert.equal(run('gameStarted'),true);
+prepareAI();const lockedWorker=workers.at(-1);element('ai-level').value='2';element('ai-level').events.change();assert.equal(lockedWorker.terminated,false);assert.equal(run('aiBudget()'),2000);
+element('restart').events.click();assert.equal(lockedWorker.terminated,true);lockedWorker.onmessage({data:opening});assert.equal(run('moving'),false);assert.equal(run('gameStarted'),false);
+assert.equal(element('opponent').disabled,false);assert.equal(element('ai-level').disabled,false);
+element('ai-level').value='2';element('start-game').events.click();assert.equal(run('aiBudget()'),8);
+prepareAI();workers.at(-1).onerror();assert.equal(run('gameStarted'),false);assert.equal(run('aiThinking'),false);assert.match(element('setup-note').textContent,/起動できません/);
 element('position').value=80;element('angle').value=65;element('power').value=1400;element('restart').events.click();
 assert.equal(Number(element('position').value),320);assert.equal(Number(element('angle').value),0);assert.equal(Number(element('power').value),300);
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
