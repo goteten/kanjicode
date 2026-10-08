@@ -324,7 +324,6 @@ function draw(){
   const {x,y}=prediction.end;
   ctx.setLineDash([5,5]);circle(x,y,R,colors[turn]+'12',colors[turn]+'cc',2);ctx.setLineDash([]);
   ctx.strokeStyle=colors[turn];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-6,y);ctx.lineTo(x+6,y);ctx.moveTo(x,y-6);ctx.lineTo(x,y+6);ctx.stroke();
-  ctx.font='12px system-ui';ctx.fillStyle='#3b6174';ctx.textAlign='center';ctx.fillText('石なしの停止位置',x,y+R+15);
  }
  if(result){
   ctx.strokeStyle=result.draw?'#82658c':'#f2b63e';ctx.lineWidth=7;ctx.lineCap='round';
