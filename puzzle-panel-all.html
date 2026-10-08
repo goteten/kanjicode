@@ -43,8 +43,10 @@
     @media(prefers-reduced-motion:reduce) { .tile.flip { animation:none; } .board-frame { transition:none; } }
 
 .pick { border:1px solid #bbb; border-radius:10px; background:#fff; padding:20px; font-size:18px; color:#111; }
-.selector { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
-#problem-select { flex:1; min-width:0; padding:8px; border:1px solid #bbb; border-radius:8px; background:#fff; font:inherit; }
+#problem-list { padding-top:44px; }
+#problem-buttons { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+#problem-buttons .course { font-size:16px; }
+#list-title { font-size:18px; margin:0 0 16px; }
 .navigation { display:grid; gap:10px; margin-top:12px; }
 .navigation button { border:1px solid #bbb; border-radius:8px; padding:12px; background:#fff; color:#111; }
 .navigation button:disabled { opacity:.4; cursor:default; }
@@ -53,13 +55,16 @@
 <body>
 <main>
   <div id="courses" aria-label="問題選択"></div>
+  <button id="back" type="button" hidden>戻る</button>
+  <section id="problem-list" hidden aria-label="全問題一覧">
+    <h2 id="list-title"></h2>
+    <div id="problem-buttons"></div>
+  </section>
   <section id="game" hidden aria-label="パズル">
-    <button id="back" type="button">戻る</button>
     <div class="progress">
       <span id="course-number"></span>
       <button id="reset" type="button">やり直す</button>
     </div>
-    <div class="selector"><select id="problem-select" aria-label="問題番号"></select></div>
     <div id="board-frame" class="board-frame">
       <div id="board" class="board" aria-label="操作するパネル"></div>
     </div>
@@ -78,6 +83,7 @@
 const $ = id => document.getElementById(id);
 const size = 4;
 let moves = 3, question = 0, current = 0, remaining = 0, pressedMask = 0, state = 'menu', activePuzzle = null;
+let listScroll = 0;
 let completed = new Set();
 try { const saved = JSON.parse(localStorage.getItem('panel-all-345-v1')); if (Array.isArray(saved)) completed = new Set(saved.filter(n => Number.isInteger(n) && n >= 0 && n < 65536)); } catch {}
   function neighbors(index) {
@@ -120,7 +126,7 @@ function announce(text) {
   }
 }
 function menu() {
-  state='menu'; $('game').hidden=true; $('courses').hidden=false;
+  state='menu'; $('game').hidden=true; $('problem-list').hidden=true; $('back').hidden=true; $('courses').hidden=false;
   $('courses').replaceChildren();
   for (const steps of [3,4,5]) {
     const button=document.createElement('button'); button.type='button'; button.className='pick';
@@ -129,15 +135,30 @@ function menu() {
     button.addEventListener('click',()=>startGroup(steps)); $('courses').append(button);
   }
 }
+function showList() {
+  state='list'; $('game').hidden=true; $('courses').hidden=true; $('problem-list').hidden=false; $('back').hidden=false;
+  window.scrollTo(0,listScroll);
+}
 function startGroup(steps) {
-  moves=steps; question=0; $('courses').hidden=true; $('game').hidden=false;
-  $('problem-select').replaceChildren();
-  groups[moves].forEach((p,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=(i+1)+' / '+groups[moves].length+(completed.has(p.board)?' 済':'');$('problem-select').append(option);});
-  startQuestion();
+  moves=steps; question=0; listScroll=0;
+  $('list-title').textContent=moves+'手 · '+groups[moves].length+'問';
+  $('problem-buttons').replaceChildren();
+  groups[moves].forEach((p,i)=>{
+    const button=document.createElement('button');button.type='button';
+    button.className='course'+(completed.has(p.board)?' complete':'');button.textContent=i+1;
+    button.setAttribute('aria-label', '問題'+(i+1)+(completed.has(p.board)?'、クリア済み':''));
+    button.addEventListener('click',()=>{
+      listScroll=window.scrollY;question=i;
+      $('problem-list').hidden=true;$('game').hidden=false;
+      startQuestion();window.scrollTo(0,0);
+    });
+    $('problem-buttons').append(button);
+  });
+  showList();
 }
 function startQuestion() {
   activePuzzle=groups[moves][question]; current=activePuzzle.board;remaining=moves;pressedMask=0;state='playing';
-  $('course-number').textContent=moves+'手'; $('problem-select').value=String(question);
+  $('course-number').textContent=moves+'手 · '+(question+1)+' / '+groups[moves].length;
   draw();announce('');
 }
   function paint(tile, index) {
@@ -174,7 +195,7 @@ function startQuestion() {
   }
 
 function play(index) {
-  if (state==='menu' || state==='complete') return;
+  if (state==='menu' || state==='list' || state==='complete') return;
   if (state==='failed') {resetPuzzle();return;}
   if (pressedMask & (1 << index)) return;
   pressedMask |= 1 << index; current ^= flips[index];remaining--;
@@ -183,14 +204,14 @@ function play(index) {
   if (current===0) {
     state='complete';completed.add(activePuzzle.board);
     try {localStorage.setItem('panel-all-345-v1',JSON.stringify([...completed]));} catch {}
-    $('problem-select').children[question].textContent=(question+1)+' / '+groups[moves].length+' 済';
+    const button=$('problem-buttons').children[question];
+    button.className='course complete';button.setAttribute('aria-label','問題'+(question+1)+'、クリア済み');
     announce(question===groups[moves].length-1?'最後の問題です':'');
   } else if (remaining===0) {state='failed';announce('手数切れ。タップで再挑戦');}
   else announce('');
 }
-$('back').addEventListener('click',menu);
+$('back').addEventListener('click',()=>{if(state==='list') menu();else showList();});
 $('reset').addEventListener('click',resetPuzzle);
-$('problem-select').addEventListener('change',()=>{const index=Number($('problem-select').value);if(Number.isInteger(index)&&index>=0&&index<groups[moves].length){question=index;startQuestion();}});
 $('previous').addEventListener('click',()=>{if(question>0){question--;startQuestion();}});
 $('next').addEventListener('click',()=>{if(state==='complete'&&question+1<groups[moves].length){question++;startQuestion();}});
 menu();
