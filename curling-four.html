@@ -28,7 +28,7 @@ const $=id=>document.getElementById(id);
 const N=9,START=80,GAP=60,R=30,LEFT=50,RIGHT=590,TOP=50,BOTTOM=740;
 const colors=['#e45650','#367fce'];
 let stones=[],turn=0,shots=0,moving=false,result=null,history=[],drag=null,lastTime=null,accumulator=0,motionTime=0;
-let gameStarted=false,matchConfig=null,powerMode=false;
+let gameStarted=false,matchConfig=null,powerMode=false,fadingStones=[];
 function humanPowerLimit(){return powerMode?1400:470;}
 function opponentMode(){return matchConfig?matchConfig.opponent:$('opponent').value;}
 let aiThinking=false,aiWorker=null,aiGeneration=0,aiSummary="青のAIは選んだレベルに応じて投石を考えます。",gameMotion=null;
@@ -92,7 +92,7 @@ function outcomeFor(list,shotCount){
  return null;
 }
 function createShotState(initial,shot,player){
- const list=initial.map(s=>({...s,vx:0,vy:0}));
+ const list=initial.filter(s=>Math.hypot(s.x-shot.x,s.y-690)>=R*2).map(s=>({...s,vx:0,vy:0}));
  list.push({x:shot.x,y:690,vx:Math.sin(shot.angle)*shot.power,vy:-Math.cos(shot.angle)*shot.power,player,entered:true});
  return {stones:list,time:0,done:false};
 }
@@ -146,6 +146,7 @@ function finishShot(){
 function launch(shot=settings(),fromAI=false){
  if(!gameStarted||moving||result||(!fromAI&&isAITurn()))return;
  history.push({stones:stones.map(s=>({...s})),turn,shots});
+ fadingStones=stones.filter(s=>Math.hypot(s.x-shot.x,s.y-690)<R*2).map(s=>({...s,age:0}));
  gameMotion=createShotState(stones,shot,turn);stones=gameMotion.stones;
  shots++;moving=true;motionTime=0;accumulator=0;drag=null;updateUI();
 }
@@ -291,6 +292,13 @@ function emptyRinkPreview(shot){
  aimPreviewCache={key,points,hitWall,end:{x:s.x,y:s.y}};
  return aimPreviewCache;
 }
+function drawLaunchZone(x){
+ ctx.save();ctx.beginPath();ctx.arc(x,690,R*2,0,Math.PI*2);ctx.clip();
+ ctx.fillStyle='#d89b3920';ctx.fillRect(x-R*2,690-R*2,R*4,R*4);
+ ctx.strokeStyle='#b8864380';ctx.lineWidth=1.5;
+ for(let offset=-R*4;offset<=R*4;offset+=10){ctx.beginPath();ctx.moveTo(x+offset,690-R*2);ctx.lineTo(x+offset+R*4,690+R*2);ctx.stroke();}
+ ctx.restore();circle(x,690,R*2,null,'#b8864380',1);
+}
 function draw(){
  let prediction=null;
  ctx.clearRect(0,0,640,760);ctx.fillStyle='#e7f4f7';ctx.fillRect(0,0,640,760);
@@ -319,11 +327,13 @@ function draw(){
   ctx.moveTo(prediction.points[0].x,prediction.points[0].y);
   for(let i=1;i<prediction.points.length;i++)ctx.lineTo(prediction.points[i].x,prediction.points[i].y);
   ctx.stroke();ctx.setLineDash([]);
+  drawLaunchZone(x);
   drawStone({x,y:690,player:turn},true);
 
   if(drag){ctx.strokeStyle=colors[turn];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,690);ctx.lineTo(drag.x,drag.y);ctx.stroke();circle(drag.x,drag.y,7,colors[turn]+'60');}
  }
  for(const s of stones)drawStone(s,false);
+ for(const s of fadingStones){ctx.save();ctx.globalAlpha=Math.max(0,1-s.age/.65);drawStone(s,false);ctx.restore();}
  if(prediction){
   const {x,y}=prediction.end;
   ctx.setLineDash([5,5]);circle(x,y,R,colors[turn]+'12',colors[turn]+'cc',2);ctx.setLineDash([]);
@@ -376,10 +386,10 @@ canvas.addEventListener('keydown',event=>{
 $('undo').addEventListener('click',()=>{
  if(moving||!history.length)return;cancelAI();cancelDrag();
  do{const previous=history.pop();stones=previous.stones;turn=previous.turn;shots=previous.shots;}while(opponentMode()==='ai'&&turn===1&&history.length);
- result=null;gameMotion=null;aiSummary='青のAIは選んだレベルに応じて投石を考えます。';updateUI();startAI();
+ result=null;gameMotion=null;fadingStones=[];aiSummary='青のAIは選んだレベルに応じて投石を考えます。';updateUI();startAI();
 });
 function resetToSetup(){
- cancelAI();cancelDrag();gameStarted=false;matchConfig=null;gameMotion=null;powerMode=false;
+ cancelAI();cancelDrag();gameStarted=false;matchConfig=null;gameMotion=null;powerMode=false;fadingStones=[];
  aiSummary='青のAIは選んだレベルに応じて投石を考えます。';stones=[];turn=0;shots=0;moving=false;result=null;history=[];accumulator=0;
  $('position').value=320;$('angle').value=0;$('power').value=300;
  $('setup-note').textContent='相手とレベルを選んでください。';updateUI();
@@ -404,6 +414,7 @@ window.addEventListener('pagehide',cancelAI);
 window.addEventListener('pageshow',startAI);
 function frame(time){
  if(lastTime===null)lastTime=time;const elapsed=Math.min((time-lastTime)/1000,.05);lastTime=time;
+ fadingStones=fadingStones.filter(s=>(s.age+=elapsed)<.65);
  if(moving){accumulator+=elapsed;while(accumulator>=1/120&&moving){physics(1/120);accumulator-=1/120;}}
  draw();requestAnimationFrame(frame);
 }
