@@ -12,9 +12,9 @@
 <body>
 <main>
 <header id="intro"><h1>カーリング四目並べ</h1></header>
-<section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option><option value="four">4人で対戦</option><option value="watch">AI同士を観戦</option></select></label><label id="ai-level-label">AIレベル<select id="ai-level"><option value="1" selected>1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5">5 · 最強</option></select></label><div id="watch-levels" hidden><label>赤のAIレベル<select id="red-ai-level"><option value="1">1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5" selected>5 · 最強</option></select></label><label>青のAIレベル<select id="blue-ai-level"><option value="1">1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5" selected>5 · 最強</option></select></label></div><button id="start-game">この設定ではじめる</button></section>
+<section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option><option value="four">4人で対戦</option><option value="watch">AI同士を観戦</option></select></label><label id="ai-level-label">AIレベル<select id="ai-level"><option value="1" selected>1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5">5 · 最強</option></select></label><div id="watch-levels" hidden><label>AIの数<select id="watch-count"><option value="2">2体</option><option value="3">3体</option><option value="4">4体</option><option value="5">5体</option><option value="6">6体</option><option value="7">7体</option><option value="8">8体</option></select></label><label>赤のAIレベル<select id="red-ai-level"><option value="1">1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5" selected>5 · 最強</option></select></label><label>青のAIレベル<select id="blue-ai-level"><option value="1">1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5" selected>5 · 最強</option></select></label><label id="watch-player-2" hidden>緑のAIレベル<select id="ai-level-2"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label><label id="watch-player-3" hidden>紫のAIレベル<select id="ai-level-3"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label><label id="watch-player-4" hidden>橙のAIレベル<select id="ai-level-4"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label><label id="watch-player-5" hidden>桃のAIレベル<select id="ai-level-5"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label><label id="watch-player-6" hidden>水色のAIレベル<select id="ai-level-6"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label><label id="watch-player-7" hidden>灰のAIレベル<select id="ai-level-7"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label></div><button id="start-game">この設定ではじめる</button></section>
 <div class="layout" id="game" hidden>
-<div class="rink"><div id="match-levels" class="match-levels" hidden><span id="red-level-display" class="red-level"></span><span id="blue-level-display" class="blue-level"></span></div><canvas id="rink" width="640" height="720" tabindex="0" aria-label="カーリングの盤面。下の石を後ろに引いて離すと投石できます。投げる位置は下のスライダーで調整できます。矢印キーで角度と強さを調整し、Enterでも投げられます。"></canvas><div class="launch-position" id="launch-controls"><label>投げる位置 <output id="position-value"></output><input id="position" type="range" min="80" max="560" value="320" step="1"></label></div></div>
+<div class="rink"><div id="match-levels" class="match-levels" hidden><span id="red-level-display" class="red-level"></span><span id="blue-level-display" class="blue-level"></span><span id="player-level-2" hidden></span><span id="player-level-3" hidden></span><span id="player-level-4" hidden></span><span id="player-level-5" hidden></span><span id="player-level-6" hidden></span><span id="player-level-7" hidden></span></div><canvas id="rink" width="640" height="720" tabindex="0" aria-label="カーリングの盤面。下の石を後ろに引いて離すと投石できます。投げる位置は下のスライダーで調整できます。矢印キーで角度と強さを調整し、Enterでも投げられます。"></canvas><div class="launch-position" id="launch-controls"><label>投げる位置 <output id="position-value"></output><input id="position" type="range" min="80" max="560" value="320" step="1"></label></div></div>
 <div class="board-tools"><p id="turn-display" hidden style="margin:0;text-align:center;font-size:13px;font-weight:700"></p><div class="shot-modes" id="shot-modes"><button id="delicate-mode" type="button" aria-pressed="false">繊細モード</button><button id="power-mode" type="button" aria-pressed="false">パワーモード</button></div><button id="stop-watch" type="button" hidden>観戦を終了</button><div class="end-actions" id="end-actions" hidden><button id="undo">戻す</button><button id="restart">もう一度遊ぶ</button></div></div>
 <p id="status" class="sr-only" role="status" aria-live="polite"></p>
 <div hidden><input id="angle" type="range" min="-65" max="65" value="0"><input id="power" type="range" min="30" max="1400" value="300"><button id="shoot">石を投げる</button></div>
@@ -25,8 +25,11 @@
 'use strict';
 const canvas=document.getElementById('rink'),ctx=canvas.getContext('2d');
 const $=id=>document.getElementById(id);
-const N=9,START=80,GAP=60,R=30,LEFT=50,RIGHT=590,TOP=50,BOTTOM=700;
-const colors=['#e45650','#367fce','#328856','#9060bf'];
+const START=80,GAP=60,R=30,LEFT=50,TOP=50;
+let N=9,GRID_END=560,RIGHT=590,LAUNCH_Y=650,BOTTOM=700,WIDTH=640,HEIGHT=720,SHOT_LIMIT=80;
+const colors=['#e45650','#367fce','#328856','#9060bf','#cf7c22','#c75389','#208d98','#66717e'];
+const playerNames=['赤','青','緑','紫','橙','桃','水色','灰'];
+const levelIds=['red-ai-level','blue-ai-level','ai-level-2','ai-level-3','ai-level-4','ai-level-5','ai-level-6','ai-level-7'];
 let stones=[],turn=0,shots=0,moving=false,result=null,history=[],drag=null,lastTime=null,accumulator=0,motionTime=0;
 let gameStarted=false,matchConfig=null,powerMode=false,delicateMode=false,fadingStones=[];
 function humanPowerLimit(){return delicateMode?260:powerMode?1400:470;}
@@ -37,20 +40,29 @@ function powerFromPull(){return Math.max(humanPowerMinimum(),Math.min(humanPower
 function opponentMode(){return matchConfig?matchConfig.opponent:$('opponent').value;}
 let aiThinking=false,aiWorker=null,aiGeneration=0,aiSummary="青のAIは選んだレベルに応じて投石を考えます。",gameMotion=null;
 function activeAILevel(){
- if(opponentMode()==='watch')return Number(matchConfig?(turn===0?matchConfig.redLevel:matchConfig.blueLevel):$(turn===0?'red-ai-level':'blue-ai-level').value);
+ if(opponentMode()==='watch')return Number(matchConfig?matchConfig.aiLevels[turn]:$(levelIds[turn]).value);
  return Number(matchConfig?matchConfig.level:$('ai-level').value);
 }
 function aiBudget(){return [3,8,15,30,2000][Math.max(0,Math.min(4,activeAILevel()-1))]||2000;}
-function playerCount(){return opponentMode()==='four'?4:2;}
+function playerCount(){return opponentMode()==='watch'&&matchConfig?matchConfig.count:opponentMode()==='four'?4:2;}
 function isAITurn(){return opponentMode()==='watch'||(opponentMode()==='ai'&&turn===1);}
 const inputs=['position','angle','power'].map($);
 function settings(){return {x:Number($('position').value),angle:Number($('angle').value)*Math.PI/180,power:Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Number($('power').value)))};}
 function updateUI(){
  const watch=opponentMode()==='watch';
+ const count=watch?(matchConfig?matchConfig.count:Number($('watch-count').value)):2;
+ $('watch-count').disabled=gameStarted;
+ for(let i=2;i<8;i++){
+  $('watch-player-'+i).hidden=!watch||i>=count;$(levelIds[i]).disabled=gameStarted;
+  $('player-level-'+i).hidden=!watch||!gameStarted||i>=count;
+  $('player-level-'+i).textContent=matchConfig?playerNames[i]+' '+matchConfig.aiLevels?.[i]:'';
+  $('player-level-'+i).style.color=colors[i];
+ }
+ $('match-levels').style.gap=count>4?'6px':'18px';
  $('match-levels').hidden=!gameStarted||(opponentMode()==='human'||opponentMode()==='four');
  $('red-level-display').hidden=!watch;
- $('red-level-display').textContent=watch&&matchConfig?'赤 AI Lv.'+matchConfig.redLevel:'';
- $('blue-level-display').textContent=gameStarted&&matchConfig?'青 AI Lv.'+(watch?matchConfig.blueLevel:matchConfig.level):'';
+ $('red-level-display').textContent=watch&&matchConfig?(count>2?'赤 ':'赤 AI Lv.')+matchConfig.redLevel:'';
+ $('blue-level-display').textContent=gameStarted&&matchConfig?(watch&&count>2?'青 ':'青 AI Lv.')+(watch?matchConfig.blueLevel:matchConfig.level):'';
  $('setup').hidden=gameStarted; $('game').hidden=!gameStarted; $('intro').hidden=gameStarted;
  $('end-actions').hidden=!gameStarted||!result;
  $('stop-watch').hidden=!gameStarted||opponentMode()!=='watch'||!!result;
@@ -66,8 +78,8 @@ function updateUI(){
  $('delicate-mode').disabled=$('power-mode').disabled;
  $('delicate-mode').setAttribute('aria-pressed',String(delicateMode));
  $('delicate-mode').textContent=delicateMode?'繊細モード ON':'繊細モード';
- $('turn-display').hidden=!gameStarted||opponentMode()!=='four';
- $('turn-display').textContent=['赤','青','緑','紫'][turn]+'の番';$('turn-display').style.color=colors[turn];
+ $('turn-display').hidden=!gameStarted||(opponentMode()!=='four'&&opponentMode()!=='watch');
+ $('turn-display').textContent=playerNames[turn]+'の番';$('turn-display').style.color=colors[turn];
  const names=['赤','青','緑','紫'];
  $('status').textContent=result ? (result.draw?'引き分け！':names[result.player]+'の勝ち！') : names[turn]+'の番'+(aiThinking?' · AIが考えています':moving?' · 石が滑っています':'');
  $('status').style.color=result&&!result.draw?colors[result.player]:moving?'#eaf5fc':colors[turn];
@@ -111,16 +123,16 @@ function settleStones(list){
  return list.filter(s=>cellOf(s)).map(s=>({...s,vx:0,vy:0}));
 }
 function outcomeFor(list,shotCount){
- const board=boardState(list),wins=Array.from({length:4},(_,player)=>winningLines(board,player));
+ const board=boardState(list),wins=Array.from({length:8},(_,player)=>winningLines(board,player));
  const winners=wins.map((lines,player)=>({lines,player})).filter(w=>w.lines.length);
  if(winners.length>1)return {draw:true,lines:winners.flatMap(w=>w.lines)};
  if(winners.length===1)return winners[0];
- if(shotCount>=80)return {draw:true,lines:[]};
+ if(shotCount>=SHOT_LIMIT)return {draw:true,lines:[]};
  return null;
 }
 function createShotState(initial,shot,player){
  const list=initial.map(s=>({...s,vx:0,vy:0}));
- list.push({x:shot.x,y:650,vx:Math.sin(shot.angle)*shot.power,vy:-Math.cos(shot.angle)*shot.power,player,entered:true});
+ list.push({x:shot.x,y:LAUNCH_Y,vx:Math.sin(shot.angle)*shot.power,vy:-Math.cos(shot.angle)*shot.power,player,entered:true});
  return {stones:list,time:0,done:false};
 }
 function stepPhysics(state,dt){
@@ -156,7 +168,7 @@ function stepPhysics(state,dt){
  state.stones=list;
  state.done=state.stones.every(s=>Math.hypot(s.vx,s.vy)<1)||state.time>20;
 }
-function clearLaunchStones(list){return list.filter(s=>Math.abs(s.y-650)>=R*2);}
+function clearLaunchStones(list){return list.filter(s=>Math.abs(s.y-LAUNCH_Y)>=R*2);}
 function simulateShot(initial,shot,player,deadline=Infinity){
  const state=createShotState(initial,shot,player);
  for(let step=0;!state.done;step++){
@@ -168,7 +180,7 @@ function simulateShot(initial,shot,player,deadline=Infinity){
 }
 function finishShot(){
  stones=settleStones(stones);
- fadingStones=stones.filter(s=>Math.abs(s.y-650)<R*2).map(s=>({...s,age:0}));
+ fadingStones=stones.filter(s=>Math.abs(s.y-LAUNCH_Y)<R*2).map(s=>({...s,age:0}));
  stones=clearLaunchStones(stones);flameStone=null;moving=false;result=outcomeFor(stones,shots);
  if(!result)turn=(turn+1)%playerCount();
  updateUI();startAI();
@@ -186,21 +198,16 @@ function physics(dt){
 }
 // Evaluate every four-point window, including gaps, and distinct winning threats.
 function evaluateBoard(board,player){
- let score=0;const own=1<<player,other=1<<(1-player),threats=[new Set(),new Set()];
- const weights=[0,10,110,1800,1000000];
+ let score=0;const weights=[0,10,110,1800,1000000],threats=Array.from({length:8},()=>new Set());
  for(let r=0;r<N;r++)for(let c=0;c<N;c++)for(const [dc,dr] of [[1,0],[0,1],[1,1],[1,-1]]){
   const er=r+dr*3,ec=c+dc*3;if(er<0||er>=N||ec<0||ec>=N)continue;
-  let a=0,b=0,empty=-1;
-  for(let i=0;i<4;i++){const rr=r+dr*i,cc=c+dc*i,value=board[rr][cc];if(value===own)a++;else if(value===other)b++;else empty=rr*N+cc;}
-  if(!b){score+=weights[a];if(a===3)threats[0].add(empty);}
-  if(!a){score-=weights[b]*1.35;if(b===3)threats[1].add(empty);}
+  const counts=Array(8).fill(0);let total=0,empty=-1;
+  for(let i=0;i<4;i++){const rr=r+dr*i,cc=c+dc*i,value=board[rr][cc];if(value){counts[Math.log2(value)]++;total++;}else empty=rr*N+cc;}
+  for(let p=0;p<8;p++)if(counts[p]&&counts[p]===total){score+=(p===player?1:-1.35)*weights[counts[p]];if(counts[p]===3)threats[p].add(empty);}
  }
- if(threats[0].size>=2)score+=2500*(threats[0].size-1);
- if(threats[1].size>=2)score-=4500*(threats[1].size-1);
- for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(board[r][c]){
-  const central=8-Math.abs(r-4)-Math.abs(c-4);
-  score+=(board[r][c]===own?1:-1)*(12+central*3);
- }
+ for(let p=0;p<8;p++)if(threats[p].size>=2)score+=(p===player?2500:-4500)*(threats[p].size-1);
+ const mid=(N-1)/2;
+ for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(board[r][c])score+=(board[r][c]===(1<<player)?1:-1)*(12+(N-1-Math.abs(r-mid)-Math.abs(c-mid))*3);
  return score;
 }
 function evaluatePosition(list,player,shotCount){
@@ -216,7 +223,7 @@ function evaluatePosition(list,player,shotCount){
  return score;
 }
 function normalizeShot(shot){
- return {x:Math.max(80,Math.min(560,Math.round(shot.x))),angle:Math.max(-65,Math.min(65,Math.round(shot.angle*180/Math.PI)))*Math.PI/180,power:Math.max(140,Math.min(1400,Math.round(shot.power)))};
+ return {x:Math.max(80,Math.min(GRID_END,Math.round(shot.x))),angle:Math.max(-65,Math.min(65,Math.round(shot.angle*180/Math.PI)))*Math.PI/180,power:Math.max(140,Math.min(1400,Math.round(shot.power)))};
 }
 // Execution error is applied after searching, so the AI cannot optimize it away.
 function inaccurateAIShot(shot,level,random=Math.random){
@@ -227,27 +234,27 @@ function inaccurateAIShot(shot,level,random=Math.random){
 }
 function searchBestShot(initial,player,shotCount,budgetMs){
  const started=performance.now(),deadline=started+Math.min(2000,Math.max(1,budgetMs));
- const board=boardState(initial),targets=[],own=1<<player,other=1<<(1-player);
+ const board=boardState(initial),targets=[],own=1<<player,other=~own;
  // Rank targets in one pass over line windows, avoiding 81 full evaluations.
  const priorities=Array.from({length:N},()=>Array(N).fill(0)),weights=[0,10,110,1800,1000000];
  for(let r=0;r<N;r++)for(let c=0;c<N;c++)for(const [dc,dr] of [[1,0],[0,1],[1,1],[1,-1]]){
   const er=r+3*dr,ec=c+3*dc;if(er<0||er>=N||ec<0||ec>=N)continue;
-  let a=0,b=0;for(let i=0;i<4;i++){const v=board[r+i*dr][c+i*dc];if(v===own)a++;else if(v===other)b++;}
+  let a=0,b=0;for(let i=0;i<4;i++){const v=board[r+i*dr][c+i*dc];if(v===own)a++;else if((v!==0&&v!==own))b++;}
   const baseline=(!b?weights[a]:0)-(!a?weights[b]*1.35:0);
   for(let i=0;i<4;i++){
-   const rr=r+i*dr,cc=c+i*dc,v=board[rr][cc],nextA=a+(v===own?0:1),nextB=b-(v===other?1:0);
+   const rr=r+i*dr,cc=c+i*dc,v=board[rr][cc],nextA=a+(v===own?0:1),nextB=b-((v!==0&&v!==own)?1:0);
    priorities[rr][cc]+=(!nextB?weights[nextA]:0)-(!nextA?weights[nextB]*1.35:0)-baseline;
   }
  }
  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
-  const central=12+(8-Math.abs(r-4)-Math.abs(c-4))*3;
-  targets.push({x:START+c*GAP,y:START+r*GAP,priority:priorities[r][c]+(board[r][c]===own?0:board[r][c]===other?2:1)*central});
+  const central=12+(N-1-Math.abs(r-(N-1)/2)-Math.abs(c-(N-1)/2))*3;
+  targets.push({x:START+c*GAP,y:START+r*GAP,priority:priorities[r][c]+(board[r][c]===own?0:(board[r][c]!==0&&board[r][c]!==own)?2:1)*central});
  }
  targets.sort((a,b)=>b.priority-a.priority);
  const seeds=[];
  // Straight placements first, then side approaches that can get around blockers.
  for(const offset of [0,-45,45])for(const target of targets){
-  const x=Math.max(80,Math.min(560,target.x+offset)),dx=target.x-x,dy=650-target.y;
+  const x=Math.max(80,Math.min(GRID_END,target.x+offset)),dx=target.x-x,dy=LAUNCH_Y-target.y;
   seeds.push(normalizeShot({x,angle:Math.atan2(dx,dy),power:Math.sqrt(280*Math.hypot(dx,dy))}));
  }
  for(const s of initial)seeds.push(normalizeShot({x:s.x,angle:0,power:1400}));
@@ -256,7 +263,7 @@ function searchBestShot(initial,player,shotCount,budgetMs){
   const progress=(performance.now()-started)/(deadline-started);
   let shot;
   if(seedIndex<seeds.length&&(iteration%2===0||!current))shot=seeds[seedIndex++];
-  else if(!current||iteration%17===0)shot=normalizeShot({x:80+Math.random()*480,angle:(Math.random()*130-65)*Math.PI/180,power:140+Math.random()*1260});
+  else if(!current||iteration%17===0)shot=normalizeShot({x:START+Math.random()*(GRID_END-START),angle:(Math.random()*130-65)*Math.PI/180,power:140+Math.random()*1260});
   else{
    const scale=.15+.85*(1-progress);
    shot=normalizeShot({x:current.x+(Math.random()-Math.random())*100*scale,angle:current.angle+(Math.random()-Math.random())*.5*scale,power:current.power+(Math.random()-Math.random())*350*scale});
@@ -271,10 +278,10 @@ function searchBestShot(initial,player,shotCount,budgetMs){
   if(bestScore>=1e9)break;
   iteration++;
  }
- return {shot:best||normalizeShot({x:320,angle:0,power:300}),score:bestScore,evaluated,elapsed:performance.now()-started};
+ return {shot:best||normalizeShot({x:WIDTH/2,angle:0,power:300}),score:bestScore,evaluated,elapsed:performance.now()-started};
 }
 function workerSource(){
- const constants='const N='+N+',START='+START+',GAP='+GAP+',R='+R+',LEFT='+LEFT+',RIGHT='+RIGHT+',TOP='+TOP+',BOTTOM='+BOTTOM+';';
+ const constants='const GRID_END='+GRID_END+',LAUNCH_Y='+LAUNCH_Y+',WIDTH='+WIDTH+',HEIGHT='+HEIGHT+',SHOT_LIMIT='+SHOT_LIMIT+';const N='+N+',START='+START+',GAP='+GAP+',R='+R+',LEFT='+LEFT+',RIGHT='+RIGHT+',TOP='+TOP+',BOTTOM='+BOTTOM+';';
  const shared=[cellOf,occupiedPoints,boardState,winningLines,settleStones,outcomeFor,createShotState,stepPhysics,clearLaunchStones,simulateShot,evaluateBoard,evaluatePosition,normalizeShot,searchBestShot].map(fn=>fn.toString()).join('\n');
  return constants+'\n'+shared+'\nself.onmessage=event=>{const d=event.data;self.postMessage(searchBestShot(d.stones,d.player,d.shots,d.budgetMs));};';
 }
@@ -308,7 +315,7 @@ let aimPreviewCache=null;
 function emptyRinkPreview(shot){
  const key=[shot.x,shot.angle,shot.power].join(':');
  if(aimPreviewCache&&aimPreviewCache.key===key)return aimPreviewCache;
- const state=createShotState([],shot,0),points=[{x:shot.x,y:650}];
+ const state=createShotState([],shot,0),points=[{x:shot.x,y:LAUNCH_Y}];
  let hitWall=false;
  while(!state.done){
   const before=state.stones[0],vx=before.vx,vy=before.vy;
@@ -323,7 +330,7 @@ function emptyRinkPreview(shot){
  return aimPreviewCache;
 }
 function drawLaunchZone(){
- const top=650-R*2,bottom=Math.min(BOTTOM,650+R*2),height=bottom-top;
+ const top=LAUNCH_Y-R*2,bottom=Math.min(BOTTOM,LAUNCH_Y+R*2),height=bottom-top;
  ctx.save();ctx.beginPath();ctx.rect(LEFT,top,RIGHT-LEFT,height);ctx.clip();
  ctx.fillStyle='#d89b3920';ctx.fillRect(LEFT,top,RIGHT-LEFT,height);
  ctx.strokeStyle='#b8864380';ctx.lineWidth=1.5;
@@ -332,14 +339,14 @@ function drawLaunchZone(){
 }
 function draw(){
  let prediction=null;
- ctx.clearRect(0,0,640,720);ctx.fillStyle='#e7f4f7';ctx.fillRect(0,0,640,720);
+ ctx.clearRect(0,0,WIDTH,HEIGHT);ctx.fillStyle='#e7f4f7';ctx.fillRect(0,0,WIDTH,HEIGHT);
  ctx.fillStyle='#c8e4ed';ctx.fillRect(LEFT,TOP,RIGHT-LEFT,BOTTOM-TOP);
  ctx.strokeStyle='#adcdd7';ctx.lineWidth=1;
  // Dashed boundaries show grid spacing; occupation requires covering a dot.
  ctx.setLineDash([3,7]);
- for(let i=0;i<=N;i++){const q=50+i*GAP;ctx.beginPath();ctx.moveTo(q,50);ctx.lineTo(q,590);ctx.moveTo(50,q);ctx.lineTo(590,q);ctx.stroke();}
+ for(let i=0;i<=N;i++){const q=50+i*GAP;ctx.beginPath();ctx.moveTo(q,50);ctx.lineTo(q,RIGHT);ctx.moveTo(50,q);ctx.lineTo(RIGHT,q);ctx.stroke();}
  ctx.setLineDash([]);ctx.strokeStyle='#78a9bc';
- for(let i=0;i<N;i++){const q=START+i*GAP;ctx.beginPath();ctx.moveTo(q,START);ctx.lineTo(q,560);ctx.moveTo(START,q);ctx.lineTo(560,q);ctx.stroke();}
+ for(let i=0;i<N;i++){const q=START+i*GAP;ctx.beginPath();ctx.moveTo(q,START);ctx.lineTo(q,GRID_END);ctx.moveTo(START,q);ctx.lineTo(GRID_END,q);ctx.stroke();}
  ctx.strokeStyle='#6095ab';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(LEFT,BOTTOM);ctx.lineTo(LEFT,TOP);ctx.lineTo(RIGHT,TOP);ctx.lineTo(RIGHT,BOTTOM);ctx.stroke();
  ctx.setLineDash([]);ctx.strokeStyle='#6095ab';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(LEFT,BOTTOM);ctx.lineTo(RIGHT,BOTTOM);ctx.stroke();ctx.setLineDash([]);
  drawLaunchZone();
@@ -351,7 +358,7 @@ function draw(){
  }
  if(!moving){ctx.setLineDash([3,3]);ctx.lineWidth=1;for(const s of stones){const cell=cellOf(s);if(!cell||owners[cell.r][cell.c]!==s)continue;ctx.strokeStyle=colors[s.player]+'80';ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(START+cell.c*GAP,START+cell.r*GAP);ctx.stroke();}ctx.setLineDash([]);}
  ctx.fillStyle='#476e80';ctx.font='500 12px "Yu Gothic", "YuGothic", "Meiryo", sans-serif';ctx.textAlign='center';
- for(let i=0;i<N;i++){ctx.fillText(String(i+1),START+i*GAP,34);ctx.fillText('ABCDEFGHI'[i],30,START+i*GAP+4);}
+ for(let i=0;i<N;i++){ctx.fillText(String(i+1),START+i*GAP,34);ctx.fillText('ABCDEFGHIJKLM'[i],30,START+i*GAP+4);}
 
  if(gameStarted&&!moving&&!result&&!isAITurn()){
   const shot=settings(),{x}=shot;prediction=emptyRinkPreview(shot);
@@ -359,9 +366,9 @@ function draw(){
   ctx.moveTo(prediction.points[0].x,prediction.points[0].y);
   for(let i=1;i<prediction.points.length;i++)ctx.lineTo(prediction.points[i].x,prediction.points[i].y);
   ctx.stroke();ctx.setLineDash([]);
-  drawStone({x,y:650,player:turn},true);
+  drawStone({x,y:LAUNCH_Y,player:turn},true);
 
-  if(drag){ctx.strokeStyle=colors[turn];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,650);ctx.lineTo(drag.x,drag.y);ctx.stroke();circle(drag.x,drag.y,7,colors[turn]+'60');}
+  if(drag){ctx.strokeStyle=colors[turn];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,LAUNCH_Y);ctx.lineTo(drag.x,drag.y);ctx.stroke();circle(drag.x,drag.y,7,colors[turn]+'60');}
  }
  for(const s of stones)drawStone(s,false);
  for(const s of fadingStones){ctx.save();ctx.globalAlpha=Math.max(0,1-s.age/.65);drawStone(s,false);ctx.restore();}
@@ -373,7 +380,7 @@ function draw(){
  if(result){
   ctx.strokeStyle=result.draw?'#82658c':'#f2b63e';ctx.lineWidth=7;ctx.lineCap='round';
   for(const line of result.lines){ctx.beginPath();ctx.moveTo(START+line[0].c*GAP,START+line[0].r*GAP);ctx.lineTo(START+line[3].c*GAP,START+line[3].r*GAP);ctx.stroke();}ctx.lineCap='butt';
-  ctx.fillStyle='#ffffff';ctx.fillRect(50,650,540,62);ctx.fillStyle='#243741';ctx.font='700 24px "Yu Gothic", "YuGothic", "Meiryo", sans-serif';ctx.fillText(result.draw?'引き分け！':['赤','青','緑','紫'][result.player]+'の勝ち！',320,689);
+  ctx.fillStyle='#ffffff';ctx.fillRect(LEFT,LAUNCH_Y,RIGHT-LEFT,50);ctx.fillStyle='#243741';ctx.font='700 24px "Yu Gothic", "YuGothic", "Meiryo", sans-serif';ctx.fillText(result.draw?'引き分け！':['赤','青','緑','紫'][result.player]+'の勝ち！',320,689);
  }
 }
 function drawFlames(s){
@@ -388,7 +395,7 @@ function drawFlames(s){
  ctx.restore();
 }
 function drawStone(s,preview){
- circle(s.x,s.y,R,['#ed7770','#5b9cdf','#67b786','#b08cda'][s.player],'#fff',2);
+ circle(s.x,s.y,R,colors[s.player],'#fff',2);
  circle(s.x,s.y,R-6,colors[s.player],'#ffffff70',1);
  ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(s.x-8,s.y);ctx.lineTo(s.x+8,s.y);ctx.stroke();ctx.lineCap='butt';
  if(s.player===1){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(s.x,s.y-7);ctx.lineTo(s.x+7,s.y);ctx.lineTo(s.x,s.y+7);ctx.lineTo(s.x-7,s.y);ctx.closePath();ctx.stroke();}
@@ -401,22 +408,22 @@ function drawStone(s,preview){
  if(preview)circle(s.x,s.y,R+6,null,colors[s.player]+'60',2);
  if((preview&&powerMode)||(moving&&s===flameStone))drawFlames(s);
 }
-function point(event){const rect=canvas.getBoundingClientRect();return {x:(event.clientX-rect.left)*640/rect.width,y:(event.clientY-rect.top)*720/rect.height};}
+function point(event){const rect=canvas.getBoundingClientRect();return {x:(event.clientX-rect.left)*WIDTH/rect.width,y:(event.clientY-rect.top)*HEIGHT/rect.height};}
 canvas.addEventListener('pointerdown',event=>{
  if(!gameStarted||moving||result||isAITurn()||drag||(event.pointerType==='mouse'&&event.button!==0))return;
- const p=point(event),{x}=settings();if(Math.hypot(p.x-x,p.y-650)>40)return;
+ const p=point(event),{x}=settings();if(Math.hypot(p.x-x,p.y-LAUNCH_Y)>40)return;
  drag={...p,id:event.pointerId,start:p,initial:settings(),initialPull:aimPullLength};canvas.setPointerCapture(event.pointerId);event.preventDefault();
 });
 canvas.addEventListener('pointermove',event=>{
  if(!drag||event.pointerId!==drag.id)return;
  const p=point(event);drag.x=p.x;drag.y=p.y;const {x}=settings();
- const dx=x-p.x,dy=p.y-650,length=Math.hypot(dx,dy);
+ const dx=x-p.x,dy=p.y-LAUNCH_Y,length=Math.hypot(dx,dy);
  if(dy>0){$('angle').value=Math.max(-65,Math.min(65,Math.atan2(dx,dy)*180/Math.PI));aimPullLength=length;$('power').value=powerFromPull();updateUI();}
 });
 function cancelDrag(){if(!drag)return;$('angle').value=drag.initial.angle*180/Math.PI;$('power').value=drag.initial.power;aimPullLength=drag.initialPull;drag=null;updateUI();}
 canvas.addEventListener('pointerup',event=>{
  if(!drag||event.pointerId!==drag.id)return;
- const p=point(event),{x}=settings(),valid=p.y>658&&Math.hypot(x-p.x,p.y-650)>12;
+ const p=point(event),{x}=settings(),valid=p.y>658&&Math.hypot(x-p.x,p.y-LAUNCH_Y)>12;
  if(valid){drag=null;launch();}else cancelDrag();
 });
 canvas.addEventListener('pointercancel',cancelDrag);canvas.addEventListener('lostpointercapture',cancelDrag);
@@ -438,16 +445,22 @@ $('undo').addEventListener('click',()=>{
  do{const previous=history.pop();stones=previous.stones;turn=previous.turn;shots=previous.shots;}while(opponentMode()==='ai'&&turn===1&&history.length);
  result=null;gameMotion=null;fadingStones=[];aiSummary='青のAIは選んだレベルに応じて投石を考えます。';updateUI();startAI();
 });
+function configureField(){
+ const count=playerCount();N=opponentMode()==='watch'?(count>4?13:count>2?11:9):9;
+ GRID_END=START+(N-1)*GAP;RIGHT=GRID_END+GAP/2;WIDTH=RIGHT+50;
+ LAUNCH_Y=GRID_END+90;BOTTOM=LAUNCH_Y+50;HEIGHT=BOTTOM+20;SHOT_LIMIT=40*count;
+ canvas.width=WIDTH;canvas.height=HEIGHT;$('position').max=GRID_END;$('position').value=WIDTH/2;aimPreviewCache=null;
+}
 function resetToSetup(){
  cancelAI();cancelDrag();gameStarted=false;matchConfig=null;gameMotion=null;flameStone=null;powerMode=false;delicateMode=false;fadingStones=[];
  aiSummary='青のAIは選んだレベルに応じて投石を考えます。';stones=[];turn=0;shots=0;moving=false;result=null;history=[];accumulator=0;
- $('position').value=320;$('angle').value=0;$('power').value=300;aimPullLength=60;aimPreviewCache=null;
+ configureField();$('position').value=WIDTH/2;$('angle').value=0;$('power').value=300;aimPullLength=60;aimPreviewCache=null;
  $('setup-note').textContent='相手とレベルを選んでください。';updateUI();
 }
 $('start-game').addEventListener('click',()=>{
  if(gameStarted)return;
- matchConfig=Object.freeze({opponent:$('opponent').value,level:Number($('ai-level').value),redLevel:Number($('red-ai-level').value),blueLevel:Number($('blue-ai-level').value)});
- gameStarted=true;updateUI();startAI();
+ matchConfig=Object.freeze({opponent:$('opponent').value,level:Number($('ai-level').value),redLevel:Number($('red-ai-level').value),blueLevel:Number($('blue-ai-level').value),count:Math.max(2,Math.min(8,Number($('watch-count').value))),aiLevels:Object.freeze(levelIds.map(id=>Number($(id).value)))});
+ gameStarted=true;configureField();updateUI();startAI();
 });
 function switchShotMode(mode){
  if(!gameStarted||moving||result||isAITurn()||drag)return;
@@ -462,13 +475,13 @@ $('delicate-mode').addEventListener('click',()=>switchShotMode('delicate'));
 $('restart').addEventListener('click',resetToSetup);
 $('stop-watch').addEventListener('click',resetToSetup);
 function setupChanged(){
- if(gameStarted){$('opponent').value=matchConfig.opponent;$('ai-level').value=matchConfig.level;$('red-ai-level').value=matchConfig.redLevel;$('blue-ai-level').value=matchConfig.blueLevel;return;}
+ if(gameStarted){$('opponent').value=matchConfig.opponent;$('ai-level').value=matchConfig.level;$('red-ai-level').value=matchConfig.redLevel;$('blue-ai-level').value=matchConfig.blueLevel;$('watch-count').value=matchConfig.count;levelIds.forEach((id,i)=>$(id).value=matchConfig.aiLevels[i]);return;}
  updateUI();
 }
 $('opponent').addEventListener('change',setupChanged);
 $('ai-level').addEventListener('change',setupChanged);
 $('red-ai-level').addEventListener('change',setupChanged);
-$('blue-ai-level').addEventListener('change',setupChanged);
+$('blue-ai-level').addEventListener('change',setupChanged);$('watch-count').addEventListener('change',setupChanged);levelIds.slice(2).forEach(id=>$(id).addEventListener('change',setupChanged));
 window.addEventListener('pagehide',cancelAI);
 window.addEventListener('pageshow',startAI);
 function frame(time){

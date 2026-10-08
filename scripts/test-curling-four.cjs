@@ -9,7 +9,7 @@ const drawing = new Proxy({}, {get: (o,k) => o[k] ?? noop, set: (o,k,v) => (o[k]
 const elements = new Map();
 function element(id) {
  if (!elements.has(id)) elements.set(id, {
-  value: ({position:320, angle:0, power:300, opponent:'human', 'ai-level':'5','red-ai-level':'5','blue-ai-level':'5'})[id] ?? '',
+  value: ({position:320, angle:0, power:300, opponent:'human', 'ai-level':'5','red-ai-level':'5','blue-ai-level':'5','watch-count':'2','ai-level-2':'1','ai-level-3':'1','ai-level-4':'1','ai-level-5':'1','ai-level-6':'1','ai-level-7':'1'})[id] ?? '',
   style: {}, classList: {toggle:noop}, events: {},
   addEventListener(name, fn) { this.events[name] = fn; },
   getContext() { return drawing; },
@@ -85,11 +85,11 @@ assert.ok(run('gameMotion.stones[0].y<=BOTTOM-R'));
 run('gameMotion={stones:[{x:320,y:BOTTOM-R-1,vx:0,vy:500,player:0,entered:true}],time:0,done:false};stepPhysics(gameMotion,1/120);');
 assert.equal(run('gameMotion.stones.length'),1);assert.ok(run('gameMotion.stones[0].vy')<0);
 // Execute the exact generated worker program in its own global environment.
-function workerSearch(fixture, shotCount, budgetMs) {
+function workerSearch(fixture, shotCount, budgetMs, player=1) {
  let answer;
  const workerContext=vm.createContext({performance, self:{postMessage:data=>answer=data}});
  vm.runInContext(run('workerSource()'),workerContext);
- workerContext.self.onmessage({data:{stones:fixture,player:1,shots:shotCount,budgetMs}});
+ workerContext.self.onmessage({data:{stones:fixture,player,shots:shotCount,budgetMs}});
  return answer;
 }
 const winningFixture=[stone(200,440,1),stone(260,440,1),stone(320,440,1)];
@@ -275,5 +275,28 @@ for(let p=0;p<4;p++){
 context.multiWinner=[0,2].flatMap(p=>[80,140,200,260].map(x=>stone(x,260+p*60,p)));
 assert.equal(run('outcomeFor(multiWinner,8).draw'),true);
 element('restart').events.click();
+// All spectator counts configure the correct board, with frozen individual levels.
+for(let count=2;count<=8;count++){
+ element('restart').events.click();element('opponent').value='watch';element('watch-count').value=String(count);element('start-game').events.click();
+ assert.equal(run('playerCount()'),count);assert.equal(run('N'),count>4?13:count>2?11:9);
+ assert.ok(run('canvas.width===WIDTH&&canvas.height===HEIGHT'));
+ assert.equal(element('watch-count').disabled,true);assert.equal(element('watch-player-7').hidden,count<8);
+ element('stop-watch').events.click();assert.equal(run('N'),9);
+}
+element('opponent').value='watch';element('watch-count').value='8';
+for(const id of ['red-ai-level','blue-ai-level','ai-level-2','ai-level-3','ai-level-4','ai-level-5','ai-level-6','ai-level-7'])element(id).value='5';
+element('start-game').events.click();
+for(let p=0;p<8;p++){
+ assert.equal(run('turn'),p);assert.equal(run('activeAILevel()'),5);
+ const worker=workers.at(-1);assert.equal(worker.request.player,p);assert.equal(worker.request.budgetMs,2000);
+ worker.onmessage({data:{shot:{x:run('WIDTH/2'),angle:0,power:300},elapsed:2,evaluated:10}});
+ run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');
+ assert.equal(run('turn'),(p+1)%8);assert.equal(run('aiThinking'),true);
+}
+for(let p=0;p<8;p++){
+ context.multiFixture=[80,140,200,260].map(x=>stone(x,260,p));assert.equal(run('outcomeFor(multiFixture,10).player'),p);
+}
+const eighthWin=workerSearch([stone(200,440,7),stone(260,440,7),stone(320,440,7)],10,2000,7);assert.equal(eighthWin.score,1e9);
+element('stop-watch').events.click();assert.equal(run('N'),9);assert.equal(run('gameStarted'),false);
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');
