@@ -1,0 +1,154 @@
+const fs = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const html = fs.readFileSync(path.join(__dirname, '..', 'curling-four.html'), 'utf8');
+const source = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const noop = () => {};
+const drawing = new Proxy({}, {get: (o,k) => o[k] ?? noop, set: (o,k,v) => (o[k]=v,true)});
+const elements = new Map();
+function element(id) {
+ if (!elements.has(id)) elements.set(id, {
+  value: ({position:320, angle:0, power:300, opponent:'human', 'ai-level':'5'})[id] ?? '',
+  style: {}, classList: {toggle:noop}, events: {},
+  addEventListener(name, fn) { this.events[name] = fn; },
+  getContext() { return drawing; },
+ });
+ return elements.get(id);
+}
+const workers = [];
+class MockWorker {
+ constructor() { workers.push(this); this.terminated = false; }
+ postMessage(data) { this.request = data; }
+ terminate() { this.terminated = true; }
+}
+const context = vm.createContext({
+ document: {getElementById:element}, window: {addEventListener:noop},
+ requestAnimationFrame:noop, performance, console, Worker:MockWorker,
+ Blob:class { constructor(parts) { this.parts = parts; } },
+ URL: {createObjectURL: () => 'blob:test', revokeObjectURL:noop},
+});
+const run = code => vm.runInContext(code, context);
+run(source);
+const reset = () => {element('opponent').value='human'; element('restart').events.click();};
+const stone = (x,y,player) => ({x,y,player,vx:0,vy:0,entered:true});
+function setStones(list) { context.fixture = list; run('stones=fixture.map(s=>({...s}));'); }
+function animate(shot) {
+ context.testShot = shot;
+ run('launch(testShot);for(let n=0;n<2600&&moving;n++)physics(1/120);');
+ assert.equal(run('moving'),false);
+ return JSON.parse(run('JSON.stringify(stones)'));
+}
+// The simulation must leave its input untouched and reproduce the actual game,
+// including wall bounces, collision chains, exits and non-snapped positions.
+for (const fixture of [[], [stone(320,440,0)], [stone(260,380,0),stone(320,380,1),stone(380,380,0)]]) {
+ for (const shot of [{x:320,angle:0,power:1400},{x:95,angle:Math.PI/3,power:1300},{x:540,angle:-.4,power:300}]) {
+  reset(); setStones(fixture); context.testShot=shot;
+  const before=JSON.stringify(fixture);
+  const predicted=JSON.parse(run('JSON.stringify(simulateShot(stones,testShot,1))'));
+  assert.equal(JSON.stringify(fixture),before);
+  run('turn=1;');
+  assert.deepEqual(animate(shot),predicted);
+ }
+}
+assert.equal(run('simulateShot([], {x:320,angle:0,power:300},1,performance.now()-1)'),null);
+reset(); setStones([stone(111,111,0),stone(154,154,1)]);
+assert.equal(run('boardState()[1][1]'),2);
+assert.equal(run('R*2'),run('GAP'));
+// A nearby stone in the same square does not count unless it covers the dot.
+setStones([stone(111,111,0)]);assert.equal(run('boardState()[1][1]'),0);
+setStones([stone(110,140,0)]);assert.ok(run('boardState().flat().every(v=>v===0)'));
+setStones([stone(110.01,140,0)]);assert.equal(run('boardState()[1][1]'),1);
+setStones([stone(140,140,1)]);assert.equal(run('boardState()[1][1]'),2);
+// Not covering a dot must not delete a stone at the end of a shot.
+setStones([stone(111,111,0)]);run('finishShot()');assert.equal(run('stones.length'),1);
+// Two touching stones on opposite sides cannot both own the shared dot.
+setStones([stone(110,140,0),stone(170,140,1)]);assert.equal(run('boardState()[1][1]'),0);
+// Moving a single stone off its dot breaks the line, even within the same cell.
+setStones([stone(80,260,1),stone(140,260,1),stone(200,260,1),stone(260,260,1)]);
+assert.ok(run('winningLines(boardState(),1).length')>0);
+run('stones[1].x=169;stones[1].y=289;');assert.equal(run('winningLines(boardState(),1).length'),0);
+// A strong shot must rebound from the lower wall rather than leave the board.
+reset();
+run('gameMotion=createShotState([], {x:320,angle:0,power:1400},0);');
+let lowerBounces=0;
+for(let n=0;n<2600&&!run('gameMotion.done');n++){
+ const oldVy=run('gameMotion.stones[0].vy');
+ run('stepPhysics(gameMotion,1/120)');
+ if(oldVy>0&&run('gameMotion.stones[0].vy')<0)lowerBounces++;
+}
+assert.ok(lowerBounces>0);
+assert.equal(run('settleStones(gameMotion.stones).length'),1);
+assert.ok(run('gameMotion.stones[0].y<=BOTTOM-R'));
+// Existing stones pushed toward the floor also survive.
+run('gameMotion={stones:[{x:320,y:559,vx:0,vy:500,player:0,entered:true}],time:0,done:false};stepPhysics(gameMotion,1/120);');
+assert.equal(run('gameMotion.stones.length'),1);assert.ok(run('gameMotion.stones[0].vy')<0);
+// Execute the exact generated worker program in its own global environment.
+function workerSearch(fixture, shotCount, budgetMs) {
+ let answer;
+ const workerContext=vm.createContext({performance, self:{postMessage:data=>answer=data}});
+ vm.runInContext(run('workerSource()'),workerContext);
+ workerContext.self.onmessage({data:{stones:fixture,player:1,shots:shotCount,budgetMs}});
+ return answer;
+}
+const winningFixture=[stone(200,440,1),stone(260,440,1),stone(320,440,1)];
+const winning=workerSearch(winningFixture,5,2000);
+assert.equal(winning.score,1e9);
+assert.ok(winning.evaluated>0);
+reset();setStones(winningFixture);context.testShot=winning.shot;
+assert.equal(run('outcomeFor(simulateShot(stones,testShot,1),6).player'),1);
+const openingFixture=[stone(320,380,0)];
+const opening=workerSearch(openingFixture,1,2000);
+assert.ok(opening.evaluated>1);
+assert.ok(opening.elapsed>=1800 && opening.elapsed<2600, 'The complete search should stay close to the two-second budget');
+assert.ok(opening.shot.x>=80&&opening.shot.x<=560);
+assert.ok(opening.shot.power>=140&&opening.shot.power<=1400);
+assert.ok(Math.abs(opening.shot.angle)<=65*Math.PI/180);
+reset();setStones(openingFixture);context.testShot=opening.shot;
+assert.equal(run('evaluatePosition(simulateShot(stones,testShot,1),1,2)'),opening.score);
+// A threatening opponent line should be broken, not rewarded as extra stones.
+const threatFixture=[stone(200,440,0),stone(260,440,0),stone(320,440,0)];
+const defense=workerSearch(threatFixture,5,600);
+context.threatFixture=threatFixture;context.defense=defense;
+assert.ok(defense.score>run('evaluatePosition(threatFixture,1,5)')+5000);
+assert.equal(run('outcomeFor(simulateShot(threatFixture,defense.shot,1),6)?.player'),undefined);
+// Each difficulty uses its own budget and completes actual candidates.
+for(const [index,budget] of [50,150,400,1000,2000].entries()){
+ element('ai-level').value=String(index+1);assert.equal(run('aiBudget()'),budget);
+ const candidate=workerSearch(openingFixture,1,budget);
+ assert.ok(candidate.evaluated>0,'Level '+(index+1)+' must simulate a complete candidate');
+ assert.ok(candidate.elapsed<budget+300,'Level '+(index+1)+' budget exceeded');
+}
+element('ai-level').value='5';
+// Turning AI on schedules a worker; human input cannot throw for blue.
+reset();setStones(openingFixture);run('turn=1;shots=1;history=[{stones:[],turn:0,shots:0}];');
+element('opponent').value='ai';element('opponent').events.change();
+assert.equal(run('aiThinking'),true);assert.equal(element('shoot').disabled,true);
+const pending=workers.at(-1);assert.equal(pending.request.budgetMs,2000);
+run('launch()');assert.equal(run('shots'),1);
+// Canceling must reject even a queued response from the old worker.
+element('undo').events.click();assert.equal(pending.terminated,true);
+pending.onmessage({data:opening});assert.equal(run('shots'),0);assert.equal(run('turn'),0);assert.equal(run('moving'),false);
+// A current response actually launches and matches the prediction.
+reset();setStones(openingFixture);run('turn=1;shots=1;history=[{stones:[],turn:0,shots:0}];');element('opponent').value='ai';element('opponent').events.change();
+element('position').value=365;element('angle').value=-12;element('power').value=620;
+const current=workers.at(-1);current.onmessage({data:opening});
+assert.equal(Number(element('position').value),365);assert.equal(Number(element('angle').value),-12);assert.equal(Number(element('power').value),620);assert.equal(current.terminated,true);assert.equal(run('moving'),true);
+run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');
+assert.equal(run('turn'),0);assert.equal(run('aiThinking'),false);
+assert.equal(Number(element('position').value),365);assert.equal(Number(element('angle').value),-12);assert.equal(Number(element('power').value),620);
+context.testShot=opening.shot;context.openingFixture=openingFixture;
+assert.equal(run('JSON.stringify(stones)'),run('JSON.stringify(simulateShot(openingFixture,testShot,1))'));
+// AI undo removes both the AI move and the preceding human move.
+element('undo').events.click();assert.equal(run('stones.length'),0);assert.equal(run('shots'),0);assert.equal(run('turn'),0);
+reset();run('turn=1;');element('opponent').value='ai';element('opponent').events.change();const restartWorker=workers.at(-1);element('restart').events.click();restartWorker.onmessage({data:opening});assert.equal(run('moving'),false);assert.equal(run('shots'),0);
+reset();run('turn=1;');element('opponent').value='ai';element('opponent').events.change();const oldLevelWorker=workers.at(-1);
+element('ai-level').value='2';element('ai-level').events.change();assert.equal(oldLevelWorker.terminated,true);assert.equal(workers.at(-1).request.budgetMs,150);
+oldLevelWorker.onmessage({data:opening});assert.equal(run('moving'),false);assert.equal(run('aiThinking'),true);
+element('restart').events.click();element('ai-level').value='5';
+reset();run('turn=1;');element('opponent').value='ai';element('opponent').events.change();const modeWorker=workers.at(-1);element('opponent').value='human';element('opponent').events.change();modeWorker.onmessage({data:opening});assert.equal(run('aiThinking'),false);assert.equal(run('moving'),false);assert.equal(element('shoot').disabled,false);
+reset();run('turn=1;');element('opponent').value='ai';element('opponent').events.change();workers.at(-1).onerror();assert.equal(element('opponent').value,'human');assert.equal(run('aiThinking'),false);assert.match(element('ai-info').textContent,/起動できません/);
+element('position').value=80;element('angle').value=65;element('power').value=1400;element('restart').events.click();
+assert.equal(Number(element('position').value),320);assert.equal(Number(element('angle').value),0);assert.equal(Number(element('power').value),300);
+console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
+console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');
