@@ -209,5 +209,13 @@ run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');assert.equal(run('s
 element('undo').events.click();assert.equal(run('stones.length'),3);assert.equal(run('stones[0].y'),690);assert.equal(run('fadingStones.length'),0);
 run('launch(removalShot);lastTime=0;for(let n=1;n<=60;n++)frame(n*16);');assert.equal(run('fadingStones.length'),0);
 element('restart').events.click();assert.equal(run('fadingStones.length'),0);
+reset();element('delicate-mode').events.click();assert.equal(run('delicateMode'),true);assert.equal(run('powerMode'),false);
+element('power').value=20;assert.equal(run('settings().power'),30);element('power').value=400;assert.equal(run('settings().power'),260);
+element('power-mode').events.click();assert.equal(run('delicateMode'),false);assert.equal(run('powerMode'),true);
+element('delicate-mode').events.click();assert.equal(run('delicateMode'),true);assert.equal(run('powerMode'),false);
+element('power').value=30;context.softShot={x:320,angle:0,power:30};assert.equal(run('simulateShot([],softShot,0).length'),1);
+element('delicate-mode').events.click();assert.equal(Number(element('power').value),140);
+element('delicate-mode').events.click();element('restart').events.click();assert.equal(run('delicateMode'),false);
+
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');
