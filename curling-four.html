@@ -92,7 +92,7 @@ function outcomeFor(list,shotCount){
  return null;
 }
 function createShotState(initial,shot,player){
- const list=initial.filter(s=>Math.hypot(s.x-shot.x,s.y-690)>=R*2).map(s=>({...s,vx:0,vy:0}));
+ const list=initial.filter(s=>Math.abs(s.y-690)>=R*2).map(s=>({...s,vx:0,vy:0}));
  list.push({x:shot.x,y:690,vx:Math.sin(shot.angle)*shot.power,vy:-Math.cos(shot.angle)*shot.power,player,entered:true});
  return {stones:list,time:0,done:false};
 }
@@ -146,7 +146,7 @@ function finishShot(){
 function launch(shot=settings(),fromAI=false){
  if(!gameStarted||moving||result||(!fromAI&&isAITurn()))return;
  history.push({stones:stones.map(s=>({...s})),turn,shots});
- fadingStones=stones.filter(s=>Math.hypot(s.x-shot.x,s.y-690)<R*2).map(s=>({...s,age:0}));
+ fadingStones=stones.filter(s=>Math.abs(s.y-690)<R*2).map(s=>({...s,age:0}));
  gameMotion=createShotState(stones,shot,turn);stones=gameMotion.stones;
  shots++;moving=true;motionTime=0;accumulator=0;drag=null;updateUI();
 }
@@ -292,12 +292,13 @@ function emptyRinkPreview(shot){
  aimPreviewCache={key,points,hitWall,end:{x:s.x,y:s.y}};
  return aimPreviewCache;
 }
-function drawLaunchZone(x){
- ctx.save();ctx.beginPath();ctx.arc(x,690,R*2,0,Math.PI*2);ctx.clip();
- ctx.fillStyle='#d89b3920';ctx.fillRect(x-R*2,690-R*2,R*4,R*4);
+function drawLaunchZone(){
+ const top=690-R*2,bottom=Math.min(BOTTOM,690+R*2),height=bottom-top;
+ ctx.save();ctx.beginPath();ctx.rect(LEFT,top,RIGHT-LEFT,height);ctx.clip();
+ ctx.fillStyle='#d89b3920';ctx.fillRect(LEFT,top,RIGHT-LEFT,height);
  ctx.strokeStyle='#b8864380';ctx.lineWidth=1.5;
- for(let offset=-R*4;offset<=R*4;offset+=10){ctx.beginPath();ctx.moveTo(x+offset,690-R*2);ctx.lineTo(x+offset+R*4,690+R*2);ctx.stroke();}
- ctx.restore();circle(x,690,R*2,null,'#b8864380',1);
+ for(let x=LEFT-height;x<=RIGHT;x+=10){ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x+height,bottom);ctx.stroke();}
+ ctx.restore();
 }
 function draw(){
  let prediction=null;
@@ -311,6 +312,7 @@ function draw(){
  for(let i=0;i<N;i++){const q=START+i*GAP;ctx.beginPath();ctx.moveTo(q,START);ctx.lineTo(q,560);ctx.moveTo(START,q);ctx.lineTo(560,q);ctx.stroke();}
  ctx.strokeStyle='#6095ab';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(LEFT,BOTTOM);ctx.lineTo(LEFT,TOP);ctx.lineTo(RIGHT,TOP);ctx.lineTo(RIGHT,BOTTOM);ctx.stroke();
  ctx.setLineDash([]);ctx.strokeStyle='#6095ab';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(LEFT,BOTTOM);ctx.lineTo(RIGHT,BOTTOM);ctx.stroke();ctx.setLineDash([]);
+ drawLaunchZone();
  const owners=occupiedPoints(),board=owners.map(row=>row.map(s=>s?1<<s.player:0));
  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
   const x=START+c*GAP,y=START+r*GAP,mask=board[r][c];
@@ -327,7 +329,6 @@ function draw(){
   ctx.moveTo(prediction.points[0].x,prediction.points[0].y);
   for(let i=1;i<prediction.points.length;i++)ctx.lineTo(prediction.points[i].x,prediction.points[i].y);
   ctx.stroke();ctx.setLineDash([]);
-  drawLaunchZone(x);
   drawStone({x,y:690,player:turn},true);
 
   if(drag){ctx.strokeStyle=colors[turn];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,690);ctx.lineTo(drag.x,drag.y);ctx.stroke();circle(drag.x,drag.y,7,colors[turn]+'60');}

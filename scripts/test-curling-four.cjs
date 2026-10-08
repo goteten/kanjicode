@@ -201,9 +201,11 @@ reset();run('draw()');
 // Launch overlap removes only overlapping stones, is shared with AI, and undoes.
 reset();setStones([stone(320,690,1),stone(260,690,0),stone(400,600,1)]);
 context.removalShot={x:320,angle:0,power:300};
-assert.equal(run('createShotState(stones,removalShot,0).stones.length'),3);
-run('launch(removalShot)');assert.equal(run('fadingStones.length'),1);assert.equal(run('fadingStones[0].player'),1);
-run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');assert.equal(run('stones.length'),3);
+assert.equal(run('createShotState(stones,{x:560,angle:0,power:300},0).stones.length'),2);
+assert.equal(run('createShotState(stones,{x:80,angle:0,power:300},0).stones.length'),2);
+assert.equal(run('createShotState(stones,removalShot,0).stones.length'),2);
+run('launch(removalShot)');assert.equal(run('fadingStones.length'),2);assert.equal(run('fadingStones[0].player'),1);
+run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');assert.equal(run('stones.length'),2);
 element('undo').events.click();assert.equal(run('stones.length'),3);assert.equal(run('stones[0].y'),690);assert.equal(run('fadingStones.length'),0);
 run('launch(removalShot);lastTime=0;for(let n=1;n<=60;n++)frame(n*16);');assert.equal(run('fadingStones.length'),0);
 element('restart').events.click();assert.equal(run('fadingStones.length'),0);
