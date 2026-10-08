@@ -47,6 +47,7 @@
 #problem-buttons { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
 #problem-buttons .course { font-size:16px; }
 #list-title { font-size:18px; margin:0 0 16px; }
+#random-unsolved { margin-bottom:16px; padding:9px 12px; border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; font:inherit; font-size:14px; }
 #visibility-filter { margin-bottom:16px; padding:8px 10px; border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; font:inherit; font-size:14px; }
 #empty-list { color:#666; font-size:14px; }
 .navigation { display:grid; gap:10px; margin-top:12px; }
@@ -64,6 +65,7 @@
       <option value="all">すべて表示</option>
       <option value="unsolved">未クリアのみ</option>
     </select>
+    <button id="random-unsolved" type="button">未クリアをランダム</button>
     <div id="problem-buttons"></div>
     <p id="empty-list" hidden>すべてクリア済みです</p>
   </section>
@@ -90,7 +92,7 @@
 const $ = id => document.getElementById(id);
 const size = 4;
 let moves = 3, question = 0, current = 0, remaining = 0, pressedMask = 0, state = 'menu', activePuzzle = null;
-let listScroll = 0;
+let listScroll = 0, randomMode = false;
 try { $('visibility-filter').value = localStorage.getItem('panel-all-345-filter') === 'unsolved' ? 'unsolved' : 'all'; } catch { $('visibility-filter').value = 'all'; }
 let completed = new Set();
 try { const saved = JSON.parse(localStorage.getItem('panel-all-345-v1')); if (Array.isArray(saved)) completed = new Set(saved.filter(n => Number.isInteger(n) && n >= 0 && n < 65536)); } catch {}
@@ -127,8 +129,10 @@ function announce(text) {
   $('board-frame').classList.toggle('failed',state==='failed');
   $('moves').textContent = '残り ' + remaining + ' 手';
   $('message').textContent = text;
+  $('previous').hidden = randomMode;
   $('previous').disabled = question === 0;
-  $('next').disabled = state !== 'complete' || question === groups[moves].length - 1;
+  const unsolved = groups[moves].some(p=>!completed.has(p.board));
+  $('next').disabled = state !== 'complete' || (randomMode ? !unsolved : question === groups[moves].length - 1);
   if (state !== 'playing') for (const slot of $('board').children) {
     slot.firstElementChild.classList.remove('affected'); slot.firstElementChild.disabled = false;
   }
@@ -151,8 +155,10 @@ function applyFilter() {
     if (!button.hidden) visible++;
   });
   $('empty-list').hidden = visible !== 0;
+  $('random-unsolved').disabled = groups[moves].every(p=>completed.has(p.board));
 }
 function showList() {
+  randomMode=false;
   state='list'; $('game').hidden=true; $('courses').hidden=true; $('problem-list').hidden=false; $('back').hidden=false;
   applyFilter();
   window.scrollTo(0,listScroll);
@@ -166,7 +172,7 @@ function startGroup(steps) {
     button.className='course'+(completed.has(p.board)?' complete':'');button.textContent=i+1;
     button.setAttribute('aria-label', '問題'+(i+1)+(completed.has(p.board)?'、クリア済み':''));
     button.addEventListener('click',()=>{
-      listScroll=window.scrollY;question=i;
+      randomMode=false;listScroll=window.scrollY;question=i;
       $('problem-list').hidden=true;$('game').hidden=false;
       startQuestion();window.scrollTo(0,0);
     });
@@ -174,9 +180,17 @@ function startGroup(steps) {
   });
   showList();
 }
+function nextRandom() {
+  const candidates=[];
+  groups[moves].forEach((p,i)=>{if(!completed.has(p.board)) candidates.push(i);});
+  if (!candidates.length) {announce('すべてクリア済みです');return;}
+  question=candidates[Math.floor(Math.random()*candidates.length)];
+  $('problem-list').hidden=true;$('game').hidden=false;
+  startQuestion();window.scrollTo(0,0);
+}
 function startQuestion() {
   activePuzzle=groups[moves][question]; current=activePuzzle.board;remaining=moves;pressedMask=0;state='playing';
-  $('course-number').textContent=moves+'手 · '+(question+1)+' / '+groups[moves].length;
+  $('course-number').textContent=moves+'手 · '+(question+1)+' / '+groups[moves].length+(randomMode?' · ランダム':'');
   draw();announce('');
 }
   function paint(tile, index) {
@@ -213,7 +227,8 @@ function startQuestion() {
   }
 
 function play(index) {
-  if (state==='menu' || state==='list' || state==='complete') return;
+  if (state==='menu' || state==='list') return;
+  if (state==='complete') {if(randomMode) nextRandom();return;}
   if (state==='failed') {resetPuzzle();return;}
   if (pressedMask & (1 << index)) return;
   pressedMask |= 1 << index; current ^= flips[index];remaining--;
@@ -224,7 +239,7 @@ function play(index) {
     try {localStorage.setItem('panel-all-345-v1',JSON.stringify([...completed]));} catch {}
     const button=$('problem-buttons').children[question];
     button.className='course complete';button.setAttribute('aria-label','問題'+(question+1)+'、クリア済み');
-    announce(question===groups[moves].length-1?'最後の問題です':'');
+    announce(randomMode ? (groups[moves].some(p=>!completed.has(p.board))?'タップで次の未クリア問題へ':'すべてクリア済みです') : (question===groups[moves].length-1?'最後の問題です':''));
   } else if (remaining===0) {state='failed';announce('手数切れ。タップで再挑戦');}
   else announce('');
 }
@@ -233,9 +248,10 @@ $('visibility-filter').addEventListener('change',()=>{
   applyFilter();
 });
 $('back').addEventListener('click',()=>{if(state==='list') menu();else showList();});
+$('random-unsolved').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;nextRandom();});
 $('reset').addEventListener('click',resetPuzzle);
 $('previous').addEventListener('click',()=>{if(question>0){question--;startQuestion();}});
-$('next').addEventListener('click',()=>{if(state==='complete'&&question+1<groups[moves].length){question++;startQuestion();}});
+$('next').addEventListener('click',()=>{if(state!=='complete')return;if(randomMode){nextRandom();return;}if(question+1<groups[moves].length){question++;startQuestion();}});
 menu();
 </script>
 </body>
