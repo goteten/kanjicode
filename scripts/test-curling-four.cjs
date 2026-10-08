@@ -242,5 +242,17 @@ prepareAI();assert.equal(element('match-levels').hidden,false);assert.equal(elem
 element('restart').events.click();element('opponent').value='watch';element('red-ai-level').value='2';element('blue-ai-level').value='4';element('start-game').events.click();
 assert.equal(element('red-level-display').textContent,'赤 AI Lv.2');assert.equal(element('blue-level-display').textContent,'青 AI Lv.4');assert.equal(element('red-level-display').hidden,false);
 element('stop-watch').events.click();assert.equal(element('match-levels').hidden,true);
+// Repeated mode switches retain pull strength and immediately rebuild preview.
+reset();assert.equal(run('settings().power'),300);
+for(let n=0;n<5;n++){
+ element('power-mode').events.click();assert.equal(run('settings().power'),840);assert.equal(run('aimPreviewCache.key'),run('[settings().x,settings().angle,settings().power].join(":")'));
+ element('delicate-mode').events.click();assert.equal(run('settings().power'),150);assert.equal(run('powerMode'),false);
+ element('delicate-mode').events.click();assert.equal(run('settings().power'),300);
+}
+run('aimPullLength=100;document.getElementById("power").value=powerFromPull();');
+element('power-mode').events.click();assert.equal(run('settings().power'),1400);
+element('delicate-mode').events.click();assert.equal(run('settings().power'),250);
+element('delicate-mode').events.click();assert.equal(run('settings().power'),470);
+element('power-mode').events.click();assert.equal(run('settings().power'),1400);
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');

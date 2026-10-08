@@ -31,6 +31,9 @@ let stones=[],turn=0,shots=0,moving=false,result=null,history=[],drag=null,lastT
 let gameStarted=false,matchConfig=null,powerMode=false,delicateMode=false,fadingStones=[];
 function humanPowerLimit(){return delicateMode?260:powerMode?1400:470;}
 function humanPowerMinimum(){return delicateMode?30:140;}
+let aimPullLength=60;
+function humanPowerGain(){return delicateMode?2.5:powerMode?14:5;}
+function powerFromPull(){return Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Math.round(aimPullLength*humanPowerGain())));}
 function opponentMode(){return matchConfig?matchConfig.opponent:$('opponent').value;}
 let aiThinking=false,aiWorker=null,aiGeneration=0,aiSummary="青のAIは選んだレベルに応じて投石を考えます。",gameMotion=null;
 function activeAILevel(){
@@ -379,22 +382,22 @@ function point(event){const rect=canvas.getBoundingClientRect();return {x:(event
 canvas.addEventListener('pointerdown',event=>{
  if(!gameStarted||moving||result||isAITurn()||drag||(event.pointerType==='mouse'&&event.button!==0))return;
  const p=point(event),{x}=settings();if(Math.hypot(p.x-x,p.y-650)>40)return;
- drag={...p,id:event.pointerId,start:p,initial:settings()};canvas.setPointerCapture(event.pointerId);event.preventDefault();
+ drag={...p,id:event.pointerId,start:p,initial:settings(),initialPull:aimPullLength};canvas.setPointerCapture(event.pointerId);event.preventDefault();
 });
 canvas.addEventListener('pointermove',event=>{
  if(!drag||event.pointerId!==drag.id)return;
  const p=point(event);drag.x=p.x;drag.y=p.y;const {x}=settings();
  const dx=x-p.x,dy=p.y-650,length=Math.hypot(dx,dy);
- if(dy>0){$('angle').value=Math.max(-65,Math.min(65,Math.atan2(dx,dy)*180/Math.PI));$('power').value=Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),length*(delicateMode?2.5:powerMode?14:5)));updateUI();}
+ if(dy>0){$('angle').value=Math.max(-65,Math.min(65,Math.atan2(dx,dy)*180/Math.PI));aimPullLength=length;$('power').value=powerFromPull();updateUI();}
 });
-function cancelDrag(){if(!drag)return;$('angle').value=drag.initial.angle*180/Math.PI;$('power').value=drag.initial.power;drag=null;updateUI();}
+function cancelDrag(){if(!drag)return;$('angle').value=drag.initial.angle*180/Math.PI;$('power').value=drag.initial.power;aimPullLength=drag.initialPull;drag=null;updateUI();}
 canvas.addEventListener('pointerup',event=>{
  if(!drag||event.pointerId!==drag.id)return;
  const p=point(event),{x}=settings(),valid=p.y>658&&Math.hypot(x-p.x,p.y-650)>12;
  if(valid){drag=null;launch();}else cancelDrag();
 });
 canvas.addEventListener('pointercancel',cancelDrag);canvas.addEventListener('lostpointercapture',cancelDrag);
-inputs.forEach(input=>input.addEventListener('input',updateUI));$('shoot').addEventListener('click',()=>launch());
+inputs.forEach(input=>input.addEventListener('input',()=>{if(input.id==='power')aimPullLength=Number(input.value)/humanPowerGain();updateUI();}));$('shoot').addEventListener('click',()=>launch());
 canvas.addEventListener('keydown',event=>{
  if(event.key==='Escape'){cancelDrag();return;}
  if(!gameStarted||moving||result||isAITurn())return;
@@ -403,6 +406,7 @@ canvas.addEventListener('keydown',event=>{
   event.preventDefault();
   if(event.key==='ArrowLeft'||event.key==='ArrowRight')$('angle').value=Math.max(-65,Math.min(65,Number($('angle').value)+(event.key==='ArrowLeft'?-2:2)));
   else $('power').value=Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Number($('power').value)+(event.key==='ArrowDown'?-1:1)*(delicateMode?10:40)));
+  if(event.key==='ArrowUp'||event.key==='ArrowDown')aimPullLength=Number($('power').value)/humanPowerGain();
   updateUI();
  }
 });
@@ -414,7 +418,7 @@ $('undo').addEventListener('click',()=>{
 function resetToSetup(){
  cancelAI();cancelDrag();gameStarted=false;matchConfig=null;gameMotion=null;powerMode=false;delicateMode=false;fadingStones=[];
  aiSummary='青のAIは選んだレベルに応じて投石を考えます。';stones=[];turn=0;shots=0;moving=false;result=null;history=[];accumulator=0;
- $('position').value=320;$('angle').value=0;$('power').value=300;
+ $('position').value=320;$('angle').value=0;$('power').value=300;aimPullLength=60;aimPreviewCache=null;
  $('setup-note').textContent='相手とレベルを選んでください。';updateUI();
 }
 $('start-game').addEventListener('click',()=>{
@@ -422,14 +426,16 @@ $('start-game').addEventListener('click',()=>{
  matchConfig=Object.freeze({opponent:$('opponent').value,level:Number($('ai-level').value),redLevel:Number($('red-ai-level').value),blueLevel:Number($('blue-ai-level').value)});
  gameStarted=true;updateUI();startAI();
 });
-$('power-mode').addEventListener('click',()=>{
+function switchShotMode(mode){
  if(!gameStarted||moving||result||isAITurn()||drag)return;
- powerMode=!powerMode;delicateMode=false;$('power').value=Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Number($('power').value)));updateUI();
-});
-$('delicate-mode').addEventListener('click',()=>{
- if(!gameStarted||moving||result||isAITurn()||drag)return;
- delicateMode=!delicateMode;powerMode=false;$('power').value=Math.max(humanPowerMinimum(),Math.min(humanPowerLimit(),Number($('power').value)));updateUI();
-});
+ // Preserve the unclamped pull distance across repeated mode switches.
+ if(Number($('power').value)!==powerFromPull())aimPullLength=Number($('power').value)/humanPowerGain();
+ const toggleOff=mode==='power'?powerMode:delicateMode;
+ powerMode=mode==='power'&&!toggleOff;delicateMode=mode==='delicate'&&!toggleOff;
+ $('power').value=powerFromPull();aimPreviewCache=null;updateUI();draw();
+}
+$('power-mode').addEventListener('click',()=>switchShotMode('power'));
+$('delicate-mode').addEventListener('click',()=>switchShotMode('delicate'));
 $('restart').addEventListener('click',resetToSetup);
 $('stop-watch').addEventListener('click',resetToSetup);
 function setupChanged(){
