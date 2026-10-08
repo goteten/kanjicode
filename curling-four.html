@@ -188,6 +188,13 @@ function evaluatePosition(list,player,shotCount){
 function normalizeShot(shot){
  return {x:Math.max(80,Math.min(560,Math.round(shot.x))),angle:Math.max(-65,Math.min(65,Math.round(shot.angle*180/Math.PI)))*Math.PI/180,power:Math.max(140,Math.min(1400,Math.round(shot.power)))};
 }
+// Execution error is applied after searching, so the AI cannot optimize it away.
+function inaccurateAIShot(shot,level,random=Math.random){
+ const errors=[{x:90,angle:20,power:.45},{x:65,angle:14,power:.32},{x:40,angle:9,power:.22},{x:12,angle:3,power:.06},{x:0,angle:0,power:0}];
+ const error=errors[Math.max(0,Math.min(4,Number(level)-1))]||errors[4];
+ if(!error.x)return normalizeShot(shot);
+ return normalizeShot({x:shot.x+(random()*2-1)*error.x,angle:shot.angle+(random()*2-1)*error.angle*Math.PI/180,power:shot.power*(1+(random()*2-1)*error.power)});
+}
 function searchBestShot(initial,player,shotCount,budgetMs){
  const started=performance.now(),deadline=started+Math.min(2000,Math.max(1,budgetMs));
  const board=boardState(initial),targets=[],own=1<<player,other=1<<(1-player);
@@ -256,7 +263,7 @@ function startAI(){
    const answer=event.data;cancelAI();
    aiSummary='前の探索：'+(answer.elapsed/1000).toFixed(2)+'秒 · '+answer.evaluated+'候補';
    // The AI shot must not overwrite the human player's launch controls.
-   const shot=normalizeShot(answer.shot);
+   const shot=inaccurateAIShot(answer.shot,matchConfig.level);
    launch(shot,true);
   };
   aiWorker.onerror=()=>{if(generation===aiGeneration)aiFailed();};

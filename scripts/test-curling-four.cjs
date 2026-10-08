@@ -160,5 +160,20 @@ reset();element('power').value=1400;assert.equal(run('settings().power'),470);
 element('power-mode').events.click();assert.equal(run('settings().power'),1400);assert.equal(element('power-mode')['aria-pressed'],'true');
 element('power-mode').events.click();assert.equal(run('settings().power'),470);assert.equal(Number(element('power').value),470);
 element('power-mode').events.click();element('restart').events.click();assert.equal(run('powerMode'),false);
+// Difficulty affects execution accuracy independently of search time.
+context.aim={x:320,angle:0,power:500};
+for(const [i,errors] of [[90,20,.45],[65,14,.32],[40,9,.22],[12,3,.06],[0,0,0]].entries()){
+ context.level=i+1;
+ const high=JSON.parse(run('JSON.stringify(inaccurateAIShot(aim,level,()=>1))'));
+ const low=JSON.parse(run('JSON.stringify(inaccurateAIShot(aim,level,()=>0))'));
+ assert.equal(high.x,320+errors[0]);assert.equal(low.x,320-errors[0]);
+ assert.ok(Math.abs(high.angle-errors[1]*Math.PI/180)<1e-12);
+ assert.equal(high.power,Math.round(500*(1+errors[2])));
+ assert.equal(low.power,Math.round(500*(1-errors[2])));
+ const centered=JSON.parse(run('JSON.stringify(inaccurateAIShot(aim,level,()=>.5))'));
+ assert.deepEqual(centered,{x:320,angle:0,power:500});
+}
+context.edgeAim={x:80,angle:-65*Math.PI/180,power:140};
+const bounded=JSON.parse(run('JSON.stringify(inaccurateAIShot(edgeAim,1,()=>0))'));assert.equal(bounded.x,80);assert.equal(bounded.power,140);assert.ok(bounded.angle>=-65*Math.PI/180);
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');
