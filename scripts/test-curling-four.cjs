@@ -82,7 +82,7 @@ assert.ok(lowerBounces>0);
 assert.equal(run('settleStones(gameMotion.stones).length'),1);
 assert.ok(run('gameMotion.stones[0].y<=BOTTOM-R'));
 // Existing stones pushed toward the floor also survive.
-run('gameMotion={stones:[{x:320,y:559,vx:0,vy:500,player:0,entered:true}],time:0,done:false};stepPhysics(gameMotion,1/120);');
+run('gameMotion={stones:[{x:320,y:BOTTOM-R-1,vx:0,vy:500,player:0,entered:true}],time:0,done:false};stepPhysics(gameMotion,1/120);');
 assert.equal(run('gameMotion.stones.length'),1);assert.ok(run('gameMotion.stones[0].vy')<0);
 // Execute the exact generated worker program in its own global environment.
 function workerSearch(fixture, shotCount, budgetMs) {
@@ -185,6 +185,16 @@ for(const shot of [{x:320,angle:0,power:300},{x:140,angle:.4,power:470},{x:520,a
  assert.equal(run('emptyRinkPreview(previewShot)===emptyRinkPreview(previewShot)'),true);
  setStones([stone(320,400,1)]);assert.equal(run('emptyRinkPreview(previewShot).end.x'),preview.end.x);
 }
+reset();run('draw()');
+// Launching starts fully inside the rink, even for the weakest angled shot.
+assert.ok(run('createShotState([], {x:320,angle:0,power:140},0).stones[0].y+R<=BOTTOM'));
+for(const angle of [-65,0,65]){
+ context.weakAngle=angle*Math.PI/180;
+ assert.equal(run('simulateShot([], {x:320,angle:weakAngle,power:140},0).length'),1);
+}
+context.floorShot={x:320,angle:0,power:140};
+const lowPrediction=JSON.parse(run('JSON.stringify(emptyRinkPreview(floorShot))'));
+assert.ok(lowPrediction.end.y>590&&lowPrediction.end.y<=710);
 reset();run('draw()');
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');

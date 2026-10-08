@@ -25,7 +25,7 @@
 'use strict';
 const canvas=document.getElementById('rink'),ctx=canvas.getContext('2d');
 const $=id=>document.getElementById(id);
-const N=9,START=80,GAP=60,R=30,LEFT=50,RIGHT=590,TOP=50,BOTTOM=590;
+const N=9,START=80,GAP=60,R=30,LEFT=50,RIGHT=590,TOP=50,BOTTOM=740;
 const colors=['#e45650','#367fce'];
 let stones=[],turn=0,shots=0,moving=false,result=null,history=[],drag=null,lastTime=null,accumulator=0,motionTime=0;
 let gameStarted=false,matchConfig=null,powerMode=false;
@@ -93,7 +93,7 @@ function outcomeFor(list,shotCount){
 }
 function createShotState(initial,shot,player){
  const list=initial.map(s=>({...s,vx:0,vy:0}));
- list.push({x:shot.x,y:690,vx:Math.sin(shot.angle)*shot.power,vy:-Math.cos(shot.angle)*shot.power,player,entered:false});
+ list.push({x:shot.x,y:690,vx:Math.sin(shot.angle)*shot.power,vy:-Math.cos(shot.angle)*shot.power,player,entered:true});
  return {stones:list,time:0,done:false};
 }
 function stepPhysics(state,dt){
@@ -102,12 +102,11 @@ function stepPhysics(state,dt){
  const list=state.stones;
  for(const s of list){
   s.x+=s.vx*dt;s.y+=s.vy*dt;
-  if(s.y<=BOTTOM-R)s.entered=true;
   if(s.x<LEFT+R){s.x=LEFT+R;s.vx=Math.abs(s.vx)*.82;}
   if(s.x>RIGHT-R){s.x=RIGHT-R;s.vx=-Math.abs(s.vx)*.82;}
   if(s.y<TOP+R){s.y=TOP+R;s.vy=Math.abs(s.vy)*.82;}
-  // The incoming stone can cross the lower wall once; thereafter it rebounds.
-  if(s.entered&&s.y>BOTTOM-R){s.y=BOTTOM-R;s.vy=-Math.abs(s.vy)*.82;}
+  // The launch area is inside the rink; every stone rebounds from the floor.
+  if(s.y>BOTTOM-R){s.y=BOTTOM-R;s.vy=-Math.abs(s.vy)*.82;}
   const speed=Math.hypot(s.vx,s.vy),next=Math.max(0,speed-140*dt);
   if(speed){s.vx*=next/speed;s.vy*=next/speed;}
  }
@@ -125,7 +124,7 @@ function stepPhysics(state,dt){
  // Collision corrections must not push a settled stone beyond a wall.
  for(const s of list){
   s.x=Math.max(LEFT+R,Math.min(RIGHT-R,s.x));
-  s.y=Math.max(TOP+R,s.entered?Math.min(BOTTOM-R,s.y):s.y);
+  s.y=Math.max(TOP+R,Math.min(BOTTOM-R,s.y));
  }
  state.stones=list;
  state.done=state.stones.every(s=>Math.hypot(s.vx,s.vy)<1)||state.time>20;
@@ -298,8 +297,8 @@ function draw(){
  for(let i=0;i<=N;i++){const q=50+i*GAP;ctx.beginPath();ctx.moveTo(q,50);ctx.lineTo(q,590);ctx.moveTo(50,q);ctx.lineTo(590,q);ctx.stroke();}
  ctx.setLineDash([]);ctx.strokeStyle='#78a9bc';
  for(let i=0;i<N;i++){const q=START+i*GAP;ctx.beginPath();ctx.moveTo(q,START);ctx.lineTo(q,560);ctx.moveTo(START,q);ctx.lineTo(560,q);ctx.stroke();}
- ctx.strokeStyle='#6095ab';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(50,590);ctx.lineTo(50,50);ctx.lineTo(590,50);ctx.lineTo(590,590);ctx.stroke();
- ctx.setLineDash([]);ctx.strokeStyle='#6095ab';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(50,590);ctx.lineTo(590,590);ctx.stroke();ctx.setLineDash([]);
+ ctx.strokeStyle='#6095ab';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(LEFT,BOTTOM);ctx.lineTo(LEFT,TOP);ctx.lineTo(RIGHT,TOP);ctx.lineTo(RIGHT,BOTTOM);ctx.stroke();
+ ctx.setLineDash([]);ctx.strokeStyle='#6095ab';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(LEFT,BOTTOM);ctx.lineTo(RIGHT,BOTTOM);ctx.stroke();ctx.setLineDash([]);
  const owners=occupiedPoints(),board=owners.map(row=>row.map(s=>s?1<<s.player:0));
  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
   const x=START+c*GAP,y=START+r*GAP,mask=board[r][c];
