@@ -21,6 +21,8 @@
     .course.complete { background:#a8dcae; color:#111; border-color:#8bc493; }
     .progress { display:flex; justify-content:space-between; align-items:center; padding:0 4px 18px; font-size:18px; }
     #course-number { background:none; border:0; padding:8px; color:#111; }
+    .reset-controls { display:flex; align-items:center; gap:8px; }
+    #cleared-label { color:#368346; font-size:12px; white-space:nowrap; }
     #reset { border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:7px 10px; font-size:12px; }
     #back { position:fixed; top:16px; left:16px; z-index:1; border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:8px 12px; font-size:14px; }
     #game { padding-top:44px; }
@@ -73,7 +75,10 @@
   <section id="game" hidden aria-label="パズル">
     <div class="progress">
       <span id="course-number"></span>
-      <button id="reset" type="button">やり直す</button>
+      <div class="reset-controls">
+        <span id="cleared-label" hidden>クリア済み</span>
+        <button id="reset" type="button">やり直す</button>
+      </div>
     </div>
     <div id="board-frame" class="board-frame">
       <div id="board" class="board" aria-label="操作するパネル"></div>
@@ -126,6 +131,7 @@ function buildAllProblems() {
 }
 const groups = buildAllProblems();
 function announce(text) {
+  $('cleared-label').hidden = !activePuzzle || !completed.has(activePuzzle.board);
   $('board-frame').classList.toggle('cleared',state==='complete');
   $('board-frame').classList.toggle('failed',state==='failed');
   $('moves').textContent = '残り ' + remaining + ' 手';
