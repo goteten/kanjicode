@@ -283,7 +283,7 @@ function draw(){
  if(!moving){ctx.setLineDash([3,3]);ctx.lineWidth=1;for(const s of stones){const cell=cellOf(s);if(!cell||owners[cell.r][cell.c]!==s)continue;ctx.strokeStyle=colors[s.player]+'80';ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(START+cell.c*GAP,START+cell.r*GAP);ctx.stroke();}ctx.setLineDash([]);}
  ctx.fillStyle='#476e80';ctx.font='12px system-ui';ctx.textAlign='center';
  for(let i=0;i<N;i++){ctx.fillText(String(i+1),START+i*GAP,34);ctx.fillText('ABCDEFGHI'[i],30,START+i*GAP+4);}
- 
+
  if(gameStarted&&!moving&&!result&&!isAITurn()){
   const {x,angle,power}=settings(),length=60+power*.22;
   ctx.strokeStyle=colors[turn]+'99';ctx.lineWidth=3;ctx.setLineDash([8,7]);ctx.beginPath();ctx.moveTo(x,690);ctx.lineTo(x+Math.sin(angle)*length,690-Math.cos(angle)*length);ctx.stroke();ctx.setLineDash([]);
