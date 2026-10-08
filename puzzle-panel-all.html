@@ -50,8 +50,9 @@
 #random-unsolved { margin-bottom:16px; padding:9px 12px; border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; font:inherit; font-size:14px; }
 #visibility-filter { margin-bottom:16px; padding:8px 10px; border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; font:inherit; font-size:14px; }
 #empty-list { color:#666; font-size:14px; }
-.navigation { display:grid; gap:10px; margin-top:12px; }
-.navigation button { border:1px solid #bbb; border-radius:8px; padding:12px; background:#fff; color:#111; }
+.navigation { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
+.navigation button { border:1px solid #bbb; border-radius:8px; padding:8px 12px; background:#eee; color:#555; font-size:14px; justify-self:start; }
+.navigation #next { justify-self:end; }
 .navigation button:disabled { opacity:.4; cursor:default; }
   </style>
 </head>
@@ -78,12 +79,12 @@
       <div id="board" class="board" aria-label="操作するパネル"></div>
     </div>
     <div class="status">
-      <p id="moves"></p>
+      <div class="navigation">
+        <button id="previous" type="button">前の問題へ</button>
+        <p id="moves"></p>
+        <button id="next" type="button">次の問題へ</button>
+      </div>
       <p id="message" role="status" aria-live="polite"></p>
-    </div>
-    <div class="navigation">
-      <button id="next" type="button">次の問題へ</button>
-      <button id="previous" type="button">前の問題へ</button>
     </div>
   </section>
 </main>
@@ -129,10 +130,9 @@ function announce(text) {
   $('board-frame').classList.toggle('failed',state==='failed');
   $('moves').textContent = '残り ' + remaining + ' 手';
   $('message').textContent = text;
-  $('previous').hidden = randomMode;
-  $('previous').disabled = question === 0;
-  const unsolved = groups[moves].some(p=>!completed.has(p.board));
-  $('next').disabled = state !== 'complete' || (randomMode ? !unsolved : question === groups[moves].length - 1);
+  $('previous').disabled = randomMode || question === 0;
+  const unsolved = groups[moves].some(p=>!completed.has(p.board) && (!activePuzzle || p.board !== activePuzzle.board));
+  $('next').disabled = randomMode ? !unsolved : question === groups[moves].length - 1;
   if (state !== 'playing') for (const slot of $('board').children) {
     slot.firstElementChild.classList.remove('affected'); slot.firstElementChild.disabled = false;
   }
@@ -182,7 +182,7 @@ function startGroup(steps) {
 }
 function nextRandom() {
   const candidates=[];
-  groups[moves].forEach((p,i)=>{if(!completed.has(p.board)) candidates.push(i);});
+  groups[moves].forEach((p,i)=>{if(!completed.has(p.board) && (!activePuzzle || p.board !== activePuzzle.board)) candidates.push(i);});
   if (!candidates.length) {announce('すべてクリア済みです');return;}
   question=candidates[Math.floor(Math.random()*candidates.length)];
   $('problem-list').hidden=true;$('game').hidden=false;
@@ -248,10 +248,10 @@ $('visibility-filter').addEventListener('change',()=>{
   applyFilter();
 });
 $('back').addEventListener('click',()=>{if(state==='list') menu();else showList();});
-$('random-unsolved').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;nextRandom();});
+$('random-unsolved').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;activePuzzle=null;nextRandom();});
 $('reset').addEventListener('click',resetPuzzle);
-$('previous').addEventListener('click',()=>{if(question>0){question--;startQuestion();}});
-$('next').addEventListener('click',()=>{if(state!=='complete')return;if(randomMode){nextRandom();return;}if(question+1<groups[moves].length){question++;startQuestion();}});
+$('previous').addEventListener('click',()=>{if(!randomMode && question>0){question--;startQuestion();}});
+$('next').addEventListener('click',()=>{if(randomMode){nextRandom();return;}if(question+1<groups[moves].length){question++;startQuestion();}});
 menu();
 </script>
 </body>
