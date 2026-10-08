@@ -180,7 +180,9 @@ for(const shot of [{x:320,angle:0,power:300},{x:140,angle:.4,power:470},{x:520,a
  context.previewShot=shot;
  const preview=JSON.parse(run('JSON.stringify(emptyRinkPreview(previewShot))'));
  const predicted=JSON.parse(run('JSON.stringify(simulateShot([],previewShot,0))'));
- assert.equal(preview.end.x,predicted[0].x);assert.equal(preview.end.y,predicted[0].y);
+ if(!preview.hitWall){assert.equal(preview.end.x,predicted[0].x);assert.equal(preview.end.y,predicted[0].y);}
+ else assert.ok(preview.end.x===80||preview.end.x===560||preview.end.y===80||preview.end.y===710);
+ for(let i=1;i<preview.points.length;i++){const a=preview.points[i-1],b=preview.points[i];assert.ok((b.x-a.x)*Math.sin(shot.angle)-(b.y-a.y)*Math.cos(shot.angle)>=-1e-8);}
  assert.ok(preview.points.length>2);
  assert.equal(run('emptyRinkPreview(previewShot)===emptyRinkPreview(previewShot)'),true);
  setStones([stone(320,400,1)]);assert.equal(run('emptyRinkPreview(previewShot).end.x'),preview.end.x);

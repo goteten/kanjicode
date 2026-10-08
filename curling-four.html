@@ -278,13 +278,17 @@ function emptyRinkPreview(shot){
  const key=[shot.x,shot.angle,shot.power].join(':');
  if(aimPreviewCache&&aimPreviewCache.key===key)return aimPreviewCache;
  const state=createShotState([],shot,0),points=[{x:shot.x,y:690}];
+ let hitWall=false;
  while(!state.done){
+  const before=state.stones[0],vx=before.vx,vy=before.vy;
   stepPhysics(state,1/120);
   const s=state.stones[0],last=points[points.length-1];
-  if(Math.hypot(s.x-last.x,s.y-last.y)>=2||state.done)points.push({x:s.x,y:s.y});
+  hitWall=vx*s.vx<0||vy*s.vy<0;
+  if(Math.hypot(s.x-last.x,s.y-last.y)>=2||state.done||hitWall)points.push({x:s.x,y:s.y});
+  if(hitWall)break;
  }
  const s=state.stones[0];
- aimPreviewCache={key,points,end:{x:s.x,y:s.y}};
+ aimPreviewCache={key,points,hitWall,end:{x:s.x,y:s.y}};
  return aimPreviewCache;
 }
 function draw(){
