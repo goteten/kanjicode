@@ -237,5 +237,10 @@ element('red-ai-level').value='5';element('red-ai-level').events.change();assert
 workers.at(-1).onmessage({data:watchReply});run('for(let n=0;n<2600&&moving;n++)physics(1/120);');
 assert.equal(run('turn'),1);assert.equal(run('activeAILevel()'),4);assert.equal(workers.at(-1).request.budgetMs,30);
 element('stop-watch').events.click();assert.equal(run('gameStarted'),false);
+reset();assert.equal(element('match-levels').hidden,true);
+prepareAI();assert.equal(element('match-levels').hidden,false);assert.equal(element('red-level-display').hidden,true);assert.equal(element('blue-level-display').textContent,'青 AI Lv.5');
+element('restart').events.click();element('opponent').value='watch';element('red-ai-level').value='2';element('blue-ai-level').value='4';element('start-game').events.click();
+assert.equal(element('red-level-display').textContent,'赤 AI Lv.2');assert.equal(element('blue-level-display').textContent,'青 AI Lv.4');assert.equal(element('red-level-display').hidden,false);
+element('stop-watch').events.click();assert.equal(element('match-levels').hidden,true);
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');
