@@ -181,7 +181,7 @@ for(const shot of [{x:320,angle:0,power:300},{x:140,angle:.4,power:470},{x:520,a
  const preview=JSON.parse(run('JSON.stringify(emptyRinkPreview(previewShot))'));
  const predicted=JSON.parse(run('JSON.stringify(simulateShot([],previewShot,0))'));
  if(!preview.hitWall&&predicted.length){assert.equal(preview.end.x,predicted[0].x);assert.equal(preview.end.y,predicted[0].y);}
- else if(preview.hitWall)assert.ok(preview.end.x===80||preview.end.x===560||preview.end.y===80||preview.end.y===710);
+ else if(preview.hitWall)assert.ok(preview.end.x===80||preview.end.x===560||preview.end.y===80||preview.end.y===670);
  for(let i=1;i<preview.points.length;i++){const a=preview.points[i-1],b=preview.points[i];assert.ok((b.x-a.x)*Math.sin(shot.angle)-(b.y-a.y)*Math.cos(shot.angle)>=-1e-8);}
  assert.ok(preview.points.length>2);
  assert.equal(run('emptyRinkPreview(previewShot)===emptyRinkPreview(previewShot)'),true);
@@ -192,11 +192,11 @@ reset();run('draw()');
 assert.ok(run('createShotState([], {x:320,angle:0,power:140},0).stones[0].y+R<=BOTTOM'));
 for(const angle of [-65,0,65]){
  context.weakAngle=angle*Math.PI/180;
- assert.ok(run('simulateShot([], {x:320,angle:weakAngle,power:140},0).every(s=>Math.abs(s.y-690)>=R*2)'));
+ assert.ok(run('simulateShot([], {x:320,angle:weakAngle,power:140},0).every(s=>Math.abs(s.y-650)>=R*2)'));
 }
 context.floorShot={x:320,angle:0,power:140};
 const lowPrediction=JSON.parse(run('JSON.stringify(emptyRinkPreview(floorShot))'));
-assert.ok(lowPrediction.end.y>590&&lowPrediction.end.y<=710);
+assert.ok(lowPrediction.end.y>530&&lowPrediction.end.y<=670);
 reset();run('draw()');
 // The launch strip is cleared when the shot stops, before the next turn.
 reset();context.removalShot={x:320,angle:0,power:30};
@@ -205,7 +205,7 @@ run('for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');
 assert.equal(run('turn'),1);assert.equal(run('stones.length'),0);assert.equal(run('fadingStones.length'),1);
 assert.equal(run('simulateShot([],removalShot,0).length'),0);
 element('undo').events.click();assert.equal(run('turn'),0);assert.equal(run('stones.length'),0);assert.equal(run('fadingStones.length'),0);
-setStones([stone(80,680,0),stone(560,680,1),stone(320,400,0)]);run('finishShot()');assert.equal(run('stones.length'),1);assert.equal(run('fadingStones.length'),2);
+setStones([stone(80,640,0),stone(560,640,1),stone(320,400,0)]);run('finishShot()');assert.equal(run('stones.length'),1);assert.equal(run('fadingStones.length'),2);
 run('lastTime=0;for(let n=1;n<=60;n++)frame(n*16);');assert.equal(run('fadingStones.length'),0);
 element('restart').events.click();assert.equal(run('fadingStones.length'),0);
 reset();element('delicate-mode').events.click();assert.equal(run('delicateMode'),true);assert.equal(run('powerMode'),false);
