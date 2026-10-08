@@ -258,5 +258,22 @@ element('power-mode').events.click();assert.equal(run('settings().power'),1400);
 reset();element('power-mode').events.click();run('draw();launch();');assert.equal(run('flameStone===stones[stones.length-1]'),true);
 run('frame(100);draw();for(let n=0;n<2600&&moving;n++)physics(1/120);');assert.equal(run('flameStone'),null);
 reset();run('launch()');assert.equal(run('flameStone'),null);element('restart').events.click();
+// Four local players rotate red, blue, green, purple and can each win.
+element('restart').events.click();element('opponent').value='four';element('start-game').events.click();
+assert.equal(run('playerCount()'),4);assert.equal(element('match-levels').hidden,true);
+for(let i=0;i<4;i++){
+ assert.equal(run('turn'),i);assert.equal(run('isAITurn()'),false);
+ run('launch({x:320,angle:0,power:30});for(let n=0;n<2600&&moving;n++)physics(1/120);draw();');
+ assert.equal(run('turn'),(i+1)%4);
+}
+element('undo').events.click();assert.equal(run('turn'),3);
+for(let p=0;p<4;p++){
+ context.fourFixture=[80,140,200,260].map(x=>stone(x,260,p));
+ assert.equal(run('outcomeFor(fourFixture,4).player'),p);
+ setStones(context.fourFixture);run('draw()');
+}
+context.multiWinner=[0,2].flatMap(p=>[80,140,200,260].map(x=>stone(x,260+p*60,p)));
+assert.equal(run('outcomeFor(multiWinner,8).draw'),true);
+element('restart').events.click();
 console.log('PASS: exact shared simulation, immutable inputs, canceled candidates, strict dot coverage, generated worker, winning shot, search deadline/parameters, stale-response cancellation, AI launch, paired undo, reset/mode switch and worker failure.');
 console.log('Opening search:',opening.evaluated,'candidates in',Math.round(opening.elapsed),'ms.');
