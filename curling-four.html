@@ -6,20 +6,19 @@
 <meta name="description" content="石を滑らせ、黒い格子点に石を乗せて4つ並べる、AI・2人対戦のカーリング四目並べ。">
 <title>カーリング四目並べ</title>
 <style>
-[hidden]{display:none!important}.setup{max-width:480px;margin:36px auto}.setup h2{font-size:24px}.setup p{line-height:1.8;color:#bbd2df}.setup button{width:100%;background:#9ae2eb;color:#072833;font-weight:800;margin-top:12px}:root{color-scheme:dark;font-family:"Yu Gothic",system-ui,sans-serif;color:#eaf5fc;background:#091725}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#18394c,transparent 70%);min-height:100vh}main{max-width:1080px;margin:auto;padding:28px 20px 40px}header{margin-bottom:22px}h1{font-size:clamp(24px,4vw,36px);margin:0 0 8px;letter-spacing:.06em}header p{margin:0;color:#a6c5d5;line-height:1.7}.layout{display:grid;grid-template-columns:minmax(0,640px) minmax(250px,1fr);gap:24px;align-items:start}.rink{position:relative;border:1px solid #54758a;border-radius:20px;overflow:hidden;background:#dff0f5;box-shadow:0 24px 70px #0004}.launch-position{padding:12px 12.5% 16px;background:#102737;border-top:1px solid #54758a}.launch-position label{margin:0}.launch-position input{margin:0;min-height:28px}canvas{display:block;width:100%;height:auto;touch-action:none;outline-offset:-5px}aside{display:grid;gap:16px}.panel{border:1px solid #365467;border-radius:16px;background:#102737;padding:20px}#status{font-size:22px;font-weight:800;margin:0 0 8px}#hint{color:#b2ccda;line-height:1.7;margin:0;min-height:3.4em}.teams{display:flex;gap:12px;margin-top:16px}.team{flex:1;border-radius:10px;padding:10px;background:#081c2a;color:#bad0dd;border:2px solid transparent}.team.active{border-color:var(--team);color:#fff}.team b{color:var(--team)}h2{font-size:16px;margin:0 0 15px}label{display:grid;grid-template-columns:1fr auto;gap:8px;margin:16px 0;font-size:14px}output{color:#9ce2ee;font-variant-numeric:tabular-nums}input{grid-column:1/-1;width:100%;accent-color:#72cede}button{font:inherit;border:1px solid #56788c;border-radius:10px;padding:11px 14px;background:#19394b;color:#eaf5fc;cursor:pointer}select{font:inherit;color:#eaf5fc;background:#19394b;border:1px solid #56788c;border-radius:8px;padding:9px;width:100%;grid-column:1/-1}select:focus-visible{outline:3px solid #ffe082;outline-offset:3px}button:disabled{opacity:.4;cursor:default}button:focus-visible,input:focus-visible{outline:3px solid #ffe082;outline-offset:3px}#shoot{width:100%;background:#9ae2eb;color:#072833;font-weight:800;border:0}.buttons{display:flex;gap:10px;margin-top:12px}.buttons button{flex:1}.rules{font-size:14px;color:#bbd2df;line-height:1.9}.rules p{margin:8px 0}.eyebrow{color:#7ed4e2;font-size:12px;letter-spacing:.18em;margin-bottom:12px}.note{font-size:12px;color:#91afc0;line-height:1.6;margin-bottom:0}@media(max-width:800px){main{padding:20px 12px}.layout{grid-template-columns:1fr;gap:16px}aside{grid-template-columns:1fr 1fr}.score,.rules{grid-column:1/-1}.controls{grid-column:1/-1}#hint{min-height:0}}
+:root{color-scheme:dark;font-family:"Yu Gothic",system-ui,sans-serif;color:#eaf5fc;background:#091725}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#18394c,transparent 70%)}main{max-width:664px;margin:auto;padding:12px}header{margin:16px 0 24px}h1{font-size:clamp(24px,4vw,36px);margin:0 0 8px}header p{color:#a6c5d5;line-height:1.7}.eyebrow{color:#7ed4e2;font-size:12px;letter-spacing:.18em;margin-bottom:12px}.setup{max-width:480px;margin:36px auto;border:1px solid #365467;border-radius:16px;background:#102737;padding:20px}.setup h2{font-size:24px;margin:0}.setup p{color:#bbd2df;line-height:1.8}.setup button{width:100%;background:#9ae2eb;color:#072833;font-weight:800;margin-top:12px}.layout{display:grid;gap:12px}.rink{border:1px solid #54758a;border-radius:20px;overflow:hidden;background:#dff0f5;box-shadow:0 24px 70px #0004}canvas{display:block;width:100%;height:auto;touch-action:none;outline-offset:-5px}.launch-position{padding:12px 12.5% 16px;background:#102737;border-top:1px solid #54758a}.launch-position label{margin:0}.launch-position input{margin:0;min-height:28px}label{display:grid;grid-template-columns:1fr auto;gap:8px;margin:16px 0;font-size:14px}output{color:#9ce2ee;font-variant-numeric:tabular-nums}input{grid-column:1/-1;width:100%;accent-color:#72cede}button,select{font:inherit;border:1px solid #56788c;border-radius:10px;padding:11px 14px;background:#19394b;color:#eaf5fc}button{cursor:pointer}select{width:100%;grid-column:1/-1}button:disabled{opacity:.4;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #ffe082;outline-offset:3px}.end-actions{display:flex;gap:12px}.end-actions button{flex:1}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 </style>
 </head>
 <body>
 <main>
-<header><div class="eyebrow">SLIDE · BUMP · CONNECT</div><h1>カーリング四目並べ</h1><p>狙って滑らせる。ぶつけて崩す。格子点を4つつないだら勝ち。</p></header>
+<header id="intro"><div class="eyebrow">SLIDE · BUMP · CONNECT</div><h1>カーリング四目並べ</h1><p>狙って滑らせる。ぶつけて崩す。格子点を4つつないだら勝ち。</p></header>
 <section class="panel setup" id="setup" aria-labelledby="setup-title"><h2 id="setup-title">対戦をはじめる</h2><p id="setup-note">相手とレベルを選んでください。対戦中は変更できません。</p><label>対戦相手<select id="opponent"><option value="ai">AIと対戦（あなたは赤）</option><option value="human">2人で対戦</option></select></label><label>AIレベル<select id="ai-level"><option value="1">1 · やさしい</option><option value="2">2 · 気軽</option><option value="3">3 · ふつう</option><option value="4">4 · 強い</option><option value="5" selected>5 · 最強</option></select></label><button id="start-game">この設定ではじめる</button></section>
 <div class="layout" id="game" hidden>
-<div class="rink"><canvas id="rink" width="640" height="760" tabindex="0" aria-label="カーリングの盤面。下の石を後ろに引いて離すと投石できます。角度と強さのスライダー、投げるボタンでも操作できます。"></canvas><div class="launch-position"><label>投げる位置 <output id="position-value"></output><input id="position" type="range" min="80" max="560" value="320" step="1"></label></div></div>
-<aside>
-<section class="panel score"><p id="status" role="status" aria-live="polite"></p><p id="hint"></p><div class="teams"><div class="team" id="red" style="--team:#ff8b80"><b>● 赤</b> <span id="red-count">0</span></div><div class="team" id="blue" style="--team:#83bbff"><b>◆ 青</b> <span id="blue-count">0</span></div></div><p class="note" id="moves"></p></section>
-<section class="panel controls"><h2>対戦と投石</h2><p class="note" id="ai-info" aria-live="polite">青のAIは選んだレベルに応じて投石を考えます。</p><label>角度 <output id="angle-value"></output><input id="angle" type="range" min="-65" max="65" value="0" step="1"></label><label>強さ <output id="power-value"></output><input id="power" type="range" min="140" max="1400" value="300" step="1"></label><button id="shoot">石を投げる</button><div class="buttons"><button id="undo" disabled>1投戻す</button><button id="restart">最初から</button></div><p class="note">盤面下の石をつかみ、後ろに引いて離しても投げられます。引く長さが強さになります。</p></section>
-<section class="panel rules"><h2>遊び方</h2><p>赤 → 青の順に、下から石を1つずつ滑らせます。AI対戦ではあなたが赤、AIが青です。石にぶつけると、相手の石も自分の石も動きます。盤内に入った石は四方の壁で跳ね返り、下まで戻っても残ります。</p><p>石は止まった場所から動かしません。<strong>黒い点が石の円の内側に入っている</strong>場合だけ、その点を占めていると判定します。近くにあるだけ、または石の縁が点に触れるだけでは数えません。色付きの輪が判定位置です。</p><p>すべての石が止まった時、縦・横・斜めに自分の点が<strong>4つ以上</strong>続けば勝ち。接触している必要はありません。</p><p>石の直径は1マス分。石同士は重ならないため、1つの黒い点を複数の石が同時に覆うことはありません。点に乗っていない石も盤上に残り、ほかの石にぶつけられます。両者が同時に揃った時、または80投で決着しない時は引き分け。</p></section>
-</aside>
+<div class="rink"><canvas id="rink" width="640" height="760" tabindex="0" aria-label="カーリングの盤面。下の石を後ろに引いて離すと投石できます。投げる位置は下のスライダーで調整できます。矢印キーで角度と強さを調整し、Enterでも投げられます。"></canvas><div class="launch-position"><label>投げる位置 <output id="position-value"></output><input id="position" type="range" min="80" max="560" value="320" step="1"></label></div></div>
+<p id="status" class="sr-only" role="status" aria-live="polite"></p>
+<div hidden><input id="angle" type="range" min="-65" max="65" value="0"><input id="power" type="range" min="140" max="1400" value="300"><button id="shoot">石を投げる</button></div>
+<div class="end-actions" id="end-actions" hidden><button id="undo">戻す</button><button id="restart">もう一度遊ぶ</button></div>
+
 </div>
 </main>
 <script>
@@ -37,20 +36,16 @@ function isAITurn(){return opponentMode()==='ai'&&turn===1;}
 const inputs=['position','angle','power'].map($);
 function settings(){return {x:Number($('position').value),angle:Number($('angle').value)*Math.PI/180,power:Number($('power').value)};}
 function updateUI(){
- $('setup').hidden=gameStarted; $('game').hidden=!gameStarted;
+ $('setup').hidden=gameStarted; $('game').hidden=!gameStarted; $('intro').hidden=gameStarted;
+ $('end-actions').hidden=!gameStarted||!result;
  const names=['赤','青'];
  $('status').textContent=result ? (result.draw?'引き分け！':names[result.player]+'の勝ち！') : names[turn]+'の番'+(aiThinking?' · AIが考えています':moving?' · 石が滑っています':'');
  $('status').style.color=result&&!result.draw?colors[result.player]:moving?'#eaf5fc':colors[turn];
- $('hint').textContent=result?'戻すボタンで再挑戦、「最初から」で新しい対戦ができます。':aiThinking?'AIが投石後の盤面を予測しています。少しお待ちください。':moving?'すべての石が止まったら、格子点で四目を判定します。':'下の石を後ろに引いて離すか、狙いを調整して投げてください。';
- ['red','blue'].forEach((id,p)=>{$(id).classList.toggle('active',!result&&turn===p);$(id+'-count').textContent=stones.filter(s=>s.player===p).length+'個';});
- $('moves').textContent=shots+' / 80 投 · '+(opponentMode()==='ai'?'あなた：赤 / AI：青':'同じ画面で交互に操作');
  $('shoot').disabled=!gameStarted||moving||!!result||isAITurn(); $('undo').disabled=moving||history.length===0;
  $('undo').textContent=opponentMode()==='ai'?'自分の番まで戻す':'1投戻す';
- $('opponent').disabled=gameStarted; $('ai-level').disabled=gameStarted||opponentMode()!=='ai'; $('ai-info').textContent=opponentMode()==='ai'?aiSummary:'赤と青を交互に操作してください。';
+ $('opponent').disabled=gameStarted; $('ai-level').disabled=gameStarted||opponentMode()!=='ai';
  inputs.forEach(input=>input.disabled=!gameStarted||moving||!!result||isAITurn());
  $('position-value').textContent=((Number($('position').value)-320)/60).toFixed(1)+' マス';
- const a=Number($('angle').value);$('angle-value').textContent=a===0?'まっすぐ':(a<0?'左 ':'右 ')+Math.abs(a)+'°';
- $('power-value').textContent=Math.round((Number($('power').value)-140)/1260*100)+'%';
 }
 function cellOf(s){
  if(s.x<LEFT||s.x>RIGHT||s.y<TOP||s.y>BOTTOM)return null;
@@ -288,12 +283,12 @@ function draw(){
  if(!moving){ctx.setLineDash([3,3]);ctx.lineWidth=1;for(const s of stones){const cell=cellOf(s);if(!cell||owners[cell.r][cell.c]!==s)continue;ctx.strokeStyle=colors[s.player]+'80';ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(START+cell.c*GAP,START+cell.r*GAP);ctx.stroke();}ctx.setLineDash([]);}
  ctx.fillStyle='#476e80';ctx.font='12px system-ui';ctx.textAlign='center';
  for(let i=0;i<N;i++){ctx.fillText(String(i+1),START+i*GAP,34);ctx.fillText('ABCDEFGHI'[i],30,START+i*GAP+4);}
- ctx.fillStyle='#4a7587';ctx.font='14px system-ui';ctx.fillText('投石エリア',320,637);
+ 
  if(gameStarted&&!moving&&!result&&!isAITurn()){
   const {x,angle,power}=settings(),length=60+power*.22;
   ctx.strokeStyle=colors[turn]+'99';ctx.lineWidth=3;ctx.setLineDash([8,7]);ctx.beginPath();ctx.moveTo(x,690);ctx.lineTo(x+Math.sin(angle)*length,690-Math.cos(angle)*length);ctx.stroke();ctx.setLineDash([]);
   drawStone({x,y:690,player:turn},true);
-  ctx.font='12px system-ui';ctx.fillStyle='#507080';ctx.fillText(drag?'離して投げる · 近くに戻すとキャンセル':'石を後ろに引いて離す',320,740);
+
   if(drag){ctx.strokeStyle=colors[turn];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,690);ctx.lineTo(drag.x,drag.y);ctx.stroke();circle(drag.x,drag.y,7,colors[turn]+'60');}
  }
  for(const s of stones)drawStone(s,false);
@@ -330,7 +325,17 @@ canvas.addEventListener('pointerup',event=>{
 });
 canvas.addEventListener('pointercancel',cancelDrag);canvas.addEventListener('lostpointercapture',cancelDrag);
 inputs.forEach(input=>input.addEventListener('input',updateUI));$('shoot').addEventListener('click',()=>launch());
-canvas.addEventListener('keydown',event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();launch();}if(event.key==='Escape')cancelDrag();});
+canvas.addEventListener('keydown',event=>{
+ if(event.key==='Escape'){cancelDrag();return;}
+ if(!gameStarted||moving||result||isAITurn())return;
+ if(event.key===' '||event.key==='Enter'){event.preventDefault();launch();}
+ else if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){
+  event.preventDefault();
+  if(event.key==='ArrowLeft'||event.key==='ArrowRight')$('angle').value=Math.max(-65,Math.min(65,Number($('angle').value)+(event.key==='ArrowLeft'?-2:2)));
+  else $('power').value=Math.max(140,Math.min(1400,Number($('power').value)+(event.key==='ArrowDown'?-40:40)));
+  updateUI();
+ }
+});
 $('undo').addEventListener('click',()=>{
  if(moving||!history.length)return;cancelAI();cancelDrag();
  do{const previous=history.pop();stones=previous.stones;turn=previous.turn;shots=previous.shots;}while(opponentMode()==='ai'&&turn===1&&history.length);

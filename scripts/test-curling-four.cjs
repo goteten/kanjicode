@@ -128,6 +128,9 @@ run('launch()');assert.equal(run('shots'),0);
 element('opponent').value='ai';element('ai-level').value='4';element('start-game').events.click();
 assert.equal(run('gameStarted'),true);assert.equal(element('setup').hidden,true);assert.equal(element('game').hidden,false);
 assert.equal(element('opponent').disabled,true);assert.equal(element('ai-level').disabled,true);assert.equal(run('aiBudget()'),30);
+assert.equal(element('intro').hidden,true);assert.equal(element('end-actions').hidden,true);assert.equal(html.includes('<aside>'),false);
+run('result={draw:true,lines:[]};updateUI();');assert.equal(element('end-actions').hidden,false);
+run('result=null;updateUI();');assert.equal(element('end-actions').hidden,true);
 element('ai-level').value='1';element('ai-level').events.change();assert.equal(run('aiBudget()'),30);assert.equal(Number(element('ai-level').value),4);
 element('opponent').value='human';element('opponent').events.change();assert.equal(run('opponentMode()'),'ai');
 function prepareAI(){
