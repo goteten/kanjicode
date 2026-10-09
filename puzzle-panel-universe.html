@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Panel Puzzle — 全65,536盤面</title><style>
+    :root { color-scheme:light; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px 16px; background:#eee; color:#111; font-family:"Segoe UI",sans-serif; }
+    main { width:min(100%,380px); }
+    button { touch-action:manipulation; cursor:pointer; font:inherit; }
+    button:focus-visible { outline:3px solid #888; outline-offset:3px; }
+    #courses { display:grid; gap:18px; }
+    .course-group h2 { margin:0 0 8px; font-size:14px; font-weight:400; color:#666; }
+    .group-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .group-heading h2 { margin:0; }
+    .endless { border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; padding:7px 12px; font-size:12px; }
+    .course-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+    .course { aspect-ratio:1; border:1px solid #bbb; border-radius:10px; background:#fff; color:#111; font-size:22px; }
+    .course.complete { background:#a8dcae; color:#111; border-color:#8bc493; }
+    .progress { display:flex; justify-content:space-between; align-items:center; padding:0 4px 18px; font-size:18px; }
+    #course-number { background:none; border:0; padding:8px; color:#111; }
+    .reset-controls { display:flex; align-items:center; gap:8px; }
+    #cleared-label { color:#368346; font-size:12px; white-space:nowrap; }
+    #reset { border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:7px 10px; font-size:12px; }
+    #back { position:fixed; top:16px; left:16px; z-index:1; border:1px solid #bbb; border-radius:8px; background:#eee; color:#555; padding:8px 12px; font-size:14px; }
+    #game { padding-top:44px; }
+    .board { display:grid; aspect-ratio:1; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(4,minmax(0,1fr)); gap:2px; }
+    .tile-slot { min-width:0; min-height:0; padding:5px; border-radius:15px; background:transparent; }
+    .tile-slot.pressed { background:#bdbdbd; }
+    .board-frame { padding:12px; margin:0 -12px; border-radius:20px; background:transparent; transition:background .25s ease; }
+    .board-frame.cleared { background:#a8dcae; }
+    .board-frame.failed { background:#f2c5c5; }
+    .tile { width:100%; height:100%; min-width:0; min-height:0; appearance:none; margin:0; border-radius:10px; border:1px solid #bbb; background:#fff; color:#888; font-size:clamp(24px,7vw,36px); line-height:1; display:grid; place-items:center; padding:0; }
+    .tile.black { background:#111; }
+    .tile.affected { outline:2px solid #888; outline-offset:1px; }
+    .tile:disabled { cursor:default; }
+    .tile.flip { animation:flip .22s ease; }
+    @keyframes flip { 50% { transform:scaleX(.3); } }
+    .status { margin-top:16px; text-align:center; font-size:14px; }
+    #moves { margin:0; font-variant-numeric:tabular-nums; }
+    #message { min-height:44px; margin:8px 0 0; color:#666; line-height:1.6; }
+    [hidden] { display:none !important; }
+    @media(prefers-reduced-motion:reduce) { .tile.flip { animation:none; } .board-frame { transition:none; } }
+
+
+#list { padding-top:12px; }
+h1 { font-size:18px; font-weight:400; }
+.pagination { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:16px 0; }
+.pagination button, .navigation button, .save-actions button { border:1px solid #bbb; border-radius:8px; padding:8px 12px; background:#eee; color:#555; font-size:14px; }
+button:disabled { opacity:.4; cursor:default; }
+#page-input { width:70px; padding:7px; border:1px solid #bbb; border-radius:8px; background:#fff; font:inherit; }
+#problem-buttons { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+#problem-buttons .course { font-size:14px; }
+.navigation { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
+.navigation #previous { justify-self:start; }.navigation #next { justify-self:end; }
+#page-status { font-size:13px; color:#666; }
+#save-panel { margin-top:24px; font-size:14px; color:#555; }
+#save-text { width:100%; min-height:90px; margin:12px 0; padding:8px; font:12px monospace; }
+.save-actions { display:flex; gap:8px; }
+</style></head>
+<body>
+<main>
+<section id="list" aria-label="全盤面の問題一覧">
+<h1>全65,536盤面</h1>
+<div class="pagination">
+<button id="page-previous" type="button">前</button>
+<form id="page-form"><label><input id="page-input" type="number" min="1" max="656" step="1" required aria-label="ページ番号"> / 656</label> <button type="submit">移動</button></form>
+<button id="page-next" type="button">次</button>
+</div>
+<p id="page-status" role="status"></p><p id="page-range"></p>
+<div id="problem-buttons"></div>
+<div class="pagination"><button id="page-previous-bottom" type="button">前</button><button id="page-next-bottom" type="button">次</button></div>
+</section>
+<button id="back" type="button" hidden>戻る</button>
+<section id="game" hidden aria-label="パズル">
+<div class="progress"><span id="course-number"></span><div class="reset-controls"><span id="cleared-label" hidden>クリア済み</span><button id="reset" type="button">やり直す</button></div></div>
+<div id="board-frame" class="board-frame"><div id="board" class="board" aria-label="操作するパネル"></div></div>
+<div class="status"><div class="navigation"><button id="previous" type="button">前の問題へ</button><p id="moves"></p><button id="next" type="button">次の問題へ</button></div><p id="message" role="status" aria-live="polite"></p></div>
+</section>
+<details id="save-panel"><summary>セーブデータ</summary><textarea id="save-text" aria-label="セーブ文字列" spellcheck="false"></textarea><div class="save-actions"><button id="save-export" type="button">書き出す</button><button id="save-import" type="button">読み込む</button></div><p id="save-status" role="status"></p></details>
+</main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const size=4,total=65536,pageSize=100,pageCount=Math.ceil(total/pageSize);
+let page=1,question=0,current=0,remaining=0,pressedMask=0,state='list',activePuzzle=null,listScroll=0;
+let completed=new Set();
+try {const saved=JSON.parse(localStorage.getItem('panel-universe-v1'));if(Array.isArray(saved))completed=new Set(saved.filter(n=>Number.isInteger(n)&&n>=0&&n<total));} catch {}
+  function neighbors(index) {
+    const row = Math.floor(index / size), col = index % size, cells = [];
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const r = row + dr, c = col + dc;
+      if (r >= 0 && r < size && c >= 0 && c < size) cells.push(r * size + c);
+    }
+    return cells;
+  }
+  const flips = Array.from({length:16}, (_, i) => neighbors(i).reduce((mask, cell) => mask | (1 << cell), 0));
+  function countBits(mask) {
+    let count = 0;
+    while (mask) { mask &= mask - 1; count++; }
+    return count;
+  }
+
+
+function buildSolutions() {
+  const results=new Uint16Array(total),solutions=new Uint16Array(total),seen=new Uint8Array(total);
+  for(let presses=0;presses<total;presses++) {
+    if(presses){const bit=presses&-presses;results[presses]=results[presses^bit]^flips[31-Math.clz32(bit)];}
+    const board=results[presses];if(seen[board])throw new Error('反転ルールの解が一意ではありません');
+    seen[board]=1;solutions[board]=presses;
+  }
+  return solutions;
+}
+const solutions=buildSolutions();
+function saveProgress(){try {localStorage.setItem('panel-universe-v1',JSON.stringify([...completed]));}catch {}}
+function renderPage() {
+  $('problem-buttons').replaceChildren();
+  const start=(page-1)*pageSize,end=Math.min(start+pageSize,total);
+  for(let board=start;board<end;board++) {
+    const button=document.createElement('button');button.type='button';button.className='course'+(completed.has(board)?' complete':'');
+    button.textContent=board+1;
+    button.setAttribute('aria-label','問題'+(board+1)+'、'+countBits(solutions[board])+'手'+(completed.has(board)?'、クリア済み':''));
+    button.addEventListener('click',()=>{listScroll=window.scrollY;question=board;startQuestion();window.scrollTo(0,0);});
+    $('problem-buttons').append(button);
+  }
+  $('page-input').value=page;
+  for(const id of ['page-previous','page-previous-bottom'])$(id).disabled=page===1;
+  for(const id of ['page-next','page-next-bottom'])$(id).disabled=page===pageCount;
+  $('page-range').textContent=(start+1)+'–'+end+' / '+total;
+}
+function goPage(value) {
+  const n=Number(value);
+  if(!Number.isInteger(n)||n<1||n>pageCount){$('page-status').textContent='1〜'+pageCount+'のページ番号を入力してください。';$('page-input').value=page;return;}
+  page=n;$('page-status').textContent='';renderPage();window.scrollTo(0,0);
+}
+function showList(){state='list';$('game').hidden=true;$('back').hidden=true;$('list').hidden=false;$('save-panel').hidden=false;page=Math.floor(question/pageSize)+1;renderPage();window.scrollTo(0,listScroll);}
+function announce(text) {
+  $('board-frame').classList.toggle('cleared',state==='complete');$('board-frame').classList.toggle('failed',state==='failed');
+  $('cleared-label').hidden=!activePuzzle||!completed.has(activePuzzle.board);
+  $('moves').textContent='残り '+remaining+' 手';$('message').textContent=text;
+  $('previous').disabled=question===0;$('next').disabled=question===total-1;
+  if(state!=='playing')for(const slot of $('board').children){slot.firstElementChild.disabled=false;slot.firstElementChild.classList.remove('affected');}
+}
+function startQuestion() {
+  activePuzzle={board:question,solution:solutions[question],moves:countBits(solutions[question])};
+  current=activePuzzle.board;remaining=activePuzzle.moves;pressedMask=0;state=current===0?'complete':'playing';
+  if(current===0){completed.add(0);saveProgress();}
+  $('list').hidden=true;$('save-panel').hidden=true;$('game').hidden=false;$('back').hidden=false;
+  $('course-number').textContent='問題 '+(question+1)+' · '+activePuzzle.moves+'手';draw();announce(current===0?'完成済みの盤面です':'');
+}
+  function paint(tile, index) {
+    const black = Boolean(current & (1 << index));
+    const pressed = Boolean(pressedMask & (1 << index));
+    tile.className = 'tile' + (black ? ' black' : '');
+    tile.parentElement.classList.toggle('pressed', pressed);
+    tile.disabled = pressed && state === 'playing';
+    tile.textContent = black ? '×' : '○';
+    tile.setAttribute('aria-label', (Math.floor(index / size) + 1) + '行' + (index % size + 1) + '列：' + (black ? '黒' : '白') + (pressed ? '、押したパネル' : ''));
+  }
+  function resetPuzzle() {
+    if (state === 'list' || !activePuzzle) return;
+    current = activePuzzle.board; remaining = activePuzzle.moves;
+    pressedMask = 0; state = 'playing';
+    draw(); announce('');
+  }
+  function highlight(index, on) {
+    for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.toggle('affected', on && state === 'playing');
+  }
+  function draw() {
+    $('board').replaceChildren();
+    for (let i = 0; i < 16; i++) {
+      const slot = document.createElement('div'); slot.className = 'tile-slot';
+      const tile = document.createElement('button'); tile.type = 'button';
+      slot.append(tile); paint(tile, i);
+      tile.addEventListener('click', () => play(i));
+      tile.addEventListener('pointerenter', () => highlight(i, true));
+      tile.addEventListener('pointerleave', () => highlight(i, false));
+      tile.addEventListener('focus', () => highlight(i, true));
+      tile.addEventListener('blur', () => highlight(i, false));
+      $('board').append(slot);
+    }
+  }
+
+
+function play(index) {
+  if(state==='list'||state==='complete')return;
+  if(state==='failed'){resetPuzzle();return;}
+  if(pressedMask&(1<<index))return;
+  pressedMask|=1<<index;current^=flips[index];remaining--;
+  Array.from($('board').children).forEach((slot,i)=>paint(slot.firstElementChild,i));
+  for(const cell of neighbors(index))$('board').children[cell].firstElementChild.classList.add('flip');
+  if(current===0){state='complete';completed.add(question);saveProgress();announce('');}
+  else if(remaining===0){state='failed';announce('手数切れ。タップで再挑戦');}else announce('');
+}
+$('back').addEventListener('click',showList);
+$('reset').addEventListener('click',()=>{if(activePuzzle&&activePuzzle.board===0)startQuestion();else resetPuzzle();});
+$('previous').addEventListener('click',()=>{if(question>0){question--;startQuestion();}});
+$('next').addEventListener('click',()=>{if(question+1<total){question++;startQuestion();}});
+for(const id of ['page-previous','page-previous-bottom'])$(id).addEventListener('click',()=>goPage(page-1));
+for(const id of ['page-next','page-next-bottom'])$(id).addEventListener('click',()=>goPage(page+1));
+$('page-form').addEventListener('submit',event=>{event.preventDefault();goPage($('page-input').value);});
+$('save-export').addEventListener('click',()=>{
+  $('save-text').value=JSON.stringify({format:'panel-universe',version:1,completed:[...completed].sort((a,b)=>a-b)});
+  $('save-text').focus();$('save-text').select();$('save-status').textContent='文字列をコピーして保管してください。';
+});
+$('save-import').addEventListener('click',()=>{
+  try {
+    const text=$('save-text').value.trim();if(text.length>500000)throw Error();const data=JSON.parse(text);
+    if(!data||data.format!=='panel-universe'||data.version!==1||!Array.isArray(data.completed)||data.completed.length>total||data.completed.some(n=>!Number.isInteger(n)||n<0||n>=total))throw Error();
+    const merged=new Set([...completed,...data.completed]);localStorage.setItem('panel-universe-v1',JSON.stringify([...merged]));completed=merged;renderPage();$('save-status').textContent='クリア記録を読み込みました。';
+  }catch {$('save-status').textContent='読み込めませんでした。記録は変更していません。';}
+});
+renderPage();
+</script>
+</body></html>
