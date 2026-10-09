@@ -57,11 +57,15 @@ button:disabled { opacity:.4; cursor:default; }
 .save-actions { display:flex; gap:8px; }
 .mode-controls { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }.mode-controls button,.mode-controls select { border:1px solid #bbb; border-radius:8px; padding:8px 10px; background:#fff; color:#555; font:14px sans-serif; }
 .unsolved-nav { display:flex; justify-content:space-between; margin-top:8px; }.unsolved-nav button { border:1px solid #bbb; border-radius:8px; padding:8px; background:#eee; color:#555; font-size:12px; }
+#move-random { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:16px 0; }
+#move-random button { padding:10px 4px; border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; font-size:14px; }
+#move-random button.complete { background:#a8dcae; border-color:#8bc493; color:#111; opacity:1; }
 </style></head>
 <body>
 <main>
 <section id="list" aria-label="全盤面の問題一覧">
 <h1>全65,536盤面</h1>
+<div id="move-random" aria-label="手数別の未クリアランダム"></div>
 <div class="mode-controls"><select id="filter" aria-label="表示する問題"><option value="all">すべて表示</option><option value="unsolved">未クリアのみ</option></select><button id="random-all" type="button">全問題をランダム</button><button id="random-unsolved" type="button">未クリアをランダム</button></div>
 <div class="pagination">
 <button id="page-previous" type="button">前</button>
@@ -85,7 +89,7 @@ button:disabled { opacity:.4; cursor:default; }
 const $=id=>document.getElementById(id);
 const size=4,total=65536,pageSize=100,pageCount=Math.ceil(total/pageSize);
 let page=1,question=0,current=0,remaining=0,pressedMask=0,state='list',activePuzzle=null,listScroll=0;
-let randomMode=false,randomIncludesSolved=false;
+let randomMode=false,randomIncludesSolved=false,randomMoves=null;
 try {$('filter').value=localStorage.getItem('panel-universe-filter')==='unsolved'?'unsolved':'all';}catch {}
 let completed=new Set();
 try {const saved=JSON.parse(localStorage.getItem('panel-universe-v1'));if(Array.isArray(saved))completed=new Set(saved.filter(n=>Number.isInteger(n)&&n>=0&&n<total));} catch {}
@@ -115,6 +119,19 @@ function buildSolutions() {
   return solutions;
 }
 const solutions=buildSolutions();
+const moveCounts=Uint8Array.from(solutions,solution=>countBits(solution));
+function renderMoveButtons() {
+  const totals=Array(17).fill(0),remainingByMoves=Array(17).fill(0);
+  for(let i=0;i<total;i++){totals[moveCounts[i]]++;if(!completed.has(i))remainingByMoves[moveCounts[i]]++;}
+  $('move-random').replaceChildren();
+  for(let steps=0;steps<=16;steps++){
+    const button=document.createElement('button');button.type='button';button.textContent=steps+'手';
+    button.disabled=remainingByMoves[steps]===0;button.className=button.disabled?'complete':'';
+    button.setAttribute('aria-label',steps+'手、未クリア'+remainingByMoves[steps]+'問 / '+totals[steps]+'問');
+    button.addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=false;randomMoves=steps;nextRandom(true);});
+    $('move-random').append(button);
+  }
+}
 function equivalentBoards(board) {
   const variants=new Set();
   for(let mirror=0;mirror<2;mirror++)for(let turns=0;turns<4;turns++) {
@@ -144,13 +161,14 @@ function renderPage() {
     const button=document.createElement('button');button.type='button';button.className='course'+(completed.has(board)?' complete':'');
     button.textContent=board+1;button.hidden=$('filter').value==='unsolved'&&completed.has(board);
     button.setAttribute('aria-label','問題'+(board+1)+'、'+countBits(solutions[board])+'手'+(completed.has(board)?'、クリア済み':''));
-    button.addEventListener('click',()=>{randomMode=false;listScroll=window.scrollY;question=board;startQuestion();window.scrollTo(0,0);});
+    button.addEventListener('click',()=>{randomMode=false;randomMoves=null;listScroll=window.scrollY;question=board;startQuestion();window.scrollTo(0,0);});
     $('problem-buttons').append(button);
   }
   $('page-input').value=page;
   for(const id of ['page-previous','page-previous-bottom'])$(id).disabled=page===1;
   for(const id of ['page-next','page-next-bottom'])$(id).disabled=page===pageCount;
   $('random-unsolved').disabled=completed.size===total;
+  renderMoveButtons();
   $('page-range').textContent=(start+1)+'–'+end+' / '+total;
 }
 function goPage(value) {
@@ -158,7 +176,7 @@ function goPage(value) {
   if(!Number.isInteger(n)||n<1||n>pageCount){$('page-status').textContent='1〜'+pageCount+'のページ番号を入力してください。';$('page-input').value=page;return;}
   page=n;$('page-status').textContent='';renderPage();window.scrollTo(0,0);
 }
-function showList(){randomMode=false;state='list';$('game').hidden=true;$('back').hidden=true;$('list').hidden=false;$('save-panel').hidden=false;page=Math.floor(question/pageSize)+1;renderPage();window.scrollTo(0,listScroll);}
+function showList(){randomMode=false;randomMoves=null;state='list';$('game').hidden=true;$('back').hidden=true;$('list').hidden=false;$('save-panel').hidden=false;page=Math.floor(question/pageSize)+1;renderPage();window.scrollTo(0,listScroll);}
 function announce(text) {
   $('board-frame').classList.toggle('cleared',state==='complete');$('board-frame').classList.toggle('failed',state==='failed');
   $('cleared-label').hidden=!activePuzzle||!completed.has(activePuzzle.board);
@@ -176,9 +194,9 @@ function adjacent(direction,onlyUnsolved) {
   for(let i=question+direction;i>=0&&i<total;i+=direction)if(!onlyUnsolved||!completed.has(i))return i;
   return -1;
 }
-function randomCandidates(){const result=[];for(let i=0;i<total;i++)if(i!==question&&(randomIncludesSolved||!completed.has(i)))result.push(i);return result;}
+function randomCandidates(){const result=[];for(let i=0;i<total;i++)if(i!==question&&(randomMoves===null||moveCounts[i]===randomMoves)&&(randomIncludesSolved||!completed.has(i)))result.push(i);return result;}
 function nextRandom(initial=false){
-  const candidates=randomCandidates();if(initial&&(randomIncludesSolved||!completed.has(question)))candidates.push(question);
+  const candidates=randomCandidates();if(initial&&(randomMoves===null||moveCounts[question]===randomMoves)&&(randomIncludesSolved||!completed.has(question)))candidates.push(question);
   if(!candidates.length){$('message').textContent='すべてクリア済みです';return;}
   question=candidates[Math.floor(Math.random()*candidates.length)];startQuestion();window.scrollTo(0,0);
 }
@@ -187,7 +205,7 @@ function startQuestion() {
   current=activePuzzle.board;remaining=activePuzzle.moves;pressedMask=0;state=current===0?'complete':'playing';
   if(current===0){completed.add(0);saveProgress();}
   $('list').hidden=true;$('save-panel').hidden=true;$('game').hidden=false;$('back').hidden=false;
-  $('course-number').textContent='問題 '+(question+1)+' · '+activePuzzle.moves+'手'+(randomMode?(randomIncludesSolved?' · 全問題ランダム':' · 未クリアランダム'):'');draw();announce(current===0?'完成済みの盤面です':'');
+  $('course-number').textContent='問題 '+(question+1)+' · '+activePuzzle.moves+'手'+(randomMode?(randomIncludesSolved?' · 全問題ランダム':(randomMoves===null?' · 未クリアランダム':' · '+randomMoves+'手ランダム')):'');draw();announce(current===0?'完成済みの盤面です':'');
 }
   function paint(tile, index) {
     const black = Boolean(current & (1 << index));
@@ -290,8 +308,8 @@ $('save-import').addEventListener('click',()=>{
   }catch {$('save-status').textContent='読み込めませんでした。文字列が欠けていないか確認してください。記録は変更していません。';}
 });
 $('filter').addEventListener('change',()=>{try{localStorage.setItem('panel-universe-filter',$('filter').value);}catch {}renderPage();});
-$('random-all').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=true;nextRandom(true);});
-$('random-unsolved').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=false;nextRandom(true);});
+$('random-all').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=true;randomMoves=null;nextRandom(true);});
+$('random-unsolved').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=false;randomMoves=null;nextRandom(true);});
 for(const [id,d]of [['previous-unsolved',-1],['next-unsolved',1]])$(id).addEventListener('click',()=>{if(randomMode)return;const i=adjacent(d,true);if(i!==-1){question=i;startQuestion();}});
 renderPage();
 </script>
