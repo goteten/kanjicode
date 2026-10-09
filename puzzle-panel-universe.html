@@ -57,6 +57,7 @@ button:disabled { opacity:.4; cursor:default; }
 .save-actions { display:flex; gap:8px; }
 .mode-controls { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }.mode-controls button,.mode-controls select { border:1px solid #bbb; border-radius:8px; padding:8px 10px; background:#fff; color:#555; font:14px sans-serif; }
 .unsolved-nav { display:flex; justify-content:space-between; margin-top:8px; }.unsolved-nav button { border:1px solid #bbb; border-radius:8px; padding:8px; background:#eee; color:#555; font-size:12px; }
+.move-random-title { margin:20px 0 8px; font-size:14px; font-weight:400; color:#555; }
 #move-random { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:16px 0; }
 #move-random button { padding:10px 4px; border:1px solid #bbb; border-radius:8px; background:#fff; color:#555; font-size:14px; }
 #move-random button.complete { background:#a8dcae; border-color:#8bc493; color:#111; opacity:1; }
@@ -66,6 +67,7 @@ button:disabled { opacity:.4; cursor:default; }
 <section id="list" aria-label="全盤面の問題一覧">
 <h1>全65,536盤面</h1>
 <p id="clear-count" aria-live="polite"></p>
+<h2 class="move-random-title">未クリア問題をランダム出題</h2>
 <div id="move-random" aria-label="手数別の未クリアランダム"></div>
 <div class="mode-controls"><select id="filter" aria-label="表示する問題"><option value="all">すべて表示</option><option value="unsolved">未クリアのみ</option></select><button id="random-all" type="button">全問題をランダム</button><button id="random-unsolved" type="button">未クリアをランダム</button></div>
 <div class="pagination">
@@ -127,6 +129,7 @@ function renderMoveButtons() {
   $('move-random').replaceChildren();
   for(let steps=0;steps<=16;steps++){
     const button=document.createElement('button');button.type='button';button.textContent=steps+'手';
+    const caption=document.createElement('small');caption.style.display='block';caption.style.fontSize='10px';caption.style.marginTop='4px';caption.textContent=remainingByMoves[steps]===0?'クリア済み':'ランダム';button.append(caption);
     button.disabled=remainingByMoves[steps]===0;button.className=button.disabled?'complete':'';
     button.setAttribute('aria-label',steps+'手、未クリア'+remainingByMoves[steps]+'問 / '+totals[steps]+'問');
     button.addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=false;randomMoves=steps;nextRandom(true);});
