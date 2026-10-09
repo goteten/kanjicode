@@ -26,6 +26,15 @@
     .tile-slot { min-width:0; min-height:0; padding:5px; border-radius:15px; background:transparent; }
     .tile-slot.pressed { background:#bdbdbd; }
     .board-frame { padding:12px; margin:0 -12px; border-radius:20px; background:transparent; transition:background .25s ease; }
+    .board-layout { position:relative; }
+    .previous-board { position:absolute; left:calc(100% + 28px); top:12px; width:104px; margin:0; }
+    .previous-board figcaption { margin-bottom:8px; color:#666; font-size:12px; text-align:center; }
+    .mini-board { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; aspect-ratio:1; }
+    .mini-slot { padding:2px; border-radius:5px; }
+    .mini-slot.pressed { background:#bdbdbd; }
+    .mini-tile { width:100%; height:100%; display:grid; place-items:center; border:1px solid #bbb; border-radius:3px; background:#fff; color:#888; font-size:12px; line-height:1; }
+    .mini-tile.black { background:#111; }
+    @media(max-width:700px) { .previous-board { position:static; margin:16px 0 0 auto; } }
     .board-frame.cleared { background:#a8dcae; }
     .board-frame.failed { background:#f2c5c5; }
     .tile { width:100%; height:100%; min-width:0; min-height:0; appearance:none; margin:0; border-radius:10px; border:1px solid #bbb; background:#fff; color:#888; font-size:clamp(24px,7vw,36px); line-height:1; display:grid; place-items:center; padding:0; }
@@ -82,7 +91,7 @@ button:disabled { opacity:.4; cursor:default; }
 <button id="back" type="button" hidden>戻る</button>
 <section id="game" hidden aria-label="パズル">
 <div class="progress"><span id="course-number"></span><div class="reset-controls"><span id="cleared-label" hidden>クリア済み</span><button id="reset" type="button">やり直す</button></div></div>
-<div id="board-frame" class="board-frame"><div id="board" class="board" aria-label="操作するパネル"></div></div>
+<div class="board-layout"><div id="board-frame" class="board-frame"><div id="board" class="board" aria-label="操作するパネル"></div></div><figure id="previous-board" class="previous-board" hidden><figcaption>やり直す前</figcaption><div id="mini-board" class="mini-board" role="img" aria-label="やり直す前の盤面"></div></figure></div>
 <div class="status"><div class="navigation"><button id="previous" type="button">前の問題へ</button><p id="moves"></p><button id="next" type="button">次の問題へ</button></div><div id="unsolved-nav" class="unsolved-nav"><button id="previous-unsolved" type="button">前の未クリア問題へ</button><button id="next-unsolved" type="button">次の未クリア問題へ</button></div><p id="message" role="status" aria-live="polite"></p></div>
 </section>
 <details id="save-panel"><summary>セーブデータ</summary><textarea id="save-text" aria-label="セーブ文字列" spellcheck="false"></textarea><div class="save-actions"><button id="save-export" type="button">書き出す</button><button id="save-import" type="button">読み込む</button></div><p id="save-status" role="status"></p></details>
@@ -221,6 +230,7 @@ function nextRandom(initial=false){
   question=candidates[Math.floor(Math.random()*candidates.length)];startQuestion();window.scrollTo(0,0);
 }
 function startQuestion() {
+  $('previous-board').hidden=true;$('mini-board').replaceChildren();
   activePuzzle={board:question,solution:solutions[question],moves:countBits(solutions[question])};
   current=activePuzzle.board;remaining=activePuzzle.moves;pressedMask=0;state=current===0?'complete':'playing';
   if(current===0){completed.add(0);saveProgress();}
@@ -236,8 +246,19 @@ function startQuestion() {
     tile.textContent = black ? '×' : '○';
     tile.setAttribute('aria-label', (Math.floor(index / size) + 1) + '行' + (index % size + 1) + '列：' + (black ? '黒' : '白') + (pressed ? '、押したパネル' : ''));
   }
+  function rememberPreviousBoard() {
+    $('mini-board').replaceChildren();
+    for(let i=0;i<16;i++) {
+      const black=Boolean(current&(1<<i)),pressed=Boolean(pressedMask&(1<<i));
+      const slot=document.createElement('div');slot.className='mini-slot'+(pressed?' pressed':'');
+      const tile=document.createElement('span');tile.className='mini-tile'+(black?' black':'');tile.textContent=black?'×':'○';
+      slot.append(tile);$('mini-board').append(slot);
+    }
+    $('previous-board').hidden=false;
+  }
   function resetPuzzle() {
     if (state === 'list' || !activePuzzle) return;
+    if(pressedMask!==0)rememberPreviousBoard();
     current = activePuzzle.board; remaining = activePuzzle.moves;
     pressedMask = 0; state = 'playing';
     draw(); announce('');
