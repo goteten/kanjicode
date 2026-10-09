@@ -55,11 +55,14 @@ button:disabled { opacity:.4; cursor:default; }
 #save-panel { margin-top:24px; font-size:14px; color:#555; }
 #save-text { width:100%; min-height:90px; margin:12px 0; padding:8px; font:12px monospace; }
 .save-actions { display:flex; gap:8px; }
+.mode-controls { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }.mode-controls button,.mode-controls select { border:1px solid #bbb; border-radius:8px; padding:8px 10px; background:#fff; color:#555; font:14px sans-serif; }
+.unsolved-nav { display:flex; justify-content:space-between; margin-top:8px; }.unsolved-nav button { border:1px solid #bbb; border-radius:8px; padding:8px; background:#eee; color:#555; font-size:12px; }
 </style></head>
 <body>
 <main>
 <section id="list" aria-label="全盤面の問題一覧">
 <h1>全65,536盤面</h1>
+<div class="mode-controls"><select id="filter" aria-label="表示する問題"><option value="all">すべて表示</option><option value="unsolved">未クリアのみ</option></select><button id="random-all" type="button">全問題をランダム</button><button id="random-unsolved" type="button">未クリアをランダム</button></div>
 <div class="pagination">
 <button id="page-previous" type="button">前</button>
 <form id="page-form"><label><input id="page-input" type="number" min="1" max="656" step="1" required aria-label="ページ番号"> / 656</label> <button type="submit">移動</button></form>
@@ -73,7 +76,7 @@ button:disabled { opacity:.4; cursor:default; }
 <section id="game" hidden aria-label="パズル">
 <div class="progress"><span id="course-number"></span><div class="reset-controls"><span id="cleared-label" hidden>クリア済み</span><button id="reset" type="button">やり直す</button></div></div>
 <div id="board-frame" class="board-frame"><div id="board" class="board" aria-label="操作するパネル"></div></div>
-<div class="status"><div class="navigation"><button id="previous" type="button">前の問題へ</button><p id="moves"></p><button id="next" type="button">次の問題へ</button></div><p id="message" role="status" aria-live="polite"></p></div>
+<div class="status"><div class="navigation"><button id="previous" type="button">前の問題へ</button><p id="moves"></p><button id="next" type="button">次の問題へ</button></div><div id="unsolved-nav" class="unsolved-nav"><button id="previous-unsolved" type="button">前の未クリア問題へ</button><button id="next-unsolved" type="button">次の未クリア問題へ</button></div><p id="message" role="status" aria-live="polite"></p></div>
 </section>
 <details id="save-panel"><summary>セーブデータ</summary><textarea id="save-text" aria-label="セーブ文字列" spellcheck="false"></textarea><div class="save-actions"><button id="save-export" type="button">書き出す</button><button id="save-import" type="button">読み込む</button></div><p id="save-status" role="status"></p></details>
 </main>
@@ -82,6 +85,8 @@ button:disabled { opacity:.4; cursor:default; }
 const $=id=>document.getElementById(id);
 const size=4,total=65536,pageSize=100,pageCount=Math.ceil(total/pageSize);
 let page=1,question=0,current=0,remaining=0,pressedMask=0,state='list',activePuzzle=null,listScroll=0;
+let randomMode=false,randomIncludesSolved=false;
+try {$('filter').value=localStorage.getItem('panel-universe-filter')==='unsolved'?'unsolved':'all';}catch {}
 let completed=new Set();
 try {const saved=JSON.parse(localStorage.getItem('panel-universe-v1'));if(Array.isArray(saved))completed=new Set(saved.filter(n=>Number.isInteger(n)&&n>=0&&n<total));} catch {}
   function neighbors(index) {
@@ -137,14 +142,15 @@ function renderPage() {
   const start=(page-1)*pageSize,end=Math.min(start+pageSize,total);
   for(let board=start;board<end;board++) {
     const button=document.createElement('button');button.type='button';button.className='course'+(completed.has(board)?' complete':'');
-    button.textContent=board+1;
+    button.textContent=board+1;button.hidden=$('filter').value==='unsolved'&&completed.has(board);
     button.setAttribute('aria-label','問題'+(board+1)+'、'+countBits(solutions[board])+'手'+(completed.has(board)?'、クリア済み':''));
-    button.addEventListener('click',()=>{listScroll=window.scrollY;question=board;startQuestion();window.scrollTo(0,0);});
+    button.addEventListener('click',()=>{randomMode=false;listScroll=window.scrollY;question=board;startQuestion();window.scrollTo(0,0);});
     $('problem-buttons').append(button);
   }
   $('page-input').value=page;
   for(const id of ['page-previous','page-previous-bottom'])$(id).disabled=page===1;
   for(const id of ['page-next','page-next-bottom'])$(id).disabled=page===pageCount;
+  $('random-unsolved').disabled=completed.size===total;
   $('page-range').textContent=(start+1)+'–'+end+' / '+total;
 }
 function goPage(value) {
@@ -152,20 +158,36 @@ function goPage(value) {
   if(!Number.isInteger(n)||n<1||n>pageCount){$('page-status').textContent='1〜'+pageCount+'のページ番号を入力してください。';$('page-input').value=page;return;}
   page=n;$('page-status').textContent='';renderPage();window.scrollTo(0,0);
 }
-function showList(){state='list';$('game').hidden=true;$('back').hidden=true;$('list').hidden=false;$('save-panel').hidden=false;page=Math.floor(question/pageSize)+1;renderPage();window.scrollTo(0,listScroll);}
+function showList(){randomMode=false;state='list';$('game').hidden=true;$('back').hidden=true;$('list').hidden=false;$('save-panel').hidden=false;page=Math.floor(question/pageSize)+1;renderPage();window.scrollTo(0,listScroll);}
 function announce(text) {
   $('board-frame').classList.toggle('cleared',state==='complete');$('board-frame').classList.toggle('failed',state==='failed');
   $('cleared-label').hidden=!activePuzzle||!completed.has(activePuzzle.board);
   $('moves').textContent='残り '+remaining+' 手';$('message').textContent=text;
-  $('previous').disabled=question===0;$('next').disabled=question===total-1;
+  const onlyUnsolved=$('filter').value==='unsolved';
+  $('previous').disabled=randomMode||adjacent(-1,onlyUnsolved)===-1;
+  $('next').disabled=randomMode?randomCandidates().length===0:adjacent(1,onlyUnsolved)===-1;
+  $('previous').textContent=onlyUnsolved?'前の未クリア問題へ':'前の問題へ';
+  $('next').textContent=(randomMode?!randomIncludesSolved:onlyUnsolved)?'次の未クリア問題へ':'次の問題へ';
+  $('unsolved-nav').hidden=onlyUnsolved||randomMode;
+  $('previous-unsolved').disabled=adjacent(-1,true)===-1;$('next-unsolved').disabled=adjacent(1,true)===-1;
   if(state!=='playing')for(const slot of $('board').children){slot.firstElementChild.disabled=false;slot.firstElementChild.classList.remove('affected');}
+}
+function adjacent(direction,onlyUnsolved) {
+  for(let i=question+direction;i>=0&&i<total;i+=direction)if(!onlyUnsolved||!completed.has(i))return i;
+  return -1;
+}
+function randomCandidates(){const result=[];for(let i=0;i<total;i++)if(i!==question&&(randomIncludesSolved||!completed.has(i)))result.push(i);return result;}
+function nextRandom(initial=false){
+  const candidates=randomCandidates();if(initial&&(randomIncludesSolved||!completed.has(question)))candidates.push(question);
+  if(!candidates.length){$('message').textContent='すべてクリア済みです';return;}
+  question=candidates[Math.floor(Math.random()*candidates.length)];startQuestion();window.scrollTo(0,0);
 }
 function startQuestion() {
   activePuzzle={board:question,solution:solutions[question],moves:countBits(solutions[question])};
   current=activePuzzle.board;remaining=activePuzzle.moves;pressedMask=0;state=current===0?'complete':'playing';
   if(current===0){completed.add(0);saveProgress();}
   $('list').hidden=true;$('save-panel').hidden=true;$('game').hidden=false;$('back').hidden=false;
-  $('course-number').textContent='問題 '+(question+1)+' · '+activePuzzle.moves+'手';draw();announce(current===0?'完成済みの盤面です':'');
+  $('course-number').textContent='問題 '+(question+1)+' · '+activePuzzle.moves+'手'+(randomMode?(randomIncludesSolved?' · 全問題ランダム':' · 未クリアランダム'):'');draw();announce(current===0?'完成済みの盤面です':'');
 }
   function paint(tile, index) {
     const black = Boolean(current & (1 << index));
@@ -202,19 +224,20 @@ function startQuestion() {
 
 
 function play(index) {
-  if(state==='list'||state==='complete')return;
+  if(state==='list')return;
+  if(state==='complete'){if(randomMode)nextRandom();return;}
   if(state==='failed'){resetPuzzle();return;}
   if(pressedMask&(1<<index))return;
   pressedMask|=1<<index;current^=flips[index];remaining--;
   Array.from($('board').children).forEach((slot,i)=>paint(slot.firstElementChild,i));
   for(const cell of neighbors(index))$('board').children[cell].firstElementChild.classList.add('flip');
-  if(current===0){state='complete';for(const board of equivalentBoards(question))completed.add(board);saveProgress();announce('');}
+  if(current===0){state='complete';for(const board of equivalentBoards(question))completed.add(board);saveProgress();announce(randomMode?(randomCandidates().length?'タップで次の問題へ':'すべてクリア済みです'):'');}
   else if(remaining===0){state='failed';announce('手数切れ。タップで再挑戦');}else announce('');
 }
 $('back').addEventListener('click',showList);
 $('reset').addEventListener('click',()=>{if(activePuzzle&&activePuzzle.board===0)startQuestion();else resetPuzzle();});
-$('previous').addEventListener('click',()=>{if(question>0){question--;startQuestion();}});
-$('next').addEventListener('click',()=>{if(question+1<total){question++;startQuestion();}});
+$('previous').addEventListener('click',()=>{if(randomMode)return;const i=adjacent(-1,$('filter').value==='unsolved');if(i!==-1){question=i;startQuestion();}});
+$('next').addEventListener('click',()=>{if(randomMode){nextRandom();return;}const i=adjacent(1,$('filter').value==='unsolved');if(i!==-1){question=i;startQuestion();}});
 for(const id of ['page-previous','page-previous-bottom'])$(id).addEventListener('click',()=>goPage(page-1));
 for(const id of ['page-next','page-next-bottom'])$(id).addEventListener('click',()=>goPage(page+1));
 $('page-form').addEventListener('submit',event=>{event.preventDefault();goPage($('page-input').value);});
@@ -229,6 +252,10 @@ $('save-import').addEventListener('click',()=>{
     const merged=expandCompleted([...completed,...data.completed]);localStorage.setItem('panel-universe-v1',JSON.stringify([...merged]));completed=merged;renderPage();$('save-status').textContent='クリア記録を読み込みました。';
   }catch {$('save-status').textContent='読み込めませんでした。記録は変更していません。';}
 });
+$('filter').addEventListener('change',()=>{try{localStorage.setItem('panel-universe-filter',$('filter').value);}catch {}renderPage();});
+$('random-all').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=true;nextRandom(true);});
+$('random-unsolved').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=false;nextRandom(true);});
+for(const [id,d]of [['previous-unsolved',-1],['next-unsolved',1]])$(id).addEventListener('click',()=>{if(randomMode)return;const i=adjacent(d,true);if(i!==-1){question=i;startQuestion();}});
 renderPage();
 </script>
 </body></html>
