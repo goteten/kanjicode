@@ -110,6 +110,27 @@ function buildSolutions() {
   return solutions;
 }
 const solutions=buildSolutions();
+function equivalentBoards(board) {
+  const variants=new Set();
+  for(let mirror=0;mirror<2;mirror++)for(let turns=0;turns<4;turns++) {
+    let transformed=0;
+    for(let i=0;i<16;i++)if(board&(1<<i)) {
+      let r=Math.floor(i/4),c=i%4;
+      if(mirror)c=3-c;
+      for(let t=0;t<turns;t++)[r,c]=[c,3-r];
+      transformed|=1<<(r*4+c);
+    }
+    variants.add(transformed);
+  }
+  return variants;
+}
+function expandCompleted(boards) {
+  const expanded=new Set();
+  for(const board of boards)for(const equivalent of equivalentBoards(board))expanded.add(equivalent);
+  return expanded;
+}
+completed=expandCompleted(completed);
+saveProgress();
 function saveProgress(){try {localStorage.setItem('panel-universe-v1',JSON.stringify([...completed]));}catch {}}
 function renderPage() {
   $('problem-buttons').replaceChildren();
@@ -187,7 +208,7 @@ function play(index) {
   pressedMask|=1<<index;current^=flips[index];remaining--;
   Array.from($('board').children).forEach((slot,i)=>paint(slot.firstElementChild,i));
   for(const cell of neighbors(index))$('board').children[cell].firstElementChild.classList.add('flip');
-  if(current===0){state='complete';completed.add(question);saveProgress();announce('');}
+  if(current===0){state='complete';for(const board of equivalentBoards(question))completed.add(board);saveProgress();announce('');}
   else if(remaining===0){state='failed';announce('手数切れ。タップで再挑戦');}else announce('');
 }
 $('back').addEventListener('click',showList);
@@ -205,7 +226,7 @@ $('save-import').addEventListener('click',()=>{
   try {
     const text=$('save-text').value.trim();if(text.length>500000)throw Error();const data=JSON.parse(text);
     if(!data||data.format!=='panel-universe'||data.version!==1||!Array.isArray(data.completed)||data.completed.length>total||data.completed.some(n=>!Number.isInteger(n)||n<0||n>=total))throw Error();
-    const merged=new Set([...completed,...data.completed]);localStorage.setItem('panel-universe-v1',JSON.stringify([...merged]));completed=merged;renderPage();$('save-status').textContent='クリア記録を読み込みました。';
+    const merged=expandCompleted([...completed,...data.completed]);localStorage.setItem('panel-universe-v1',JSON.stringify([...merged]));completed=merged;renderPage();$('save-status').textContent='クリア記録を読み込みました。';
   }catch {$('save-status').textContent='読み込めませんでした。記録は変更していません。';}
 });
 renderPage();
