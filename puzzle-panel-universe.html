@@ -130,8 +130,13 @@ function renderMoveButtons() {
   for(let steps=0;steps<=16;steps++){
     const button=document.createElement('button');button.type='button';button.textContent=steps+'手';
     const caption=document.createElement('small');caption.style.display='block';caption.style.fontSize='10px';caption.style.marginTop='4px';caption.textContent=remainingByMoves[steps]===0?'クリア済み':'ランダム';button.append(caption);
+    const cleared=totals[steps]-remainingByMoves[steps];
+    const percentage=Math.floor(cleared*1000/totals[steps])/10;
+    const progress=document.createElement('small');progress.style.display='block';progress.style.marginTop='4px';progress.style.fontSize='11px';
+    progress.textContent=percentage.toFixed(1)+'%';button.append(progress);
+    button.title=cleared+' / '+totals[steps]+'問クリア';
     button.disabled=remainingByMoves[steps]===0;button.className=button.disabled?'complete':'';
-    button.setAttribute('aria-label',steps+'手、未クリア'+remainingByMoves[steps]+'問 / '+totals[steps]+'問');
+    button.setAttribute('aria-label',steps+'手、未クリア'+remainingByMoves[steps]+'問 / '+totals[steps]+'問、クリア率'+percentage.toFixed(1)+'パーセント');
     button.addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=false;randomMoves=steps;nextRandom(true);});
     $('move-random').append(button);
   }
