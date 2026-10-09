@@ -186,8 +186,18 @@ function goPage(value) {
   if(!Number.isInteger(n)||n<1||n>pageCount){$('page-status').textContent='1〜'+pageCount+'のページ番号を入力してください。';$('page-input').value=page;return;}
   page=n;$('page-status').textContent='';renderPage();window.scrollTo(0,0);
 }
-function showList(){randomMode=false;randomMoves=null;state='list';$('game').hidden=true;$('back').hidden=true;$('list').hidden=false;$('save-panel').hidden=false;page=Math.floor(question/pageSize)+1;renderPage();window.scrollTo(0,listScroll);}
+function showList(){randomMode=false;randomMoves=null;state='list';updateLeaveGuard();$('game').hidden=true;$('back').hidden=true;$('list').hidden=false;$('save-panel').hidden=false;page=Math.floor(question/pageSize)+1;renderPage();window.scrollTo(0,listScroll);}
+let leaveGuardAttached=false;
+function confirmLeaving(event) {
+  event.preventDefault();event.returnValue='';
+}
+function updateLeaveGuard() {
+  const needed=state==='playing'&&pressedMask!==0;
+  if(needed&&!leaveGuardAttached){window.addEventListener('beforeunload',confirmLeaving);leaveGuardAttached=true;}
+  else if(!needed&&leaveGuardAttached){window.removeEventListener('beforeunload',confirmLeaving);leaveGuardAttached=false;}
+}
 function announce(text) {
+  updateLeaveGuard();
   $('board-frame').classList.toggle('cleared',state==='complete');$('board-frame').classList.toggle('failed',state==='failed');
   $('cleared-label').hidden=!activePuzzle||!completed.has(activePuzzle.board);
   $('moves').textContent='残り '+remaining+' 手';$('message').textContent=text;
