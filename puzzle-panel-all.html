@@ -162,6 +162,27 @@ function buildAllProblems() {
   return groups;
 }
 const groups = buildAllProblems();
+function equivalentBoards(board) {
+  const variants=new Set();
+  for(let mirror=0;mirror<2;mirror++)for(let turns=0;turns<4;turns++) {
+    let transformed=0;
+    for(let i=0;i<16;i++)if(board&(1<<i)) {
+      let r=Math.floor(i/4),c=i%4;
+      if(mirror)c=3-c;
+      for(let t=0;t<turns;t++)[r,c]=[c,3-r];
+      transformed|=1<<(r*4+c);
+    }
+    variants.add(transformed);
+  }
+  return variants;
+}
+function expandCompleted(boards) {
+  const expanded=new Set();
+  for(const board of boards)for(const equivalent of equivalentBoards(board))expanded.add(equivalent);
+  return expanded;
+}
+completed=expandCompleted(completed);
+try {localStorage.setItem('panel-all-345-v1',JSON.stringify([...completed]));}catch {}
 function adjacentQuestion(direction, forceUnsolved = false) {
   const onlyUnsolved = forceUnsolved || $('visibility-filter').value === 'unsolved';
   for (let i = question + direction; i >= 0 && i < groups[moves].length; i += direction) {
@@ -288,10 +309,13 @@ function play(index) {
   Array.from($('board').children).forEach((slot,i)=>paint(slot.firstElementChild,i));
   for (const cell of neighbors(index)) $('board').children[cell].firstElementChild.classList.add('flip');
   if (current===0) {
-    state='complete';completed.add(activePuzzle.board);
+    state='complete';for(const board of equivalentBoards(activePuzzle.board))completed.add(board);
     try {localStorage.setItem('panel-all-345-v1',JSON.stringify([...completed]));} catch {}
-    const button=$('problem-buttons').children[question];
-    button.className='course complete';button.setAttribute('aria-label','問題'+(question+1)+'、クリア済み');
+    groups[moves].forEach((p,i)=>{
+      if(!completed.has(p.board))return;
+      const button=$('problem-buttons').children[i];
+      button.className='course complete';button.setAttribute('aria-label','問題'+(i+1)+'、クリア済み');
+    });
     announce(randomMode && randomIncludesSolved ? 'タップで次の問題へ' : randomMode ? (groups[moves].some(p=>!completed.has(p.board))?'タップで次の未クリア問題へ':'すべてクリア済みです') : (question===groups[moves].length-1?'最後の問題です':''));
   } else if (remaining===0) {state='failed';announce('手数切れ。タップで再挑戦');}
   else announce('');
@@ -314,7 +338,7 @@ function importSave() {
   } catch {
     $('save-status').textContent='読み込めませんでした。全問題ページのセーブ文字列を確認してください。';return;
   }
-  const merged=new Set([...completed,...data.completed]);
+  const merged=expandCompleted([...completed,...data.completed]);
   try {
     localStorage.setItem('panel-all-345-v1',JSON.stringify([...merged]));
   } catch {
