@@ -241,16 +241,53 @@ $('next').addEventListener('click',()=>{if(randomMode){nextRandom();return;}cons
 for(const id of ['page-previous','page-previous-bottom'])$(id).addEventListener('click',()=>goPage(page-1));
 for(const id of ['page-next','page-next-bottom'])$(id).addEventListener('click',()=>goPage(page+1));
 $('page-form').addEventListener('submit',event=>{event.preventDefault();goPage($('page-input').value);});
+function saveChecksum(bytes) {
+  let hash=0x811c9dc5;
+  for(const byte of bytes){hash^=byte;hash=Math.imul(hash,0x01000193);}
+  return (hash>>>0).toString(16).padStart(8,'0');
+}
+function saveBase64(bytes){return btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function encodeSave(records) {
+  const bits=new Uint8Array(8192);
+  for(const board of records)bits[board>>>3]|=1<<(board&7);
+  const runs=[];
+  for(let i=0;i<bits.length;){let count=1;while(count<255&&i+count<bits.length&&bits[i+count]===bits[i])count++;runs.push(count,bits[i]);i+=count;}
+  const compressed=runs.length<bits.length;
+  return 'PU1.'+(compressed?'R':'B')+'.'+saveBase64(compressed?Uint8Array.from(runs):bits)+'.'+saveChecksum(bits);
+}
+function decodeSave(text) {
+  if(text.length>500000)throw Error();
+  if(text.startsWith('{')){
+    const data=JSON.parse(text);
+    if(!data||data.format!=='panel-universe'||data.version!==1||!Array.isArray(data.completed)||data.completed.length>total||data.completed.some(n=>!Number.isInteger(n)||n<0||n>=total))throw Error();
+    return new Set(data.completed);
+  }
+  const match=/^PU1\.([BR])\.([A-Za-z0-9_-]+)\.([0-9a-f]{8})$/.exec(text);
+  if(!match||match[2].length>10923)throw Error();
+  const payload=match[2];if(payload.length%4===1)throw Error();
+  const binary=atob(payload.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-payload.length%4)%4));
+  const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+  if(saveBase64(bytes)!==payload)throw Error();
+  let bits;
+  if(match[1]==='B'){if(bytes.length!==8192)throw Error();bits=bytes;}
+  else {
+    if(bytes.length%2!==0)throw Error();bits=new Uint8Array(8192);let offset=0;
+    for(let i=0;i<bytes.length;i+=2){const count=bytes[i];if(!count||offset+count>8192)throw Error();bits.fill(bytes[i+1],offset,offset+count);offset+=count;}
+    if(offset!==8192)throw Error();
+  }
+  if(saveChecksum(bits)!==match[3])throw Error();
+  const records=new Set();for(let board=0;board<total;board++)if(bits[board>>>3]&(1<<(board&7)))records.add(board);
+  return records;
+}
 $('save-export').addEventListener('click',()=>{
-  $('save-text').value=JSON.stringify({format:'panel-universe',version:1,completed:[...completed].sort((a,b)=>a-b)});
-  $('save-text').focus();$('save-text').select();$('save-status').textContent='文字列をコピーして保管してください。';
+  $('save-text').value=encodeSave(completed);
+  $('save-text').focus();$('save-text').select();$('save-status').textContent='圧縮したセーブ文字列をコピーして保管してください。';
 });
 $('save-import').addEventListener('click',()=>{
   try {
-    const text=$('save-text').value.trim();if(text.length>500000)throw Error();const data=JSON.parse(text);
-    if(!data||data.format!=='panel-universe'||data.version!==1||!Array.isArray(data.completed)||data.completed.length>total||data.completed.some(n=>!Number.isInteger(n)||n<0||n>=total))throw Error();
-    const merged=expandCompleted([...completed,...data.completed]);localStorage.setItem('panel-universe-v1',JSON.stringify([...merged]));completed=merged;renderPage();$('save-status').textContent='クリア記録を読み込みました。';
-  }catch {$('save-status').textContent='読み込めませんでした。記録は変更していません。';}
+    const records=decodeSave($('save-text').value.trim());
+    const merged=expandCompleted([...completed,...records]);localStorage.setItem('panel-universe-v1',JSON.stringify([...merged]));completed=merged;renderPage();$('save-status').textContent='クリア記録を読み込みました。';
+  }catch {$('save-status').textContent='読み込めませんでした。文字列が欠けていないか確認してください。記録は変更していません。';}
 });
 $('filter').addEventListener('change',()=>{try{localStorage.setItem('panel-universe-filter',$('filter').value);}catch {}renderPage();});
 $('random-all').addEventListener('click',()=>{listScroll=window.scrollY;randomMode=true;randomIncludesSolved=true;nextRandom(true);});
