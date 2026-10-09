@@ -65,6 +65,7 @@ button:disabled { opacity:.4; cursor:default; }
 <main>
 <section id="list" aria-label="全盤面の問題一覧">
 <h1>全65,536盤面</h1>
+<p id="clear-count" aria-live="polite"></p>
 <div id="move-random" aria-label="手数別の未クリアランダム"></div>
 <div class="mode-controls"><select id="filter" aria-label="表示する問題"><option value="all">すべて表示</option><option value="unsolved">未クリアのみ</option></select><button id="random-all" type="button">全問題をランダム</button><button id="random-unsolved" type="button">未クリアをランダム</button></div>
 <div class="pagination">
@@ -155,6 +156,7 @@ completed=expandCompleted(completed);
 saveProgress();
 function saveProgress(){try {localStorage.setItem('panel-universe-v1',JSON.stringify([...completed]));}catch {}}
 function renderPage() {
+  $('clear-count').textContent='クリア済み '+completed.size.toLocaleString('ja-JP')+' / 65,536問';
   $('problem-buttons').replaceChildren();
   const start=(page-1)*pageSize,end=Math.min(start+pageSize,total);
   for(let board=start;board<end;board++) {
